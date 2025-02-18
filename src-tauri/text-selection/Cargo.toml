@@ -1,0 +1,14 @@
+[package]
+name = "text-selection"
+version = "0.1.0"
+edition = "2018"
+license = "MIT / Apache-2.0"
+
+[dependencies]
+core-foundation-sys = "0.8"
+core-foundation = "0.10.0"
+rdev = "0.5.3"
+
+[target.'cfg(unix)'.dependencies]
+accessibility-sys = { path = "../accessibility-sys" }
+accessibility = { path = "../accessibility" }
