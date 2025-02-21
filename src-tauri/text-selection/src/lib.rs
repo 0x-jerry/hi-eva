@@ -1,9 +1,12 @@
-use std::any::type_name;
+#![allow(dead_code)]
+use std::{any::type_name, thread::sleep, time::Duration};
 
 use accessibility::{AXAttribute, AXTextMarkerRange, AXUIElement};
 use accessibility_sys::{
-    kAXFocusedUIElementAttribute, kAXSelectedTextAttribute, AXIsProcessTrusted,
+    kAXFocusedApplicationAttribute, kAXFocusedUIElementAttribute, kAXFocusedWindowAttribute,
+    kAXSelectedTextAttribute, kAXTitleAttribute, AXIsProcessTrusted,
 };
+use clipboard_rs::{Clipboard, ClipboardContext};
 use core_foundation::{string::CFString, ConcreteCFType};
 use rdev::{listen, Button, EventType, Key};
 
@@ -20,6 +23,8 @@ pub fn listen_text_selection() {
         rdev::simulate(&key_event).expect("release");
     }
 
+    let mut mouse_pos = (0 as f64, 0 as f64);
+
     // 监听系统事件aaaa
     listen(move |event| {
         if let EventType::ButtonRelease(Button::Left) = event.event_type {
@@ -32,11 +37,16 @@ pub fn listen_text_selection() {
 
             match has_selected_text() {
                 Ok(val) => match val {
-                    SelectedMark::Selected(selected_marker) => {
-                        println!("has selected text: {}", selected_marker)
+                    SelectedMark::Selected => {
+                        println!("detected selected text")
                     }
                     SelectedMark::Text(s) => {
-                        println!("selected string is {}", s)
+                        // println!("mouse position {:?}", mouse_pos);
+
+                        println!("selected text: {}", s)
+                    }
+                    SelectedMark::None => {
+                        println!("no selected text")
                     }
                 },
                 Err(err) => {
@@ -44,20 +54,35 @@ pub fn listen_text_selection() {
                 }
             }
         }
+
+        if let EventType::MouseMove { x, y } = event.event_type {
+            mouse_pos = (x, y);
+            // println!("MouseMove x:{} y:{}", x, y);
+        }
     })
     .unwrap();
 }
 
 pub enum SelectedMark {
-    Selected(bool),
+    Selected,
+    None,
     Text(String),
 }
 
 fn has_selected_text() -> Result<SelectedMark, Box<dyn std::error::Error>> {
-    let selected_element: AXUIElement =
-        get_element_attr(&AXUIElement::system_wide(), kAXFocusedUIElementAttribute)?;
+    let sys_element = AXUIElement::system_wide();
+    let focused_app: AXUIElement = get_element_attr(&sys_element, kAXFocusedApplicationAttribute)?;
+    let focused_win: AXUIElement = get_element_attr(&focused_app, kAXFocusedWindowAttribute)?;
 
-    let selected_text = get_element_attr(&selected_element, kAXSelectedTextAttribute)
+    let focused_element: AXUIElement =
+        get_element_attr(&focused_app, kAXFocusedUIElementAttribute)?;
+
+    let app_name = get_element_attr::<CFString>(&focused_app, kAXTitleAttribute)?;
+
+    // print_available_actions(&focused_element);
+    // let _ = focused_element.perform_action(&CFString::from("AXShowMenu"));
+
+    let selected_text = get_element_attr(&focused_element, kAXSelectedTextAttribute)
         .unwrap_or(CFString::new(""))
         .to_string();
 
@@ -65,18 +90,29 @@ fn has_selected_text() -> Result<SelectedMark, Box<dyn std::error::Error>> {
         return Ok(SelectedMark::Text(selected_text));
     }
 
-    let has_selected_marker_range = has_selected_text_mark_range(&selected_element)?;
+    let has_selected_marker_range = has_selected_text_mark_range(&focused_element)?;
 
-    return Ok(SelectedMark::Selected(has_selected_marker_range));
+    if has_selected_marker_range {
+        return Ok(SelectedMark::Selected);
+    }
+
+    let str = get_selected_text_by_simulate_copy_action(app_name.to_string().as_str());
+
+    if !str.is_empty() {
+        return Ok(SelectedMark::Text(str));
+    }
+
+    return Ok(SelectedMark::None);
 }
 
 fn has_selected_text_mark_range(
     selected_element: &AXUIElement,
 ) -> Result<bool, Box<dyn std::error::Error>> {
-    let mark: AXTextMarkerRange =
+    let marker_range: AXTextMarkerRange =
         get_element_attr(&selected_element, &kAXSelectedTextMarkerRangeAttribute)?;
 
-    let is_the_same_marker = mark.start_marker().bytes() == mark.end_marker().bytes();
+    let is_the_same_marker =
+        marker_range.start_marker().bytes() == marker_range.end_marker().bytes();
 
     let has_selected_text = !is_the_same_marker;
 
@@ -85,9 +121,9 @@ fn has_selected_text_mark_range(
 
 fn get_element_attr<T: ConcreteCFType>(
     element: &AXUIElement,
-    attr: &'static str,
+    attr: &str,
 ) -> Result<T, Box<dyn std::error::Error>> {
-    let attr_value = element.attribute(&AXAttribute::new(&CFString::from_static_string(&attr)));
+    let attr_value = element.attribute(&AXAttribute::new(&CFString::new(&attr)));
 
     match attr_value {
         Ok(attr_value) => {
@@ -113,4 +149,99 @@ fn get_element_attr<T: ConcreteCFType>(
             )));
         }
     }
+}
+
+fn print_available_attrs(element: &AXUIElement, print: bool) -> Vec<String> {
+    let attrs = element.attribute_names();
+
+    if let Ok(attrs) = &attrs {
+        if print {
+            println!("attr: {:?}", attrs);
+        }
+
+        return attrs.iter().map(|s| s.to_string()).collect();
+    }
+
+    return vec![];
+}
+
+fn print_all_attrs(element: &AXUIElement) {
+    let attrs = print_available_attrs(&element, false);
+
+    for attr in attrs {
+        let val = get_element_attr::<CFString>(&element, &attr.as_str());
+
+        println!("attr: {}, val: {:?}", attr, val)
+    }
+}
+
+fn print_available_actions(element: &AXUIElement) {
+    if let Ok(names) = element.action_names() {
+        println!("actions: {:?}", names);
+    }
+}
+
+fn get_selected_text_by_simulate_copy_action(app_title: &str) -> String {
+    // get clipboard data
+    let ctx = ClipboardContext::new().unwrap();
+
+    ctx.clear().expect("clear clipboard");
+
+    // rdev::simulate(&EventType::KeyPress(Key::MetaLeft)).expect("press");
+    // std::thread::sleep(std::time::Duration::from_millis(50));
+
+    // rdev::simulate(&EventType::KeyPress(Key::KeyC)).expect("press");
+    // std::thread::sleep(std::time::Duration::from_millis(50));
+
+    // rdev::simulate(&EventType::KeyRelease(Key::KeyC)).expect("release");
+    // std::thread::sleep(std::time::Duration::from_millis(50));
+
+    // rdev::simulate(&EventType::KeyRelease(Key::MetaLeft)).expect("release");
+    // std::thread::sleep(std::time::Duration::from_millis(50));
+
+    // println!("simulate copy action");
+
+    trigger_copy_menu_for_app(app_title);
+    sleep(Duration::from_millis(50));
+
+    if let Ok(text) = ctx.get_text() {
+        return text;
+    }
+
+    String::new()
+}
+
+fn trigger_copy_menu_for_app(app_name: &str) -> bool {
+    let supported_app = ["Chromium", "Code"];
+    if !supported_app.contains(&app_name) {
+        return false;
+    }
+
+    let code = format!(
+        "
+        const appName = '{}'
+        const app = Application(appName)
+        app.activate()
+
+        const sys = Application('System Events')
+        const proc = sys.processes.byName(appName)
+
+        const menuBar = proc.menuBars[0]
+        const menuBarItem = menuBar.menuBarItems.byName('Edit')
+        const menu = menuBarItem.menus[0]
+        const menuItem = menu.menuItems.byName('Copy')
+
+        menuItem.click()
+        ",
+        app_name
+    );
+
+    let script = osascript::JavaScript::new(&code);
+
+    if let Err(err) = script.execute::<()>() {
+        println!("Error: {}", err);
+        return false;
+    }
+
+    return true;
 }

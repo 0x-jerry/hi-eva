@@ -31,4 +31,8 @@ impl AXTextMarkerRange {
             AXTextMarker::new(start_ref)
         }
     }
+
+    pub fn is_the_same_marker(&self) -> bool {
+        self.start_marker().bytes() == self.end_marker().bytes()
+    }
 }
