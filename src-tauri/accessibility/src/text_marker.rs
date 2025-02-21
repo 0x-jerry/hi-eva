@@ -14,7 +14,7 @@ impl_CFTypeDescription!(AXTextMarker);
 
 impl AXTextMarker {
     pub fn new(ptr: AXTextMarkerRef) -> AXTextMarker {
-        AXTextMarker(ptr)
+        unsafe { AXTextMarker::wrap_under_create_rule(ptr) }
     }
 
     pub fn length(&self) -> CFIndex {

@@ -10,6 +10,9 @@ core-foundation = "0.10.0"
 rdev = "0.5.3"
 clipboard-rs = "0.2.4"
 osascript = "0.3.0"
+serde_derive = "1.0.218"
+serde = "1.0.218"
+core-graphics = "0.24.0"
 
 [target.'cfg(unix)'.dependencies]
 accessibility-sys = { path = "../accessibility-sys" }

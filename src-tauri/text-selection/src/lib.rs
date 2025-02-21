@@ -1,14 +1,22 @@
 #![allow(dead_code)]
-use std::{any::type_name, thread::sleep, time::Duration};
+use std::{
+    any::type_name,
+    thread::sleep,
+    time::{Duration, Instant},
+};
 
 use accessibility::{AXAttribute, AXTextMarkerRange, AXUIElement};
 use accessibility_sys::{
-    kAXFocusedApplicationAttribute, kAXFocusedUIElementAttribute, kAXFocusedWindowAttribute,
-    kAXSelectedTextAttribute, kAXTitleAttribute, AXIsProcessTrusted,
+    kAXFocusedApplicationAttribute, kAXFocusedUIElementAttribute, kAXRoleAttribute,
+    kAXSelectedTextAttribute, kAXTitleAttribute, kAXTrustedCheckOptionPrompt,
+    AXIsProcessTrustedWithOptions,
 };
 use clipboard_rs::{Clipboard, ClipboardContext};
-use core_foundation::{string::CFString, ConcreteCFType};
+use core_foundation::{
+    base::TCFType, boolean::CFBoolean, dictionary::CFDictionary, string::CFString, ConcreteCFType,
+};
 use rdev::{listen, Button, EventType, Key};
+use serde_derive::Serialize;
 
 #[allow(non_upper_case_globals)]
 pub const kAXSelectedTextMarkerRangeAttribute: &str = "AXSelectedTextMarkerRange";
@@ -23,41 +31,78 @@ pub fn listen_text_selection() {
         rdev::simulate(&key_event).expect("release");
     }
 
-    let mut mouse_pos = (0 as f64, 0 as f64);
+    unsafe {
+        // request accessibility permission
+        let prompt_conf_key = CFString::wrap_under_create_rule(kAXTrustedCheckOptionPrompt);
+        let conf_dict =
+            CFDictionary::from_CFType_pairs(&[(prompt_conf_key, CFBoolean::from(true))]);
+        let result = AXIsProcessTrustedWithOptions(conf_dict.as_concrete_TypeRef());
+
+        println!("prompt: {:?}", result);
+    }
+
+    #[derive(Debug)]
+    struct SelectionEventMark {
+        mouse_down_pos: (f64, f64),
+        has_mouse_down: bool,
+        mouse_down_ts: Instant,
+    }
+
+    let mut event_marker = SelectionEventMark {
+        mouse_down_pos: (0.0, 0.0),
+        has_mouse_down: false,
+        mouse_down_ts: Instant::now(),
+    };
 
     // 监听系统事件aaaa
     listen(move |event| {
-        if let EventType::ButtonRelease(Button::Left) = event.event_type {
-            let is_trusted = unsafe { AXIsProcessTrusted() };
-
-            if !is_trusted {
-                println!("AXIsProcessTrusted is false");
-                return;
+        match event.event_type {
+            EventType::ButtonPress(Button::Left) => {
+                event_marker.mouse_down_pos = get_mouse_position();
+                event_marker.has_mouse_down = true;
+                event_marker.mouse_down_ts = Instant::now();
             }
 
-            match has_selected_text() {
-                Ok(val) => match val {
-                    SelectedMark::Selected => {
-                        println!("detected selected text")
-                    }
-                    SelectedMark::Text(s) => {
-                        // println!("mouse position {:?}", mouse_pos);
+            EventType::ButtonRelease(Button::Left) => {
+                let mut should_check_selection = false;
 
-                        println!("selected text: {}", s)
+                if event_marker.has_mouse_down {
+                    let now = Instant::now();
+
+                    let is_passed_distance_check =
+                        distance(event_marker.mouse_down_pos, get_mouse_position()) > 5.0;
+
+                    if now.duration_since(event_marker.mouse_down_ts) > Duration::from_millis(50)
+                        && is_passed_distance_check
+                    {
+                        should_check_selection = true;
                     }
-                    SelectedMark::None => {
-                        println!("no selected text")
-                    }
-                },
-                Err(err) => {
-                    println!("err {:?}", err);
                 }
-            }
-        }
 
-        if let EventType::MouseMove { x, y } = event.event_type {
-            mouse_pos = (x, y);
-            // println!("MouseMove x:{} y:{}", x, y);
+                if should_check_selection {
+                    match has_selected_text() {
+                        Ok(val) => match val {
+                            SelectedMark::Selected => {
+                                println!("detected selected text")
+                            }
+                            SelectedMark::Text(s) => {
+                                // println!("mouse position {:?}", mouse_pos);
+
+                                println!("selected text: {}", s)
+                            }
+                            SelectedMark::None => {
+                                println!("no selected text")
+                            }
+                        },
+                        Err(err) => {
+                            println!("err {:?}", err);
+                        }
+                    }
+                }
+
+                event_marker.has_mouse_down = false;
+            }
+            _ => {}
         }
     })
     .unwrap();
@@ -72,22 +117,20 @@ pub enum SelectedMark {
 fn has_selected_text() -> Result<SelectedMark, Box<dyn std::error::Error>> {
     let sys_element = AXUIElement::system_wide();
     let focused_app: AXUIElement = get_element_attr(&sys_element, kAXFocusedApplicationAttribute)?;
-    let focused_win: AXUIElement = get_element_attr(&focused_app, kAXFocusedWindowAttribute)?;
 
     let focused_element: AXUIElement =
         get_element_attr(&focused_app, kAXFocusedUIElementAttribute)?;
 
     let app_name = get_element_attr::<CFString>(&focused_app, kAXTitleAttribute)?;
 
-    // print_available_actions(&focused_element);
-    // let _ = focused_element.perform_action(&CFString::from("AXShowMenu"));
+    if let Ok(selected_text) =
+        get_element_attr::<CFString>(&focused_element, kAXSelectedTextAttribute)
+    {
+        let selected_text = selected_text.to_string();
 
-    let selected_text = get_element_attr(&focused_element, kAXSelectedTextAttribute)
-        .unwrap_or(CFString::new(""))
-        .to_string();
-
-    if !selected_text.is_empty() {
-        return Ok(SelectedMark::Text(selected_text));
+        if !selected_text.is_empty() {
+            return Ok(SelectedMark::Text(selected_text));
+        }
     }
 
     let has_selected_marker_range = has_selected_text_mark_range(&focused_element)?;
@@ -187,21 +230,22 @@ fn get_selected_text_by_simulate_copy_action(app_title: &str) -> String {
 
     ctx.clear().expect("clear clipboard");
 
-    // rdev::simulate(&EventType::KeyPress(Key::MetaLeft)).expect("press");
-    // std::thread::sleep(std::time::Duration::from_millis(50));
+    if !trigger_copy_menu_for_app(app_title) {
+        rdev::simulate(&EventType::KeyPress(Key::MetaLeft)).expect("press");
+        std::thread::sleep(std::time::Duration::from_millis(50));
 
-    // rdev::simulate(&EventType::KeyPress(Key::KeyC)).expect("press");
-    // std::thread::sleep(std::time::Duration::from_millis(50));
+        rdev::simulate(&EventType::KeyPress(Key::KeyC)).expect("press");
+        std::thread::sleep(std::time::Duration::from_millis(50));
 
-    // rdev::simulate(&EventType::KeyRelease(Key::KeyC)).expect("release");
-    // std::thread::sleep(std::time::Duration::from_millis(50));
+        rdev::simulate(&EventType::KeyRelease(Key::KeyC)).expect("release");
+        std::thread::sleep(std::time::Duration::from_millis(50));
 
-    // rdev::simulate(&EventType::KeyRelease(Key::MetaLeft)).expect("release");
-    // std::thread::sleep(std::time::Duration::from_millis(50));
+        rdev::simulate(&EventType::KeyRelease(Key::MetaLeft)).expect("release");
+        std::thread::sleep(std::time::Duration::from_millis(50));
 
-    // println!("simulate copy action");
+        println!("simulate copy action");
+    }
 
-    trigger_copy_menu_for_app(app_title);
     sleep(Duration::from_millis(50));
 
     if let Ok(text) = ctx.get_text() {
@@ -217,9 +261,13 @@ fn trigger_copy_menu_for_app(app_name: &str) -> bool {
         return false;
     }
 
-    let code = format!(
-        "
-        const appName = '{}'
+    #[derive(Serialize)]
+    struct ScriptParams {
+        name: String,
+    }
+
+    let code = "
+        const appName = $params.name
         const app = Application(appName)
         app.activate()
 
@@ -232,16 +280,41 @@ fn trigger_copy_menu_for_app(app_name: &str) -> bool {
         const menuItem = menu.menuItems.byName('Copy')
 
         menuItem.click()
-        ",
-        app_name
-    );
+    ";
 
     let script = osascript::JavaScript::new(&code);
 
-    if let Err(err) = script.execute::<()>() {
+    if let Err(err) = script.execute_with_params::<ScriptParams, ()>(ScriptParams {
+        name: app_name.to_string(),
+    }) {
         println!("Error: {}", err);
         return false;
     }
 
     return true;
+}
+
+fn distance(p1: (f64, f64), p2: (f64, f64)) -> f64 {
+    let x = p1.0 - p2.0;
+    let y = p1.1 - p2.1;
+
+    return (x * x + y * y).sqrt();
+}
+
+fn get_mouse_position() -> (f64, f64) {
+    use core_graphics::event::CGEvent;
+    use core_graphics::event_source::{CGEventSource, CGEventSourceStateID};
+
+    let event =
+        CGEvent::new(CGEventSource::new(CGEventSourceStateID::CombinedSessionState).unwrap());
+
+    let point = match event {
+        Ok(event) => {
+            let point = event.location();
+            return (point.x, point.y);
+        }
+        Err(_) => (0.0, 0.0),
+    };
+
+    point
 }

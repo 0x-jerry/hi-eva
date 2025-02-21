@@ -21,7 +21,7 @@ impl AXTextMarkerRange {
     pub fn start_marker(&self) -> AXTextMarker {
         unsafe {
             let start_ref = AXTextMarkerRangeCopyStartMarker(self.0);
-            AXTextMarker::new(start_ref)
+            AXTextMarker::wrap_under_create_rule(start_ref)
         }
     }
 
