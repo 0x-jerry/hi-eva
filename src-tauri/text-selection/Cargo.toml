@@ -5,15 +5,15 @@ edition = "2018"
 license = "MIT / Apache-2.0"
 
 [dependencies]
-core-foundation-sys = "0.8"
-core-foundation = "0.10.0"
 rdev = "0.5.3"
 clipboard-rs = "0.2.4"
-osascript = "0.3.0"
 serde_derive = "1.0.218"
 serde = "1.0.218"
-core-graphics = "0.24.0"
 
 [target.'cfg(unix)'.dependencies]
+osascript = "0.3.0"
+core-foundation-sys = "0.8"
+core-foundation = "0.10.0"
+core-graphics = "0.24.0"
 accessibility-sys = { path = "../accessibility-sys" }
 accessibility = { path = "../accessibility" }
