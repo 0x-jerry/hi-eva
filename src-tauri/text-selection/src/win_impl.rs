@@ -1,6 +1,6 @@
 use crate::{
-    types::{Result, TextSelectionDetectResult, TextSelectionHostTrait},
-    utils::ClipboardHostTrait,
+    clipboard_helper::ClipboardHostTrait,
+    types::{HostHelperTrait, Result, TextSelectionDetectResult},
 };
 use rdev::{EventType, Key};
 use std::{thread::sleep, time::Duration};
@@ -34,7 +34,7 @@ impl ClipboardHostTrait for HostImpl {
     }
 }
 
-impl TextSelectionHostTrait for HostImpl {
+impl HostHelperTrait for HostImpl {
     fn detect_selected_text(&self) -> Result<TextSelectionDetectResult> {
         let selected_text = get_text_by_automation()?;
 
@@ -54,8 +54,23 @@ impl TextSelectionHostTrait for HostImpl {
             Err(err) => Err(err),
         }
     }
+
+    /// https://github.com/fayez-nazzal/mouse_position/blob/master/src/impl_windows.rs
+    fn get_mouse_position(&self) -> (f64, f64) {
+        use winapi::{shared::windef::POINT, um::winuser::GetCursorPos};
+
+        let mut point = POINT { x: 0, y: 0 };
+        let result = unsafe { GetCursorPos(&mut point) };
+
+        if result == 1 {
+            return (point.x as f64, point.y as f64);
+        }
+
+        return (0.0, 0.0);
+    }
 }
 
+/// https://github.dev/pot-app/Selection/blob/master/src/windows.rs
 fn get_text_by_automation() -> Result<String> {
     unsafe {
         // Init COM

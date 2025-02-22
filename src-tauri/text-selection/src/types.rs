@@ -8,7 +8,8 @@ pub enum TextSelectionDetectResult {
     None,
 }
 
-pub trait TextSelectionHostTrait {
+pub(crate) trait HostHelperTrait {
     fn detect_selected_text(&self) -> Result<TextSelectionDetectResult>;
     fn get_selected_text(&self) -> Result<String>;
+    fn get_mouse_position(&self) -> (f64, f64);
 }

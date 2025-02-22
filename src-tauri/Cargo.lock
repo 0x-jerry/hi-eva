@@ -4318,6 +4318,7 @@ dependencies = [
  "osascript",
  "rdev",
  "serde",
+ "winapi",
  "windows 0.60.0",
 ]
 
