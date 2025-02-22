@@ -1,24 +1,26 @@
-use std::io::Error;
+use std::error;
 use std::thread::sleep;
 use std::time::Duration;
-use std::{error, io::ErrorKind};
 
 use clipboard_rs::{Clipboard, ClipboardContext, ContentFormat};
 
+use crate::Result;
+
 pub trait ClipboardHostTrait {
-    fn trigger_copy_action(&self) -> Result<(), Error>;
+    fn trigger_copy_action(&self) -> Result<()>;
 }
 
-pub fn get_selected_text_from_clipboard<T: ClipboardHostTrait>(host: &T) -> Result<String, Error> {
-    match copy_from_clipboard(host) {
-        Ok(text) => Ok(text),
-        Err(err) => Err(Error::new(ErrorKind::Other, err.to_string())),
-    }
+pub fn get_selected_text_from_clipboard<T: ClipboardHostTrait>(host: &T) -> Result<String> {
+    let r = copy_from_clipboard(host)
+        //
+        .map_err(|err| err.to_string().into());
+
+    return r;
 }
 
 fn copy_from_clipboard<T: ClipboardHostTrait>(
     host_ctx: &T,
-) -> Result<String, Box<dyn error::Error + Send + Sync + 'static>> {
+) -> std::result::Result<String, Box<dyn error::Error + Send + Sync + 'static>> {
     let ctx = ClipboardContext::new()?;
 
     let formats = vec![
@@ -31,7 +33,11 @@ fn copy_from_clipboard<T: ClipboardHostTrait>(
 
     let old_datas = ctx.get(&formats)?;
 
-    host_ctx.trigger_copy_action()?;
+    let result = host_ctx.trigger_copy_action();
+
+    if let Err(err) = result {
+        return Err(err.to_string().into());
+    }
 
     sleep(Duration::from_millis(50));
 

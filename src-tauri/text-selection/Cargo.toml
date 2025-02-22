@@ -7,7 +7,6 @@ license = "MIT / Apache-2.0"
 [dependencies]
 rdev = "0.5.3"
 clipboard-rs = "0.2.4"
-serde = { workspace = true }
 log = { workspace = true }
 
 [target.'cfg(windows)'.dependencies]
@@ -28,3 +27,4 @@ core-foundation = "0.10.0"
 core-graphics = "0.24.0"
 accessibility-sys = { path = "../accessibility-sys" }
 accessibility = { path = "../accessibility" }
+serde = { workspace = true }

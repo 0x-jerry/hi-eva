@@ -1,4 +1,6 @@
-use std::io::Error;
+use std::error::Error;
+
+pub type Result<T> = std::result::Result<T, Box<dyn Error>>;
 
 pub enum TextSelectionDetectResult {
     Selected,
@@ -7,6 +9,6 @@ pub enum TextSelectionDetectResult {
 }
 
 pub trait TextSelectionHostTrait {
-    fn detect_selected_text(&self) -> Result<TextSelectionDetectResult, Error>;
-    fn get_selected_text(&self) -> Result<String, Error>;
+    fn detect_selected_text(&self) -> Result<TextSelectionDetectResult>;
+    fn get_selected_text(&self) -> Result<String>;
 }

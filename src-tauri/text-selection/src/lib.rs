@@ -4,11 +4,9 @@ pub mod utils;
 #[cfg(windows)]
 mod win_impl;
 
-use std::io::Error;
-
 pub use types::*;
 
-pub fn detect_selected_text() -> Result<TextSelectionDetectResult, Error> {
+pub fn detect_selected_text() -> Result<TextSelectionDetectResult> {
     let host = {
         #[cfg(windows)]
         win_impl::HostImpl::default()

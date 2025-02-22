@@ -1,13 +1,9 @@
 use crate::{
-    types::{TextSelectionDetectResult, TextSelectionHostTrait},
+    types::{Result, TextSelectionDetectResult, TextSelectionHostTrait},
     utils::ClipboardHostTrait,
 };
 use rdev::{EventType, Key};
-use std::{
-    io::{Error, ErrorKind},
-    thread::sleep,
-    time::Duration,
-};
+use std::{thread::sleep, time::Duration};
 use windows::Win32::{
     System::Com::{CoCreateInstance, CoInitialize, CLSCTX_ALL},
     UI::Accessibility::{
@@ -19,31 +15,27 @@ use windows::Win32::{
 pub struct HostImpl;
 
 impl ClipboardHostTrait for HostImpl {
-    fn trigger_copy_action(&self) -> Result<(), Error> {
+    fn trigger_copy_action(&self) -> Result<()> {
         //
         let left_ctrl = Key::ControlLeft;
         let key_c = Key::KeyC;
 
-        rdev::simulate(&EventType::KeyPress(left_ctrl))
-            .map_err(|err| Error::new(ErrorKind::Other, err.to_string()))?;
+        rdev::simulate(&EventType::KeyPress(left_ctrl))?;
 
-        rdev::simulate(&EventType::KeyPress(key_c))
-            .map_err(|err| Error::new(ErrorKind::Other, err.to_string()))?;
+        rdev::simulate(&EventType::KeyPress(key_c))?;
 
         sleep(Duration::from_millis(10));
 
-        rdev::simulate(&EventType::KeyRelease(left_ctrl))
-            .map_err(|err| Error::new(ErrorKind::Other, err.to_string()))?;
+        rdev::simulate(&EventType::KeyRelease(left_ctrl))?;
 
-        rdev::simulate(&EventType::KeyRelease(key_c))
-            .map_err(|err| Error::new(ErrorKind::Other, err.to_string()))?;
+        rdev::simulate(&EventType::KeyRelease(key_c))?;
 
         Ok(())
     }
 }
 
 impl TextSelectionHostTrait for HostImpl {
-    fn detect_selected_text(&self) -> Result<TextSelectionDetectResult, Error> {
+    fn detect_selected_text(&self) -> Result<TextSelectionDetectResult> {
         let selected_text = get_text_by_automation()?;
 
         if !selected_text.is_empty() {
@@ -53,18 +45,18 @@ impl TextSelectionHostTrait for HostImpl {
         return Ok(TextSelectionDetectResult::None);
     }
 
-    fn get_selected_text(&self) -> Result<String, Error> {
+    fn get_selected_text(&self) -> Result<String> {
         match self.detect_selected_text() {
             Ok(s) => match s {
                 TextSelectionDetectResult::Text(x) => Ok(x),
-                _ => Err(Error::new(ErrorKind::NotFound, "NotFound")),
+                _ => Err("NotFound".into()),
             },
             Err(err) => Err(err),
         }
     }
 }
 
-fn get_text_by_automation() -> Result<String, Error> {
+fn get_text_by_automation() -> Result<String> {
     unsafe {
         // Init COM
         let _ = CoInitialize(None);
