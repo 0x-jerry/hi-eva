@@ -14,7 +14,7 @@ use core_graphics::{
     event_source::{CGEventSource, CGEventSourceStateID},
 };
 use rdev::{EventType, Key};
-use serde_derive::Serialize;
+use serde::Serialize;
 
 use crate::{
     clipboard_helper::ClipboardHostTrait,

@@ -28,4 +28,4 @@ core-foundation = "0.10.0"
 core-graphics = "0.24.0"
 accessibility-sys = { path = "../accessibility-sys" }
 accessibility = { path = "../accessibility" }
-serde = { workspace = true }
+serde = { workspace = true, features = ["derive"] }

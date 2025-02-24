@@ -4,7 +4,7 @@ use std::time::Duration;
 
 use clipboard_rs::{Clipboard, ClipboardContext, ContentFormat};
 
-use crate::Result;
+use crate::types::Result;
 
 pub trait ClipboardHostTrait {
     fn trigger_copy_action(&self) -> Result<()>;
@@ -34,7 +34,6 @@ fn copy_from_clipboard<T: ClipboardHostTrait>(
     let old_datas = ctx.get(&formats)?;
 
     ctx.clear();
-
     let result = host_ctx.trigger_copy_action();
 
     if let Err(err) = result {

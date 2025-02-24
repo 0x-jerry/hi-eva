@@ -24,6 +24,7 @@ struct SelectionEventMark {
     mouse_down_ts: Instant,
 }
 
+#[derive(Debug)]
 pub struct ListenResult {
     pub selected_text: String,
     pub mouse_position: (f64, f64),
