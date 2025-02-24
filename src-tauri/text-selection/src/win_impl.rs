@@ -16,17 +16,16 @@ pub struct HostImpl;
 
 impl ClipboardHostTrait for HostImpl {
     fn trigger_copy_action(&self) -> Result<()> {
-        //
-        let left_ctrl = Key::ControlLeft;
+        let key_left_ctrl = Key::ControlLeft;
         let key_c = Key::KeyC;
 
-        rdev::simulate(&EventType::KeyPress(left_ctrl))?;
+        rdev::simulate(&EventType::KeyPress(key_left_ctrl))?;
 
         rdev::simulate(&EventType::KeyPress(key_c))?;
 
         sleep(Duration::from_millis(10));
 
-        rdev::simulate(&EventType::KeyRelease(left_ctrl))?;
+        rdev::simulate(&EventType::KeyRelease(key_left_ctrl))?;
 
         rdev::simulate(&EventType::KeyRelease(key_c))?;
 

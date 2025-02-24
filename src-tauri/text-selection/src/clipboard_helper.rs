@@ -33,6 +33,8 @@ fn copy_from_clipboard<T: ClipboardHostTrait>(
 
     let old_datas = ctx.get(&formats)?;
 
+    ctx.clear();
+
     let result = host_ctx.trigger_copy_action();
 
     if let Err(err) = result {

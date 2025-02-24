@@ -3,6 +3,8 @@ pub mod utils;
 
 mod clipboard_helper;
 
+#[cfg(unix)]
+mod unix_impl;
 #[cfg(windows)]
 mod win_impl;
 
@@ -28,10 +30,10 @@ pub struct ListenResult {
 }
 
 pub fn listen<T: Fn(ListenResult) -> () + 'static>(listener: T) -> result::Result<(), ListenError> {
-    let host = {
-        #[cfg(windows)]
-        win_impl::HostImpl::default()
-    };
+    #[cfg(windows)]
+    let host = win_impl::HostImpl::default();
+    #[cfg(unix)]
+    let host = unix_impl::HostImpl::default();
 
     let mut event_marker = SelectionEventMark {
         mouse_down_pos: (0.0, 0.0),
@@ -97,9 +99,9 @@ pub fn listen<T: Fn(ListenResult) -> () + 'static>(listener: T) -> result::Resul
 fn detect_selected_text<T: ClipboardHostTrait + HostHelperTrait>(
     host: &T,
 ) -> Result<TextSelectionDetectResult> {
-    let selected_text = host.detect_selected_text()?;
+    let selected_result = host.detect_selected_text()?;
 
-    match selected_text {
+    match selected_result {
         TextSelectionDetectResult::None => {
             let text_from_clipboard = clipboard_helper::get_selected_text_from_clipboard(host)?;
 
@@ -109,6 +111,6 @@ fn detect_selected_text<T: ClipboardHostTrait + HostHelperTrait>(
 
             return Ok(TextSelectionDetectResult::None);
         }
-        _ => return Ok(selected_text),
+        _ => return Ok(selected_result),
     }
 }

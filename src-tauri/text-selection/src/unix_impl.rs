@@ -1,156 +1,148 @@
 #![allow(dead_code)]
-use std::{
-    any::type_name,
-    thread::sleep,
-    time::{Duration, Instant},
-};
+use std::{any::type_name, thread::sleep, time::Duration};
 
 use accessibility::{AXAttribute, AXTextMarkerRange, AXUIElement};
 use accessibility_sys::{
-    kAXFocusedApplicationAttribute, kAXFocusedUIElementAttribute, kAXRoleAttribute,
-    kAXSelectedTextAttribute, kAXTitleAttribute, kAXTrustedCheckOptionPrompt,
-    AXIsProcessTrustedWithOptions,
+    kAXFocusedApplicationAttribute, kAXFocusedUIElementAttribute, kAXSelectedTextAttribute,
+    kAXTitleAttribute, kAXTrustedCheckOptionPrompt, AXIsProcessTrustedWithOptions,
 };
-use clipboard_rs::{Clipboard, ClipboardContext};
 use core_foundation::{
     base::TCFType, boolean::CFBoolean, dictionary::CFDictionary, string::CFString, ConcreteCFType,
 };
-use rdev::{listen, Button, EventType, Key};
+use core_graphics::{
+    event::CGEvent,
+    event_source::{CGEventSource, CGEventSourceStateID},
+};
+use rdev::{EventType, Key};
 use serde_derive::Serialize;
+
+use crate::{
+    clipboard_helper::ClipboardHostTrait,
+    types::{HostHelperTrait, Result, TextSelectionDetectResult},
+};
 
 #[allow(non_upper_case_globals)]
 pub const kAXSelectedTextMarkerRangeAttribute: &str = "AXSelectedTextMarkerRange";
 
-pub fn listen_text_selection() {
-    {
-        // 必须先模拟一次按键，否者 辅助性 获取选中的文本会报错 Ax(-25204)
-        let key_event = rdev::EventType::KeyPress(Key::Escape);
-        rdev::simulate(&key_event).expect("press");
-        std::thread::sleep(std::time::Duration::from_millis(10));
-        let key_event = rdev::EventType::KeyRelease(Key::Escape);
-        rdev::simulate(&key_event).expect("release");
-    }
+pub struct HostImpl {
+    sys: AXUIElement,
+}
 
-    unsafe {
-        // request accessibility permission
-        let prompt_conf_key = CFString::wrap_under_create_rule(kAXTrustedCheckOptionPrompt);
-        let conf_dict =
-            CFDictionary::from_CFType_pairs(&[(prompt_conf_key, CFBoolean::from(true))]);
-        let result = AXIsProcessTrustedWithOptions(conf_dict.as_concrete_TypeRef());
+impl HostImpl {
+    fn _request_accessibility_access() -> bool {
+        unsafe {
+            // request accessibility permission
+            let prompt_conf_key = CFString::wrap_under_create_rule(kAXTrustedCheckOptionPrompt);
+            let conf_dict =
+                CFDictionary::from_CFType_pairs(&[(prompt_conf_key, CFBoolean::from(true))]);
+            let result = AXIsProcessTrustedWithOptions(conf_dict.as_concrete_TypeRef());
 
-        println!("prompt: {:?}", result);
-    }
+            println!("prompt: {:?}", result);
 
-    #[derive(Debug)]
-    struct SelectionEventMark {
-        mouse_down_pos: (f64, f64),
-        has_mouse_down: bool,
-        mouse_down_ts: Instant,
-    }
-
-    let mut event_marker = SelectionEventMark {
-        mouse_down_pos: (0.0, 0.0),
-        has_mouse_down: false,
-        mouse_down_ts: Instant::now(),
-    };
-
-    // 监听系统事件aaaa
-    listen(move |event| {
-        match event.event_type {
-            EventType::ButtonPress(Button::Left) => {
-                event_marker.mouse_down_pos = get_mouse_position();
-                event_marker.has_mouse_down = true;
-                event_marker.mouse_down_ts = Instant::now();
-            }
-
-            EventType::ButtonRelease(Button::Left) => {
-                let mut should_check_selection = false;
-
-                if event_marker.has_mouse_down {
-                    let now = Instant::now();
-
-                    let is_passed_distance_check =
-                        distance(event_marker.mouse_down_pos, get_mouse_position()) > 5.0;
-
-                    if now.duration_since(event_marker.mouse_down_ts) > Duration::from_millis(50)
-                        && is_passed_distance_check
-                    {
-                        should_check_selection = true;
-                    }
-                }
-
-                if should_check_selection {
-                    match has_selected_text() {
-                        Ok(val) => match val {
-                            SelectedMark::Selected => {
-                                println!("detected selected text")
-                            }
-                            SelectedMark::Text(s) => {
-                                // println!("mouse position {:?}", mouse_pos);
-
-                                println!("selected text: {}", s)
-                            }
-                            SelectedMark::None => {
-                                println!("no selected text")
-                            }
-                        },
-                        Err(err) => {
-                            println!("err {:?}", err);
-                        }
-                    }
-                }
-
-                event_marker.has_mouse_down = false;
-            }
-            _ => {}
+            return result;
         }
-    })
-    .unwrap();
+    }
+
+    fn _prepare() {
+        {
+            // 必须先模拟一次按键，否者 辅助性 获取选中的文本会报错 Ax(-25204)
+            let key_event = rdev::EventType::KeyPress(Key::Escape);
+            rdev::simulate(&key_event).expect("press");
+            std::thread::sleep(std::time::Duration::from_millis(10));
+            let key_event = rdev::EventType::KeyRelease(Key::Escape);
+            rdev::simulate(&key_event).expect("release");
+        }
+    }
 }
 
-pub enum SelectedMark {
-    Selected,
-    None,
-    Text(String),
+impl Default for HostImpl {
+    fn default() -> Self {
+        Self::_prepare();
+        Self::_request_accessibility_access();
+
+        let sys_element = AXUIElement::system_wide();
+
+        Self { sys: sys_element }
+    }
 }
 
-fn has_selected_text() -> Result<SelectedMark, Box<dyn std::error::Error>> {
-    let sys_element = AXUIElement::system_wide();
-    let focused_app: AXUIElement = get_element_attr(&sys_element, kAXFocusedApplicationAttribute)?;
+impl ClipboardHostTrait for HostImpl {
+    fn trigger_copy_action(&self) -> Result<()> {
+        let focused_app: AXUIElement = get_element_attr(&self.sys, kAXFocusedApplicationAttribute)?;
 
-    let focused_element: AXUIElement =
-        get_element_attr(&focused_app, kAXFocusedUIElementAttribute)?;
+        let app_title = get_element_attr::<CFString>(&focused_app, kAXTitleAttribute)?.to_string();
 
-    let app_name = get_element_attr::<CFString>(&focused_app, kAXTitleAttribute)?;
+        if !trigger_copy_menu_for_app(&app_title) {
+            let key_left_meta = Key::MetaLeft;
+            let key_c = Key::KeyC;
 
-    if let Ok(selected_text) =
-        get_element_attr::<CFString>(&focused_element, kAXSelectedTextAttribute)
-    {
-        let selected_text = selected_text.to_string();
+            rdev::simulate(&EventType::KeyPress(key_left_meta))?;
+
+            rdev::simulate(&EventType::KeyPress(key_c))?;
+
+            sleep(Duration::from_millis(10));
+
+            rdev::simulate(&EventType::KeyRelease(key_left_meta))?;
+
+            rdev::simulate(&EventType::KeyRelease(key_c))?;
+        }
+
+        return Ok(());
+    }
+}
+
+impl HostHelperTrait for HostImpl {
+    fn detect_selected_text(&self) -> Result<TextSelectionDetectResult> {
+        let focused_app: AXUIElement = get_element_attr(&self.sys, kAXFocusedApplicationAttribute)?;
+
+        let focused_element: AXUIElement =
+            get_element_attr(&focused_app, kAXFocusedUIElementAttribute)?;
+
+        let selected_text =
+            get_element_attr::<CFString>(&focused_element, kAXSelectedTextAttribute)?.to_string();
 
         if !selected_text.is_empty() {
-            return Ok(SelectedMark::Text(selected_text));
+            return Ok(TextSelectionDetectResult::Text(selected_text));
         }
+
+        let has_selected_marker_range = has_selected_text_mark_range(&focused_element)?;
+
+        if has_selected_marker_range {
+            return Ok(TextSelectionDetectResult::Selected);
+        }
+
+        return Ok(TextSelectionDetectResult::None);
     }
 
-    let has_selected_marker_range = has_selected_text_mark_range(&focused_element)?;
+    fn get_selected_text(&self) -> Result<String> {
+        let focused_app: AXUIElement = get_element_attr(&self.sys, kAXFocusedApplicationAttribute)?;
 
-    if has_selected_marker_range {
-        return Ok(SelectedMark::Selected);
+        let focused_element: AXUIElement =
+            get_element_attr(&focused_app, kAXFocusedUIElementAttribute)?;
+
+        let selected_text =
+            get_element_attr::<CFString>(&focused_element, kAXSelectedTextAttribute)?;
+
+        return Ok(selected_text.to_string());
     }
 
-    let str = get_selected_text_by_simulate_copy_action(app_name.to_string().as_str());
+    fn get_mouse_position(&self) -> (f64, f64) {
+        let event =
+            CGEvent::new(CGEventSource::new(CGEventSourceStateID::CombinedSessionState).unwrap());
 
-    if !str.is_empty() {
-        return Ok(SelectedMark::Text(str));
+        let point = match event {
+            Ok(event) => {
+                let point = event.location();
+                return (point.x, point.y);
+            }
+            Err(_) => (0.0, 0.0),
+        };
+
+        point
     }
-
-    return Ok(SelectedMark::None);
 }
 
-fn has_selected_text_mark_range(
-    selected_element: &AXUIElement,
-) -> Result<bool, Box<dyn std::error::Error>> {
+fn has_selected_text_mark_range(selected_element: &AXUIElement) -> Result<bool> {
     let marker_range: AXTextMarkerRange =
         get_element_attr(&selected_element, &kAXSelectedTextMarkerRangeAttribute)?;
 
@@ -162,10 +154,7 @@ fn has_selected_text_mark_range(
     Ok(has_selected_text)
 }
 
-fn get_element_attr<T: ConcreteCFType>(
-    element: &AXUIElement,
-    attr: &str,
-) -> Result<T, Box<dyn std::error::Error>> {
+fn get_element_attr<T: ConcreteCFType>(element: &AXUIElement, attr: &str) -> Result<T> {
     let attr_value = element.attribute(&AXAttribute::new(&CFString::new(&attr)));
 
     match attr_value {
@@ -194,68 +183,8 @@ fn get_element_attr<T: ConcreteCFType>(
     }
 }
 
-fn print_available_attrs(element: &AXUIElement, print: bool) -> Vec<String> {
-    let attrs = element.attribute_names();
-
-    if let Ok(attrs) = &attrs {
-        if print {
-            println!("attr: {:?}", attrs);
-        }
-
-        return attrs.iter().map(|s| s.to_string()).collect();
-    }
-
-    return vec![];
-}
-
-fn print_all_attrs(element: &AXUIElement) {
-    let attrs = print_available_attrs(&element, false);
-
-    for attr in attrs {
-        let val = get_element_attr::<CFString>(&element, &attr.as_str());
-
-        println!("attr: {}, val: {:?}", attr, val)
-    }
-}
-
-fn print_available_actions(element: &AXUIElement) {
-    if let Ok(names) = element.action_names() {
-        println!("actions: {:?}", names);
-    }
-}
-
-fn get_selected_text_by_simulate_copy_action(app_title: &str) -> String {
-    // get clipboard data
-    let ctx = ClipboardContext::new().unwrap();
-
-    ctx.clear().expect("clear clipboard");
-
-    if !trigger_copy_menu_for_app(app_title) {
-        rdev::simulate(&EventType::KeyPress(Key::MetaLeft)).expect("press");
-        std::thread::sleep(std::time::Duration::from_millis(50));
-
-        rdev::simulate(&EventType::KeyPress(Key::KeyC)).expect("press");
-        std::thread::sleep(std::time::Duration::from_millis(50));
-
-        rdev::simulate(&EventType::KeyRelease(Key::KeyC)).expect("release");
-        std::thread::sleep(std::time::Duration::from_millis(50));
-
-        rdev::simulate(&EventType::KeyRelease(Key::MetaLeft)).expect("release");
-        std::thread::sleep(std::time::Duration::from_millis(50));
-
-        println!("simulate copy action");
-    }
-
-    sleep(Duration::from_millis(50));
-
-    if let Ok(text) = ctx.get_text() {
-        return text;
-    }
-
-    String::new()
-}
-
 fn trigger_copy_menu_for_app(app_name: &str) -> bool {
+    // todo, support more app
     let supported_app = ["Chromium", "Code"];
     if !supported_app.contains(&app_name) {
         return false;
@@ -292,29 +221,4 @@ fn trigger_copy_menu_for_app(app_name: &str) -> bool {
     }
 
     return true;
-}
-
-fn distance(p1: (f64, f64), p2: (f64, f64)) -> f64 {
-    let x = p1.0 - p2.0;
-    let y = p1.1 - p2.1;
-
-    return (x * x + y * y).sqrt();
-}
-
-fn get_mouse_position() -> (f64, f64) {
-    use core_graphics::event::CGEvent;
-    use core_graphics::event_source::{CGEventSource, CGEventSourceStateID};
-
-    let event =
-        CGEvent::new(CGEventSource::new(CGEventSourceStateID::CombinedSessionState).unwrap());
-
-    let point = match event {
-        Ok(event) => {
-            let point = event.location();
-            return (point.x, point.y);
-        }
-        Err(_) => (0.0, 0.0),
-    };
-
-    point
 }
