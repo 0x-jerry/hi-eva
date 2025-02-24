@@ -44,7 +44,9 @@ fn copy_from_clipboard<T: ClipboardHostTrait>(
 
     let result = ctx.get_text()?;
 
-    ctx.set(old_datas)?;
+    if old_datas.len() > 0 {
+        ctx.set(old_datas)?;
+    }
 
     Ok(result.trim().to_string())
 }
