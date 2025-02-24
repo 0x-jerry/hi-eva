@@ -131,3 +131,14 @@ fn detect_selected_text<T: ClipboardHostTrait + HostHelperTrait>(
         _ => return Ok(selected_result),
     }
 }
+
+pub fn get_selected_text() -> Result<String> {
+    #[cfg(windows)]
+    let host = win_impl::HostImpl::default();
+    #[cfg(unix)]
+    let host = unix_impl::HostImpl::default();
+
+    let selected_result = host.get_selected_text()?;
+
+    return Ok(selected_result);
+}

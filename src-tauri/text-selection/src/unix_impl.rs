@@ -29,6 +29,11 @@ pub struct HostImpl {
 }
 
 impl HostImpl {
+    pub fn init() {
+        Self::_request_accessibility_access();
+        Self::_prepare();
+    }
+
     fn _request_accessibility_access() -> bool {
         unsafe {
             // request accessibility permission
@@ -57,9 +62,6 @@ impl HostImpl {
 
 impl Default for HostImpl {
     fn default() -> Self {
-        Self::_prepare();
-        Self::_request_accessibility_access();
-
         let sys_element = AXUIElement::system_wide();
 
         Self { sys: sys_element }
