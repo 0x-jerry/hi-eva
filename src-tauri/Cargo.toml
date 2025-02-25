@@ -31,3 +31,4 @@ tauri-plugin-opener = "2"
 serde = { workspace = true }
 serde_json = { workspace = true }
 log = { workspace = true }
+text-selection = { path = "./text-selection" }
