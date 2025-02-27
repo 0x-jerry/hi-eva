@@ -10,10 +10,9 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![greet])
         .setup(|app| {
-            text_selection::listen(|result| {
-
+            let _ = text_selection::listen(|result| {
                 println!("selected: {:?}", result);
-            })?;
+            });
 
             Ok(())
         })
