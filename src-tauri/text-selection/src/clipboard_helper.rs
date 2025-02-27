@@ -40,9 +40,11 @@ fn copy_from_clipboard<T: ClipboardHostTrait>(
         return Err(err.to_string().into());
     }
 
-    sleep(Duration::from_millis(50));
+    sleep(Duration::from_millis(30));
 
     let result = ctx.get_text()?;
+
+    sleep(Duration::from_millis(30));
 
     if old_datas.len() > 0 {
         ctx.set(old_datas)?;
