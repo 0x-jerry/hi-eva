@@ -15,7 +15,7 @@ impl MyApp {
     }
 
     pub fn init(&self) {
-        let main_win = self.create_main_window();
+        let _main_win = self.create_main_window();
 
         let _ = self.get_or_create_toolbar_window();
 
@@ -73,6 +73,7 @@ impl MyApp {
         .transparent(true)
         .resizable(false)
         .visible(false)
+        .skip_taskbar(true)
         .always_on_top(true);
 
         let win = win_builder.build().expect("Create toolbar window failed!");
