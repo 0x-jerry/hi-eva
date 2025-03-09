@@ -1,10 +1,10 @@
 <script lang='ts' setup>
 import { useLocalStorage } from '@vueuse/core';
 import { nanoid } from '@0x-jerry/utils'
-import Button from 'primevue/button';
 import SettingTitle from './SettingTitle.vue';
 import InputText from 'primevue/inputtext';
 import Icon from '../Icon.vue';
+import Inplace from 'primevue/inplace';
 
 
 interface AIConfig {
@@ -24,10 +24,6 @@ const builtinConfigs: AIConfig[] = [{
 }]
 
 const configs = useLocalStorage<AIConfig[]>('ai-config', builtinConfigs)
-
-async function save() {
-  // todo
-}
 
 async function add() {
   configs.value.push({
@@ -54,13 +50,21 @@ async function remove(idx: number) {
       </div>
     </SettingTitle>
 
+
     <div class="flex flex-col gap-2">
       <div class="flex flex-col gap-2 bg-light-3 p-4 rounded" v-for="(conf, idx) in configs" :key="conf.id">
-        <div class="editable-row">
-          <label>
-            名称
-          </label>
-          <InputText v-model="conf.label" />
+        <div class="flex items-center">
+          <Inplace :disabled="conf.builtin">
+            <template #display>
+              {{ conf.label }}
+            </template>
+            <template #content="{ closeCallback }">
+              <span class="inline-flex items-center gap-2">
+                <InputText v-model="conf.label" autofocus />
+                <Icon class="i-carbon:checkmark" @click="closeCallback" />
+              </span>
+            </template>
+          </Inplace>
           <div class="flex flex-1 justify-end">
             <Icon v-if="!conf.builtin" class="i-carbon:close" @click="remove(idx)" />
           </div>
