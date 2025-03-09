@@ -12,6 +12,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@0x-jerry/utils": "^5.0.0",
     "@primeuix/themes": "^1.0.0",
     "@tauri-apps/api": "^2.3.0",
     "@tauri-apps/plugin-opener": "^2.2.6",

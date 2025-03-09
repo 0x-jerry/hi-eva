@@ -1,8 +1,18 @@
-import { createApp } from "vue";
-import App from "./App.vue";
-import { router } from "./router";
+import { createApp } from 'vue'
+import App from './App.vue'
+import { router } from './router'
 
-import "normalize.css";
-import "uno.css";
+import PrimeVue from 'primevue/config'
+import Aura from '@primeuix/themes/aura'
 
-createApp(App).use(router).mount("#app");
+import 'normalize.css'
+import 'uno.css'
+
+createApp(App)
+	.use(router)
+	.use(PrimeVue, {
+		theme: {
+			preset: Aura,
+		},
+	})
+	.mount('#app')

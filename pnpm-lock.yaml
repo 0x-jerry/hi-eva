@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@0x-jerry/utils':
+        specifier: ^5.0.0
+        version: 5.0.0
       '@primeuix/themes':
         specifier: ^1.0.0
         version: 1.0.0
@@ -62,6 +65,9 @@ importers:
         version: 6.2.1(jiti@2.4.2)(less@4.2.2)(yaml@2.7.0)
 
 packages:
+
+  '@0x-jerry/utils@5.0.0':
+    resolution: {integrity: sha512-F3TnKTJrCRCKe9FG0eWEVlgYDFusC6p0hePjyR7mKAgGj61/4lScng7Dj/ss2Fo2zJvH8qWv2G7fSvW45n7fQQ==}
 
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
@@ -804,6 +810,9 @@ packages:
       picomatch:
         optional: true
 
+  fflate@0.8.2:
+    resolution: {integrity: sha512-cPJU47OaAoCbg0pBvzsgpTPhmhqI5eJjh/JIu8tPj5q+T7iLvW/JAYUqmE7KOB4R1ZyEhzBaIQpQpardBF5z8A==}
+
   fill-range@7.1.1:
     resolution: {integrity: sha512-YsGpe3WHLK8ZYi4tWDg2Jy3ebRz2rXowDxnld4bkQB00cc/1Zw9AWnC0i9ztDJitivtQvaI9KaLyKrc+hBW0yg==}
     engines: {node: '>=8'}
@@ -917,6 +926,11 @@ packages:
   nanoid@3.3.9:
     resolution: {integrity: sha512-SppoicMGpZvbF1l3z4x7No3OlIjP7QJvC9XR7AhZr1kL133KHnKPztkKDc+Ir4aJ/1VhTySrtKhrsycmrMQfvg==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+    hasBin: true
+
+  nanoid@5.1.3:
+    resolution: {integrity: sha512-zAbEOEr7u2CbxwoMRlz/pNSpRP0FdAU4pRaYunCdEezWohXFs+a0Xw7RfkKaezMsmSM1vttcLthJtwRnVtOfHQ==}
+    engines: {node: ^18 || >=20}
     hasBin: true
 
   needle@3.3.1:
@@ -1157,6 +1171,12 @@ packages:
     hasBin: true
 
 snapshots:
+
+  '@0x-jerry/utils@5.0.0':
+    dependencies:
+      fflate: 0.8.2
+      nanoid: 5.1.3
+      picocolors: 1.1.1
 
   '@ampproject/remapping@2.3.0':
     dependencies:
@@ -1845,6 +1865,8 @@ snapshots:
     optionalDependencies:
       picomatch: 4.0.2
 
+  fflate@0.8.2: {}
+
   fill-range@7.1.1:
     dependencies:
       to-regex-range: 5.0.1
@@ -1951,6 +1973,8 @@ snapshots:
   ms@2.1.3: {}
 
   nanoid@3.3.9: {}
+
+  nanoid@5.1.3: {}
 
   needle@3.3.1:
     dependencies:

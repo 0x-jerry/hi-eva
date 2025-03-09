@@ -1,6 +1,6 @@
 <script lang='ts' setup>
 import { useLocalStorage } from '@vueuse/core';
-import {nanoid} from '@0x-jerry/utils'
+import { nanoid } from '@0x-jerry/utils'
 
 interface AIConfig {
   id: string
