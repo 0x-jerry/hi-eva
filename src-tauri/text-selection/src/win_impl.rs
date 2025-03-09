@@ -1,9 +1,4 @@
-use crate::{
-    clipboard_helper::ClipboardHostTrait,
-    types::{HostHelperTrait, Result, TextSelectionDetectResult},
-};
-use rdev::{EventType, Key};
-use std::{thread::sleep, time::Duration};
+use crate::types::{HostHelperTrait, Result, TextSelectionDetectResult};
 use windows::Win32::{
     System::Com::{CoCreateInstance, CoInitialize, CLSCTX_ALL},
     UI::Accessibility::{
@@ -13,25 +8,6 @@ use windows::Win32::{
 
 #[derive(Default)]
 pub struct HostImpl;
-
-impl ClipboardHostTrait for HostImpl {
-    fn trigger_copy_action(&self) -> Result<()> {
-        let key_left_ctrl = Key::ControlLeft;
-        let key_c = Key::KeyC;
-
-        rdev::simulate(&EventType::KeyPress(key_left_ctrl))?;
-
-        rdev::simulate(&EventType::KeyPress(key_c))?;
-
-        sleep(Duration::from_millis(10));
-
-        rdev::simulate(&EventType::KeyRelease(key_left_ctrl))?;
-
-        rdev::simulate(&EventType::KeyRelease(key_c))?;
-
-        Ok(())
-    }
-}
 
 impl HostHelperTrait for HostImpl {
     fn detect_selected_text(&self) -> Result<TextSelectionDetectResult> {

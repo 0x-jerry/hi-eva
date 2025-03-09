@@ -13,3 +13,13 @@ pub(crate) trait HostHelperTrait {
     fn get_selected_text(&self) -> Result<String>;
     fn get_mouse_position(&self) -> (f64, f64);
 }
+
+#[derive(Debug)]
+pub struct ListenResult {
+    pub selected_text: String,
+    pub mouse_position: (f64, f64),
+}
+
+pub trait TextSelectionHandler {
+    fn on_selection_change(&self, result: ListenResult);
+}

@@ -1,8 +1,6 @@
 pub mod types;
 pub mod utils;
 
-mod clipboard_helper;
-
 #[cfg(unix)]
 mod unix_impl;
 #[cfg(windows)]
@@ -13,7 +11,6 @@ use std::{
     time::{Duration, Instant},
 };
 
-use clipboard_helper::ClipboardHostTrait;
 use rdev::{Button, EventType, ListenError};
 pub use types::*;
 
@@ -25,13 +22,9 @@ struct SelectionEventMark {
     last_click_pos: (f64, f64),
 }
 
-#[derive(Debug)]
-pub struct ListenResult {
-    pub selected_text: String,
-    pub mouse_position: (f64, f64),
-}
-
-pub fn listen<T: Fn(ListenResult) -> () + 'static>(listener: T) -> result::Result<(), ListenError> {
+pub fn listen<T: 'static + TextSelectionHandler>(
+    text_selection_handler: T,
+) -> result::Result<(), ListenError> {
     #[cfg(windows)]
     let host = win_impl::HostImpl::default();
     #[cfg(unix)]
@@ -85,16 +78,16 @@ pub fn listen<T: Fn(ListenResult) -> () + 'static>(listener: T) -> result::Resul
             }
 
             if should_check_selection {
-                match detect_selected_text(&host) {
+                match host.detect_selected_text() {
                     Ok(val) => match val {
                         TextSelectionDetectResult::Selected => {
-                            listener(ListenResult {
+                            text_selection_handler.on_selection_change(ListenResult {
                                 selected_text: String::default(),
                                 mouse_position: host.get_mouse_position(),
                             });
                         }
                         TextSelectionDetectResult::Text(s) => {
-                            listener(ListenResult {
+                            text_selection_handler.on_selection_change(ListenResult {
                                 selected_text: s,
                                 mouse_position: host.get_mouse_position(),
                             });
@@ -111,25 +104,6 @@ pub fn listen<T: Fn(ListenResult) -> () + 'static>(listener: T) -> result::Resul
         }
         _ => {}
     })
-}
-
-fn detect_selected_text<T: ClipboardHostTrait + HostHelperTrait>(
-    host: &T,
-) -> Result<TextSelectionDetectResult> {
-    let selected_result = host.detect_selected_text()?;
-
-    match selected_result {
-        TextSelectionDetectResult::None => {
-            let text_from_clipboard = clipboard_helper::get_selected_text_from_clipboard(host)?;
-
-            if !text_from_clipboard.is_empty() {
-                return Ok(TextSelectionDetectResult::Text(text_from_clipboard));
-            }
-
-            return Ok(TextSelectionDetectResult::None);
-        }
-        _ => return Ok(selected_result),
-    }
 }
 
 pub fn get_selected_text() -> Result<String> {

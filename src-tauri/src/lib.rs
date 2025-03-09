@@ -1,12 +1,45 @@
+use clipboard_rs::ClipboardHandler;
 use tauri::{
     AppHandle, Emitter, EventTarget, LogicalPosition, Manager, WebviewWindow, WebviewWindowBuilder,
 };
-use text_selection::ListenResult;
+use text_selection::{ListenResult, TextSelectionHandler};
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
+}
+
+struct App {
+    app: AppHandle,
+}
+
+impl ClipboardHandler for App {
+    fn on_clipboard_change(&mut self) {
+        todo!()
+    }
+}
+
+impl TextSelectionHandler for App {
+    fn on_selection_change(&self, result: ListenResult) {
+        println!("selected: {:?}", result);
+
+        let win = get_or_create_toolbar_window(&self.app);
+
+        let offset_pos = (8.0, 4.0);
+
+        // todo, calc windows position
+        let pos = LogicalPosition::new(
+            result.mouse_position.0 + offset_pos.0,
+            result.mouse_position.1 + offset_pos.1,
+        );
+
+        win.set_position(pos).unwrap();
+
+        self.app
+            .emit_to(EventTarget::labeled("toolbar"), "show", ())
+            .expect("Notify toolbar window");
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -20,33 +53,17 @@ pub fn run() {
             // create toolbar window in advance.
             let _ = get_or_create_toolbar_window(&app_handle);
 
-            let text_selection_callback = move |result: ListenResult| {
-                println!("selected: {:?}", result);
-
-                let win = get_or_create_toolbar_window(&app_handle);
-
-                let offset_pos = (8.0, 4.0);
-
-                // todo, calc windows position
-                let pos = LogicalPosition::new(
-                    result.mouse_position.0 + offset_pos.0,
-                    result.mouse_position.1 + offset_pos.1,
-                );
-
-                win.set_position(pos).unwrap();
-
-                app_handle
-                    .emit_to(EventTarget::labeled("toolbar"), "show", ())
-                    .expect("Notify toolbar window");
+            let my_app = App {
+                app: app_handle.clone(),
             };
 
             #[cfg(windows)]
             tauri::async_runtime::spawn_blocking(move || {
-                let _ = text_selection::listen(text_selection_callback);
+                let _ = text_selection::listen(my_app);
             });
 
             #[cfg(unix)]
-            let _ = text_selection::listen(text_selection_callback);
+            let _ = text_selection::listen(my_app);
 
             Ok(())
         })
