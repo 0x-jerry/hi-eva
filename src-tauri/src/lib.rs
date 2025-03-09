@@ -1,4 +1,4 @@
-use clipboard_rs::{ClipboardHandler, ClipboardWatcher, ClipboardWatcherContext};
+use clipboard_rs::{Clipboard, ClipboardHandler, ClipboardWatcher, ClipboardWatcherContext};
 use tauri::{
     AppHandle, Emitter, EventTarget, LogicalPosition, Manager, WebviewWindow, WebviewWindowBuilder,
 };
@@ -19,13 +19,17 @@ impl ClipboardHandler for MyApp {
     fn on_clipboard_change(&mut self) {
         log::info!("clipboard changed");
 
-        if let Ok(result) = text_selection::get_selected_text() {
-            log::info!("clipboard text is {:?}", result);
+        let clipboard = clipboard_rs::ClipboardContext::new().unwrap();
 
-            self.on_selection_change(ListenResult {
-                selected_text: result,
-                mouse_position: text_selection::get_mouse_pos(),
-            });
+        if let Ok(selected_text) = clipboard.get_text() {
+            log::info!("clipboard text: {:?}", selected_text);
+
+            if selected_text.trim().len() > 0 {
+                self.on_selection_change(ListenResult {
+                    selected_text,
+                    mouse_position: text_selection::get_mouse_pos(),
+                });
+            }
         }
     }
 }
