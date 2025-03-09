@@ -16,6 +16,7 @@ win.listen('show', () => {
   win.show()
 
   resizeWindow()
+  timeoutHandler.start()
 })
 
 const el = ref<HTMLElement>()
