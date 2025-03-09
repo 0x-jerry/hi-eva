@@ -9,6 +9,7 @@ const settings = [
   {
     label: '通用设置',
     Component: CommonSetting,
+    visible: false,
     id: useId(),
   },
   {
@@ -19,9 +20,10 @@ const settings = [
   {
     label: '关于',
     Component: AboutSetting,
+    visible: false,
     id: useId(),
   },
-]
+].filter(n => n.visible !== false)
 
 const activeMenu = ref(settings[0].id)
 
@@ -29,7 +31,7 @@ const activeMenu = ref(settings[0].id)
 <template>
   <div class="page flex h-screen">
     <div class="sidebar">
-      <div class="menu-item justify-center font-mono bg-light-8 h-8">
+      <div class="menu-item mb-4 justify-center font-mono bg-light-8 h-8">
         <span>Hi Eva</span>
       </div>
       <div class="menu-item" v-for="conf in settings" :id="conf.id" :class="{ active: activeMenu === conf.id }">

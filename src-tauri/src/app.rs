@@ -1,5 +1,7 @@
 use clipboard_rs::{Clipboard, ClipboardHandler, ClipboardWatcher, ClipboardWatcherContext};
 use tauri::{
+    menu::{Menu, MenuItem},
+    tray::{MouseButton, TrayIcon, TrayIconBuilder, TrayIconEvent},
     AppHandle, Emitter, EventTarget, LogicalPosition, Manager, WebviewWindow, WebviewWindowBuilder,
 };
 use text_selection::{ListenResult, TextSelectionHandler};
@@ -15,7 +17,9 @@ impl MyApp {
     }
 
     pub fn init(&self) {
-        let _main_win = self.create_main_window();
+        let _ = self.create_tray();
+
+        let _main_win = self.get_or_create_main_window();
 
         let _ = self.get_or_create_toolbar_window();
 
@@ -38,7 +42,7 @@ impl MyApp {
         let _ = text_selection::listen(app_cloned);
     }
 
-    fn create_main_window(&self) -> WebviewWindow {
+    fn get_or_create_main_window(&self) -> WebviewWindow {
         let win_label = "main";
 
         if let Some(win) = self.app.get_webview_window(&win_label) {
@@ -54,6 +58,47 @@ impl MyApp {
         let win = win_builder.build().expect("Create main window failed!");
 
         return win;
+    }
+
+    fn create_tray(&self) -> tauri::Result<TrayIcon> {
+        let app = &self.app;
+        let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
+        let menu = Menu::with_items(app, &[&quit_i])?;
+
+        let tray = TrayIconBuilder::new()
+            .menu(&menu)
+            .show_menu_on_left_click(false)
+            .build(app)?;
+
+        let my = self.clone();
+        tray.on_tray_icon_event(move |_icon, event| match event {
+            TrayIconEvent::Click {
+                id: _,
+                position: _,
+                rect: _,
+                button: MouseButton::Left,
+                button_state: _,
+            } => {
+                my.open_main_win();
+            }
+            _ => {}
+        });
+
+        let my = self.clone();
+        tray.on_menu_event(move |_app, event| match event.id.as_ref() {
+            "quit" => {
+                my.app.exit(0);
+            }
+            _ => {}
+        });
+
+        Ok(tray)
+    }
+
+    fn open_main_win(&self) {
+        let main_win = self.get_or_create_main_window();
+        main_win.show().unwrap();
+        main_win.set_focus().unwrap();
     }
 
     fn get_or_create_toolbar_window(&self) -> WebviewWindow {
