@@ -1,4 +1,4 @@
-use clipboard_rs::ClipboardHandler;
+use clipboard_rs::{ClipboardHandler, ClipboardWatcher, ClipboardWatcherContext};
 use tauri::{
     AppHandle, Emitter, EventTarget, LogicalPosition, Manager, WebviewWindow, WebviewWindowBuilder,
 };
@@ -10,17 +10,27 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
-struct App {
+#[derive(Clone)]
+struct MyApp {
     app: AppHandle,
 }
 
-impl ClipboardHandler for App {
+impl ClipboardHandler for MyApp {
     fn on_clipboard_change(&mut self) {
-        todo!()
+        log::info!("clipboard changed");
+
+        if let Ok(result) = text_selection::get_selected_text() {
+            log::info!("clipboard text is {:?}", result);
+
+            self.on_selection_change(ListenResult {
+                selected_text: result,
+                mouse_position: text_selection::get_mouse_pos(),
+            });
+        }
     }
 }
 
-impl TextSelectionHandler for App {
+impl TextSelectionHandler for MyApp {
     fn on_selection_change(&self, result: ListenResult) {
         println!("selected: {:?}", result);
 
@@ -44,6 +54,11 @@ impl TextSelectionHandler for App {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    #[cfg(dev)]
+    dotenv::from_filename(".env.development").expect("load env failed");
+
+    env_logger::init();
+
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![greet])
@@ -53,9 +68,18 @@ pub fn run() {
             // create toolbar window in advance.
             let _ = get_or_create_toolbar_window(&app_handle);
 
-            let my_app = App {
+            let my_app = MyApp {
                 app: app_handle.clone(),
             };
+
+            let my_cloned_app = my_app.clone();
+            tauri::async_runtime::spawn_blocking(move || {
+                //
+                let mut watcher =
+                    ClipboardWatcherContext::<MyApp>::new().expect("Init clipboard watcher");
+                watcher.add_handler(my_cloned_app);
+                watcher.start_watch();
+            });
 
             #[cfg(windows)]
             tauri::async_runtime::spawn_blocking(move || {

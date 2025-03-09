@@ -116,3 +116,12 @@ pub fn get_selected_text() -> Result<String> {
 
     return Ok(selected_result);
 }
+
+pub fn get_mouse_pos() -> (f64, f64) {
+    #[cfg(windows)]
+    let host = win_impl::HostImpl::default();
+    #[cfg(unix)]
+    let host = unix_impl::HostImpl::default();
+
+    host.get_mouse_position()
+}
