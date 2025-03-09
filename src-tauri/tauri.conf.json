@@ -10,14 +10,6 @@
     "frontendDist": "../dist"
   },
   "app": {
-    "windows": [
-      {
-        "title": "hi-eva",
-        "width": 800,
-        "height": 600,
-        "visible": false
-      }
-    ],
     "security": {
       "csp": null
     }
