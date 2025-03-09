@@ -6,15 +6,4 @@ import { RouterView } from 'vue-router';
   <RouterView />
 </template>
 
-<style>
-.icon {
-  display: inline-block;
-}
-
-html,
-body,
-span,
-div {
-  user-select: none;
-}
-</style>
+<style></style>

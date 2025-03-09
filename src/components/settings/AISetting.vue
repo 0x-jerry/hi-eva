@@ -1,14 +1,29 @@
 <script lang='ts' setup>
 import { useLocalStorage } from '@vueuse/core';
 import { nanoid } from '@0x-jerry/utils'
+import Button from 'primevue/button';
+import SettingTitle from './SettingTitle.vue';
+import InputText from 'primevue/inputtext';
+import Icon from '../Icon.vue';
+
 
 interface AIConfig {
   id: string
+  builtin?: boolean
   label: string
   baseUrl: string
   apiKey: string
 }
-const configs = useLocalStorage<AIConfig[]>('ai-config', [])
+
+const builtinConfigs: AIConfig[] = [{
+  id: 'dashscope',
+  builtin: true,
+  label: '百炼',
+  baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+  apiKey: ''
+}]
+
+const configs = useLocalStorage<AIConfig[]>('ai-config', builtinConfigs)
 
 async function save() {
   // todo
@@ -30,30 +45,52 @@ async function remove(idx: number) {
 
 <template>
   <div>
-    <div v-for="(conf, idx) in configs" :key="conf.id">
-      <div>
-        <label>
-          Label
-          <button @click="remove(idx)">Remove</button>
-        </label>
-        <input v-model="conf.label" />
+    <SettingTitle class="mb-2 gap-2">
+      <span>
+        AI 配置
+      </span>
+      <div class="flex items-center gap-2">
+        <Icon class="i-carbon:add" @click="add" />
       </div>
-      <div>
-        <label>baseUrl</label>
-        <input v-model="conf.baseUrl" />
-      </div>
-      <div>
-        <label>API Key</label>
-        <input v-model="conf.apiKey" />
+    </SettingTitle>
+
+    <div class="flex flex-col gap-2">
+      <div class="flex flex-col gap-2 bg-light-3 p-4 rounded" v-for="(conf, idx) in configs" :key="conf.id">
+        <div class="editable-row">
+          <label>
+            名称
+          </label>
+          <InputText v-model="conf.label" />
+          <div class="flex flex-1 justify-end">
+            <Icon v-if="!conf.builtin" class="i-carbon:close" @click="remove(idx)" />
+          </div>
+        </div>
+        <div class="editable-row">
+          <label>baseUrl</label>
+          <InputText v-model="conf.baseUrl" />
+        </div>
+        <div class="editable-row">
+          <label>API Key</label>
+          <InputText v-model="conf.apiKey" />
+        </div>
       </div>
     </div>
-    <div>
-      <button @click="add">Add</button>
-    </div>
-    <div>
-      <button @click="save">Save</button>
-    </div>
+
   </div>
 </template>
 
-<style lang='less' scoped></style>
+<style lang='less' scoped>
+.editable-row {
+  @apply flex items-center;
+
+  label {
+    width: 100px;
+    text-align: right;
+    margin-right: 0.5rem;
+  }
+
+  &:deep(.p-inputtext) {
+    width: calc(100% - 150px);
+  }
+}
+</style>

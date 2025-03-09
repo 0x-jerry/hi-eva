@@ -36,7 +36,7 @@ const activeMenu = ref(settings[0].id)
         {{ conf.label }}
       </div>
     </div>
-    <div class="content flex-1 p-2 overflow-auto">
+    <div class="content flex-1 px-4 overflow-auto flex flex-col gap-4">
       <div class="section-content" v-for="conf in settings">
         <span :id="conf.id"></span>
         <component :is="conf.Component" />
@@ -62,7 +62,14 @@ const activeMenu = ref(settings[0].id)
 }
 
 .section-content {
-  min-height: 100vh;
+  &:first-child {
+    @apply pt-2;
+  }
+
+  &:last-child {
+    min-height: 100vh;
+    @apply pb-2;
+  }
 }
 
 .icon {
