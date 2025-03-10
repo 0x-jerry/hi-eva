@@ -60,7 +60,7 @@ impl MyApp {
             return Some(selected_text.to_string());
         }
 
-        return None
+        return None;
     }
 
     fn get_or_create_main_window(&self) -> WebviewWindow {
@@ -141,6 +141,29 @@ impl MyApp {
         .visible(false)
         .skip_taskbar(true)
         .always_on_top(true);
+
+        let win = win_builder.build().expect("Create toolbar window failed!");
+
+        return win;
+    }
+
+    pub fn get_or_create_chat_window(&self, prompt_id: String) -> WebviewWindow {
+        let win_label = "chat";
+
+        if let Some(win) = self.app.get_webview_window(&win_label) {
+            return win;
+        }
+
+        let url = format!("#/chat?prompt={}", prompt_id);
+
+        let win_builder =
+            WebviewWindowBuilder::new(&self.app, win_label, tauri::WebviewUrl::App(url.into()))
+                .decorations(false)
+                .transparent(true)
+                .resizable(false)
+                .visible(false)
+                .skip_taskbar(true)
+                .always_on_top(true);
 
         let win = win_builder.build().expect("Create toolbar window failed!");
 

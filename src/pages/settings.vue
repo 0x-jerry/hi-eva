@@ -1,32 +1,36 @@
 <script setup lang="ts">
-import { ref, useId } from 'vue';
-import AboutSetting from '../components/settings/AboutSetting.vue';
-import AISetting from '../components/settings/AISetting.vue';
-import CommonSetting from '../components/settings/CommonSetting.vue';
-
+import { ref, useId } from 'vue'
+import AboutSetting from '../components/settings/AboutSetting.vue'
+import AISetting from '../components/settings/AISetting.vue'
+import CommonSetting from '../components/settings/CommonSetting.vue'
+import PromptSetting from '../components/settings/PromptSetting.vue'
 
 const settings = [
-  {
-    label: '通用设置',
-    Component: CommonSetting,
-    visible: false,
-    id: useId(),
-  },
-  {
-    label: 'AI 设置',
-    Component: AISetting,
-    id: useId(),
-  },
-  {
-    label: '关于',
-    Component: AboutSetting,
-    visible: false,
-    id: useId(),
-  },
-].filter(n => n.visible !== false)
+	{
+		label: '通用设置',
+		Component: CommonSetting,
+		visible: false,
+		id: useId(),
+	},
+	{
+		label: 'AI 设置',
+		Component: AISetting,
+		id: useId(),
+	},
+	{
+		label: 'Prompt 设置',
+		Component: PromptSetting,
+		id: useId(),
+	},
+	{
+		label: '关于',
+		Component: AboutSetting,
+		visible: false,
+		id: useId(),
+	},
+].filter((n) => n.visible !== false)
 
 const activeMenu = ref(settings[0].id)
-
 </script>
 <template>
   <div class="page flex h-screen">
