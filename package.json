@@ -16,7 +16,7 @@
     "@primeuix/themes": "^1.0.0",
     "@tauri-apps/api": "^2.3.0",
     "@tauri-apps/plugin-opener": "^2.2.6",
-    "@vueuse/core": "^12.8.2",
+    "@vueuse/core": "^13.0.0",
     "github-markdown-css": "^5.8.1",
     "lodash-es": "^4.17.21",
     "marked": "^15.0.7",
