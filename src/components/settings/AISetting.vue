@@ -1,36 +1,20 @@
 <script lang='ts' setup>
-import { useLocalStorage } from '@vueuse/core';
 import { nanoid } from '@0x-jerry/utils'
 import SettingTitle from './SettingTitle.vue';
 import InputText from 'primevue/inputtext';
 import Icon from '../Icon.vue';
 import Inplace from 'primevue/inplace';
+import { aiEndPointConfigs } from '../../logic/config';
 
-
-interface AIConfig {
-  id: string
-  builtin?: boolean
-  label: string
-  baseUrl: string
-  apiKey: string
-}
-
-const builtinConfigs: AIConfig[] = [{
-  id: 'dashscope',
-  builtin: true,
-  label: '百炼',
-  baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
-  apiKey: ''
-}]
-
-const configs = useLocalStorage<AIConfig[]>('ai-config', builtinConfigs)
+const configs = aiEndPointConfigs
 
 async function add() {
   configs.value.push({
     id: nanoid(),
     label: '',
     baseUrl: '',
-    apiKey: ''
+    apiKey: '',
+    models: []
   })
 }
 
