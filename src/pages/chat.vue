@@ -9,13 +9,13 @@ import { getPromptConf } from '../logic/config'
 import { mustache } from '../utils'
 
 interface RouteParams {
-	readonly toolbarPromptId: string
+	readonly promptId: string
 	readonly selectedText: string
 }
 
 const urlParams = useUrlSearchParams<RouteParams>('hash')
 
-const promptConf = getPromptConf(urlParams.toolbarPromptId)
+const promptConf = getPromptConf(urlParams.promptId)
 
 const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
 	{
@@ -37,7 +37,7 @@ const state = reactive({
 
 <template>
   <div class="page">
-    <ChatMessages v-model="state.messages" :prompt-id="urlParams.toolbarPromptId" />
+    <ChatMessages v-model="state.messages" :prompt-id="urlParams.promptId" />
   </div>
 </template>
 
