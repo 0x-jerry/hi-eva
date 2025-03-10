@@ -4,7 +4,9 @@ import SettingTitle from './SettingTitle.vue';
 import InputText from 'primevue/inputtext';
 import Icon from '../Icon.vue';
 import Inplace from 'primevue/inplace';
-import { aiEndPointConfigs } from '../../logic/config';
+import { type AIEndpointConfig, aiEndPointConfigs } from '../../logic/config';
+import Chip from 'primevue/chip';
+import { remove, uniq } from 'lodash-es';
 
 const configs = aiEndPointConfigs
 
@@ -18,8 +20,28 @@ async function add() {
   })
 }
 
-async function remove(idx: number) {
+async function removeConf(idx: number) {
   configs.value.splice(idx, 1)
+}
+
+function handleAddModel(event: KeyboardEvent, conf: AIEndpointConfig) {
+  if (event.code !== 'Enter') {
+    return
+  }
+
+  const el = event.target as HTMLInputElement
+  const modelName = el.value.trim()
+  if (!modelName) {
+    return
+  }
+
+  const models = [...conf.models, modelName]
+
+  conf.models = uniq(models)
+}
+
+function removeModel(conf: AIEndpointConfig, model: string) {
+  remove(conf.models, v => v === model)
 }
 </script>
 
@@ -50,7 +72,7 @@ async function remove(idx: number) {
             </template>
           </Inplace>
           <div class="flex flex-1 justify-end">
-            <Icon v-if="!conf.builtin" class="i-carbon:close" @click="remove(idx)" />
+            <Icon v-if="!conf.builtin" class="i-carbon:close" @click="removeConf(idx)" />
           </div>
         </div>
         <div class="editable-row">
@@ -60,6 +82,13 @@ async function remove(idx: number) {
         <div class="editable-row">
           <label>API Key</label>
           <InputText v-model="conf.apiKey" />
+        </div>
+        <div class="editable-row">
+          <label>Models</label>
+          <div class="flex flex-wrap gap-2 flex-1">
+            <Chip v-for="model in conf.models" :label="model" removable @remove="removeModel(conf, model)" />
+            <InputText @keydown="handleAddModel($event, conf)" />
+          </div>
         </div>
       </div>
     </div>
