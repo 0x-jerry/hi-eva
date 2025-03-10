@@ -24,3 +24,7 @@ export const aiEndPointConfigs = useLocalStorage<AIEndpointConfig[]>(
 	'ai-endpoint-config',
 	builtinEndpointConfigs,
 )
+
+export function getEndpointConf(id: string) {
+	return aiEndPointConfigs.value.find((n) => n.id === id)
+}

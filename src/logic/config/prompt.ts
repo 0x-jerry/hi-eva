@@ -46,7 +46,11 @@ const builtinToolbarConfigs: ToolbarPromptConfig[] = [
 	},
 ]
 
-export const toolbarConfigs = useLocalStorage<ToolbarPromptConfig[]>(
+export const promptConfigs = useLocalStorage<ToolbarPromptConfig[]>(
 	'prompt-configs',
 	builtinToolbarConfigs,
 )
+
+export function getPromptConf(id: string) {
+	return promptConfigs.value.find((n) => n.id === id)
+}

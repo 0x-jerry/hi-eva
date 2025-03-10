@@ -6,12 +6,12 @@ import Icon from '../Icon.vue'
 import Inplace from 'primevue/inplace'
 import {
 	aiEndPointConfigs,
-	toolbarConfigs,
+	promptConfigs,
 	type ToolbarPromptConfig,
 } from '../../logic/config'
 import Select from 'primevue/select'
 
-const configs = toolbarConfigs
+const configs = promptConfigs
 
 async function addConfig() {
 	configs.value.push({
