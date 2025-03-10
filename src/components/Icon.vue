@@ -14,7 +14,6 @@
 
   &:hover {
     @apply text-gray-8;
-
   }
 }
 </style>

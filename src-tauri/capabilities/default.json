@@ -4,7 +4,8 @@
   "description": "Capability for the main and toolbar window",
   "windows": [
     "main",
-    "toolbar"
+    "toolbar",
+    "chat"
   ],
   "permissions": [
     "core:default",

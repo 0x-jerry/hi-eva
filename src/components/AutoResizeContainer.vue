@@ -4,6 +4,8 @@ import { useResizeObserver } from '@vueuse/core'
 import { ref } from 'vue'
 
 export interface AutoResizeContainerProps {
+	width?: number
+	height?: number
 	maxWidth?: number
 	maxHeight?: number
 }
@@ -18,15 +20,13 @@ useResizeObserver(el, resizeWindow)
 async function resizeWindow() {
 	if (!el.value) return
 
-	const w = Math.min(
-		props.maxWidth || Number.POSITIVE_INFINITY,
-		el.value.clientWidth,
-	)
+	const w =
+		props.width ??
+		Math.min(props.maxWidth || Number.POSITIVE_INFINITY, el.value.clientWidth)
 
-	const h = Math.min(
-		props.maxHeight || Number.POSITIVE_INFINITY,
-		el.value.clientHeight,
-	)
+	const h =
+		props.height ??
+		Math.min(props.maxHeight || Number.POSITIVE_INFINITY, el.value.clientHeight)
 
 	const size = new LogicalSize(w, h)
 	await win.setSize(size)
@@ -45,7 +45,6 @@ async function resizeWindow() {
   position: fixed;
   top: 0;
   left: 0;
-  width: max-content;
-  height: max-content;
+  width: 100%;
 }
 </style>

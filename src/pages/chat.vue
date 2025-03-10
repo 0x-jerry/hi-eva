@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { useUrlSearchParams } from '@vueuse/core'
-import { reactive } from 'vue'
+import { watchImmediate } from '@vueuse/core'
+import { computed, reactive } from 'vue'
 import type { ChatHistory } from '../components/Chat/types'
 import ChatMessages from '../components/Chat/ChatMessages.vue'
 import { nanoid } from '@0x-jerry/utils'
@@ -10,14 +10,33 @@ import AutoResizeContainer from '../components/AutoResizeContainer.vue'
 import DraggableArea from '../components/DraggableArea.vue'
 import CloseWindow from '../components/CloseWindow.vue'
 import { getSelectedText } from '../logic/commands'
+import { getCurrentWindow } from '@tauri-apps/api/window'
 
-interface RouteParams {
-	readonly promptId: string
-}
+const urlParams = reactive({
+	promptId: '',
+})
 
-const urlParams = useUrlSearchParams<RouteParams>('hash')
+const win = getCurrentWindow()
 
-const promptConf = getPromptConf(urlParams.promptId)
+win.listen('prompt-id-changed', (evt) => {
+	urlParams.promptId = evt.payload as string
+})
+
+const promptConf = computed(() =>
+	urlParams.promptId ? getPromptConf(urlParams.promptId) : undefined,
+)
+
+watchImmediate(
+	() => urlParams.promptId,
+	async () => {
+		if (!urlParams.promptId) return
+
+		state.ready = false
+		state.chatHistory.messages = []
+
+		await initMessages()
+	},
+)
 
 const state = reactive({
 	ready: false,
@@ -28,12 +47,10 @@ const state = reactive({
 	} as ChatHistory,
 })
 
-initMessages()
-
 async function initMessages() {
 	state.chatHistory.messages.push({
 		role: 'user',
-		content: mustache(promptConf?.prompt || '', {
+		content: mustache(promptConf.value?.prompt || '', {
 			selection: (await getSelectedText()) || '',
 		}),
 	})
@@ -43,22 +60,20 @@ async function initMessages() {
 </script>
 
 <template>
-  <AutoResizeContainer>
+  <AutoResizeContainer :width="400">
     <div class="page bg-white">
-      <DraggableArea class="px-2 py-1 border-(0 b solid gray) flex"> 
-        <span class="flex-1">
-        This is Draggable 
-        </span>
-        <div>
-          <CloseWindow />
-        </div>
+      <div class="title flex items-center px-2 py-1 border-(0 b solid gray)">
+        <DraggableArea class="flex-1">
+          This is Draggable
+        </DraggableArea>
+        <CloseWindow />
+      </div>
 
-      </DraggableArea>
-      <div class="page flex flex-col bg-white min-h-600px">
+      <div class="page flex flex-col bg-white min-h-500px">
         <ChatMessages
-          v-if="state.ready"
+          v-if="state.ready && promptConf?.id"
           v-model="state.chatHistory"
-          :prompt-id="urlParams.promptId"
+          :prompt-id="promptConf.id"
         />
       </div>
     </div>

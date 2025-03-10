@@ -19,8 +19,8 @@ impl MyApp {
     pub fn init(&self) {
         let _ = self.create_tray();
 
-        let _main_win = self.get_or_create_main_window();
-
+        let _ = self.get_or_create_main_window();
+        let _ = self.get_or_create_chat_window();
         let _ = self.get_or_create_toolbar_window();
 
         let app_cloned = self.clone();
@@ -147,23 +147,25 @@ impl MyApp {
         return win;
     }
 
-    pub fn get_or_create_chat_window(&self, prompt_id: String) -> WebviewWindow {
+    pub fn get_or_create_chat_window(&self) -> WebviewWindow {
         let win_label = "chat";
 
         if let Some(win) = self.app.get_webview_window(&win_label) {
             return win;
         }
 
-        let url = format!("#/chat?prompt={}", prompt_id);
-
-        let win_builder =
-            WebviewWindowBuilder::new(&self.app, win_label, tauri::WebviewUrl::App(url.into()))
-                .decorations(false)
-                .transparent(true)
-                .resizable(false)
-                .visible(false)
-                .skip_taskbar(true)
-                .always_on_top(true);
+        let win_builder = WebviewWindowBuilder::new(
+            &self.app,
+            win_label,
+            tauri::WebviewUrl::App("#/chat".into()),
+        )
+        .inner_size(400.0, 600.0)
+        .decorations(false)
+        .transparent(true)
+        .resizable(false)
+        .visible(false)
+        .skip_taskbar(true)
+        .always_on_top(false);
 
         let win = win_builder.build().expect("Create toolbar window failed!");
 
