@@ -42,6 +42,9 @@ async function resizeWindow() {
 
 <style lang='less' scoped>
 .auto-resize-container {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: max-content;
   height: max-content;
 }

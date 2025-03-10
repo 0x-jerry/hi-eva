@@ -11,7 +11,7 @@ async function closeWindow() {
 
 <template>
   <slot>
-    <Icon class="i-carbon:close" @click.stop="closeWindow" />
+    <Icon class="i-carbon:close" @click="closeWindow" />
   </slot>
 </template>
 
