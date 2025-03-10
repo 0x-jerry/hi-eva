@@ -35,8 +35,8 @@ async function hideWindow() {
 }
 
 async function openChatPage(conf: ToolbarPromptConfig) {
-	timeoutHandler.stop()
-	openChatWindow(conf.id)
+	await hideWindow()
+	await openChatWindow(conf.id)
 }
 </script>
 
@@ -50,17 +50,17 @@ async function openChatPage(conf: ToolbarPromptConfig) {
       <DraggableArea class="px-1 flex items-center cursor-move bg-gray-1">
         <Icon class="i-carbon:draggable cursor-move" />
       </DraggableArea>
-        <div
-          v-for="conf in promptConfigs"
-          class="flex items-center px-2 hover:bg-gray-2 cursor-pointer"
-          @click="openChatPage(conf)"
-        >
-          <Icon v-if="conf.icon" :class="conf.icon" />
-          <span v-else>{{ conf.name }}</span>
-        </div>
-      <span class="py-2 px-1 flex items-center hover:bg-gray-2 cursor-pointer">
-        <CloseWindow />
-      </span>
+      <div
+        v-for="conf in promptConfigs"
+        class="flex items-center px-2 hover:bg-gray-2 cursor-pointer"
+        @click="openChatPage(conf)"
+      >
+        <Icon v-if="conf.icon" :class="conf.icon" />
+        <span v-else>{{ conf.name }}</span>
+      </div>
+      <CloseWindow
+        class="py-2 px-1 flex items-center hover:bg-gray-2"
+      />
     </div>
   </AutoResizeContainer>
 </template>

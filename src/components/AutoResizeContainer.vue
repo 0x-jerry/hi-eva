@@ -1,7 +1,7 @@
 <script lang='ts' setup>
 import { getCurrentWindow, LogicalSize } from '@tauri-apps/api/window'
 import { useResizeObserver } from '@vueuse/core'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 export interface AutoResizeContainerProps {
 	width?: number
@@ -31,10 +31,19 @@ async function resizeWindow() {
 	const size = new LogicalSize(w, h)
 	await win.setSize(size)
 }
+
+const style = computed(() => {
+	return {
+		width: `${props.width}px`,
+		height: `${props.height}px`,
+		maxWidth: `${props.maxWidth}px`,
+		maxHeight: `${props.maxHeight}px`,
+	}
+})
 </script>
 
 <template>
-  <div ref="el" class="auto-resize-container">
+  <div ref="el" class="auto-resize-container" :style="style">
     <slot></slot>
   </div>
 
@@ -45,6 +54,5 @@ async function resizeWindow() {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
 }
 </style>

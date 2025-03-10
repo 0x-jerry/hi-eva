@@ -1,4 +1,4 @@
-use tauri::{AppHandle, Emitter, EventTarget};
+use tauri::{AppHandle, Emitter, EventTarget, LogicalPosition};
 
 use crate::app::MyApp;
 
@@ -18,9 +18,17 @@ pub async fn open_chat(app: AppHandle, prompt_id: String) {
     win.emit_to(EventTarget::labeled("chat"), "prompt-id-changed", prompt_id)
         .unwrap();
 
-    win.set_always_on_top(true).unwrap();
+    {
+        let mouse_pos = text_selection::get_mouse_pos();
+
+        let offset_pos = (8.0, 4.0);
+
+        // todo, calc windows position
+        let pos = LogicalPosition::new(mouse_pos.0 + offset_pos.0, mouse_pos.1 + offset_pos.1);
+
+        win.set_position(pos).unwrap();
+    }
+
     win.show().unwrap();
     win.set_focus().unwrap();
-
-    win.set_always_on_top(false).unwrap();
 }

@@ -10,9 +10,12 @@ async function closeWindow() {
 </script>
 
 <template>
-  <slot>
-    <Icon class="i-carbon:close" @click.stop="closeWindow" />
-  </slot>
+  <div
+    class="inline-flex items-center cursor-pointer px-1 hover:bg-red hover:text-white"
+    @click.stop="closeWindow"
+  >
+    <Icon class="i-carbon:close" />
+  </div>
 </template>
 
 <style lang="less" scoped></style>

@@ -194,6 +194,10 @@ impl ClipboardHandler for MyApp {
 
 impl TextSelectionHandler for MyApp {
     fn on_selection_change(&self, result: ListenResult) {
+        if result.selected_text.trim().len() <= 0 {
+            return;
+        }
+
         println!("selected: {:?}", result);
 
         let win = self.get_or_create_toolbar_window();

@@ -3,17 +3,6 @@
 </script>
 
 <template>
-  <span class="icon cursor-pointer">
+  <span class="inline-block items-center px-1">
   </span>
 </template>
-
-<style lang='less' scoped>
-.icon {
-  display: inline-block;
-  @apply text-gray-6;
-
-  &:hover {
-    @apply text-gray-8;
-  }
-}
-</style>

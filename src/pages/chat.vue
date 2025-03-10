@@ -11,34 +11,11 @@ import DraggableArea from '../components/DraggableArea.vue'
 import CloseWindow from '../components/CloseWindow.vue'
 import { getSelectedText } from '../logic/commands'
 import { getCurrentWindow } from '@tauri-apps/api/window'
-
-const urlParams = reactive({
-	promptId: '',
-})
-
-const win = getCurrentWindow()
-
-win.listen('prompt-id-changed', (evt) => {
-	urlParams.promptId = evt.payload as string
-})
-
-const promptConf = computed(() =>
-	urlParams.promptId ? getPromptConf(urlParams.promptId) : undefined,
-)
-
-watchImmediate(
-	() => urlParams.promptId,
-	async () => {
-		if (!urlParams.promptId) return
-
-		state.ready = false
-		state.chatHistory.messages = []
-
-		await initMessages()
-	},
-)
+import Icon from '../components/Icon.vue'
 
 const state = reactive({
+	promptId: '',
+	pinned: false,
 	ready: false,
 	chatHistory: {
 		id: nanoid(),
@@ -46,6 +23,28 @@ const state = reactive({
 		messages: [],
 	} as ChatHistory,
 })
+
+const win = getCurrentWindow()
+
+win.listen('prompt-id-changed', (evt) => {
+	state.promptId = evt.payload as string
+})
+
+const promptConf = computed(() =>
+	state.promptId ? getPromptConf(state.promptId) : undefined,
+)
+
+watchImmediate(
+	() => state.promptId,
+	async () => {
+		if (!state.promptId) return
+
+		state.ready = false
+		state.chatHistory.messages = []
+
+		await initMessages()
+	},
+)
 
 async function initMessages() {
 	state.chatHistory.messages.push({
@@ -57,16 +56,33 @@ async function initMessages() {
 
 	state.ready = true
 }
+
+async function togglePinWindow() {
+	state.pinned = !state.pinned
+	await win.setAlwaysOnTop(state.pinned)
+}
 </script>
 
 <template>
   <AutoResizeContainer :width="400">
     <div class="page bg-white">
-      <div class="title flex items-center px-2 py-1 border-(0 b solid gray)">
-        <DraggableArea class="flex-1">
-          This is Draggable
+      <div class="title flex border-(0 b solid gray) h-8 select-none">
+        <div class="flex items-center pl-1 cursor-pointer" @click="togglePinWindow">
+          <Icon v-if="state.pinned" class="i-carbon:pin-filled" />
+          <Icon v-else class="i-carbon:pin" />
+        </div>
+        <div class="border-(0 r solid gray) ml-1 mr-2">&nbsp;</div>
+        <DraggableArea class="flex-1 flex items-center gap-1">
+          <template v-if="promptConf">
+            <Icon v-if="promptConf.icon" :class="promptConf.icon" />
+            <span class="">
+              {{ promptConf?.name }}
+            </span>
+          </template>
         </DraggableArea>
-        <CloseWindow />
+        <div class="icons h-full">
+          <CloseWindow class="h-full" />
+        </div>
       </div>
 
       <div class="page flex flex-col bg-white min-h-500px">
