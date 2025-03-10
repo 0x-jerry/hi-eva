@@ -1,6 +1,7 @@
 use app::MyApp;
 
 mod app;
+mod commands;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -11,7 +12,7 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![])
+        .invoke_handler(tauri::generate_handler![commands::get_selected_text])
         .setup(|app| {
             let app_handle = app.handle().clone();
 

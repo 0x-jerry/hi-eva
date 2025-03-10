@@ -42,6 +42,27 @@ impl MyApp {
         let _ = text_selection::listen(app_cloned);
     }
 
+    pub fn get_selected_text(&self) -> Option<String> {
+        if let Ok(selected) = text_selection::get_selected_text() {
+            return Some(selected);
+        }
+
+        return Self::get_selected_text_from_clipboard();
+    }
+
+    fn get_selected_text_from_clipboard() -> Option<String> {
+        let clipboard = clipboard_rs::ClipboardContext::new().unwrap();
+
+        if let Ok(selected_text) = clipboard.get_text() {
+            log::info!("clipboard text: {:?}", selected_text);
+
+            let selected_text = selected_text.trim();
+            return Some(selected_text.to_string());
+        }
+
+        return None
+    }
+
     fn get_or_create_main_window(&self) -> WebviewWindow {
         let win_label = "main";
 
