@@ -210,6 +210,7 @@ impl TextSelectionHandler for MyApp {
             result.mouse_position.1 + offset_pos.1,
         );
 
+        win.set_always_on_top(true).unwrap();
         win.set_position(pos).unwrap();
 
         self.app
