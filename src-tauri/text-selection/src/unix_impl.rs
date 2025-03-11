@@ -1,10 +1,9 @@
-#![allow(dead_code)]
-use std::{any::type_name, thread::sleep, time::Duration};
+use std::any::type_name;
 
 use accessibility::{AXAttribute, AXTextMarkerRange, AXUIElement};
 use accessibility_sys::{
     kAXFocusedApplicationAttribute, kAXFocusedUIElementAttribute, kAXSelectedTextAttribute,
-    kAXTitleAttribute, kAXTrustedCheckOptionPrompt, AXIsProcessTrustedWithOptions,
+    kAXTrustedCheckOptionPrompt, AXIsProcessTrustedWithOptions,
 };
 use core_foundation::{
     base::TCFType, boolean::CFBoolean, dictionary::CFDictionary, string::CFString, ConcreteCFType,
@@ -13,19 +12,25 @@ use core_graphics::{
     event::CGEvent,
     event_source::{CGEventSource, CGEventSourceStateID},
 };
-use rdev::{EventType, Key};
 use serde::Serialize;
 
-use crate::{
-    clipboard_helper::ClipboardHostTrait,
-    types::{HostHelperTrait, Result, TextSelectionDetectResult},
-};
+use crate::types::{HostHelperTrait, Result, TextSelectionDetectResult};
 
 #[allow(non_upper_case_globals)]
 pub const kAXSelectedTextMarkerRangeAttribute: &str = "AXSelectedTextMarkerRange";
 
 pub struct HostImpl {
     sys: AXUIElement,
+}
+
+impl Default for HostImpl {
+    fn default() -> Self {
+        let sys_element = AXUIElement::system_wide();
+
+        HostImpl::init();
+
+        Self { sys: sys_element }
+    }
 }
 
 impl HostImpl {
@@ -51,45 +56,8 @@ impl HostImpl {
     fn _prepare() {
         {
             // 必须先模拟一次按键，否者 辅助性 获取选中的文本会报错 Ax(-25204)
-            let key_event = rdev::EventType::KeyPress(Key::Escape);
-            rdev::simulate(&key_event).expect("press");
-            std::thread::sleep(std::time::Duration::from_millis(10));
-            let key_event = rdev::EventType::KeyRelease(Key::Escape);
-            rdev::simulate(&key_event).expect("release");
+            // todo
         }
-    }
-}
-
-impl Default for HostImpl {
-    fn default() -> Self {
-        let sys_element = AXUIElement::system_wide();
-
-        Self { sys: sys_element }
-    }
-}
-
-impl ClipboardHostTrait for HostImpl {
-    fn trigger_copy_action(&self) -> Result<()> {
-        let focused_app: AXUIElement = get_element_attr(&self.sys, kAXFocusedApplicationAttribute)?;
-
-        let app_title = get_element_attr::<CFString>(&focused_app, kAXTitleAttribute)?.to_string();
-
-        if !trigger_copy_menu_for_app(&app_title) {
-            let key_left_meta = Key::MetaLeft;
-            let key_c = Key::KeyC;
-
-            rdev::simulate(&EventType::KeyPress(key_left_meta))?;
-
-            rdev::simulate(&EventType::KeyPress(key_c))?;
-
-            sleep(Duration::from_millis(10));
-
-            rdev::simulate(&EventType::KeyRelease(key_left_meta))?;
-
-            rdev::simulate(&EventType::KeyRelease(key_c))?;
-        }
-
-        return Ok(());
     }
 }
 
@@ -185,6 +153,7 @@ fn get_element_attr<T: ConcreteCFType>(element: &AXUIElement, attr: &str) -> Res
     }
 }
 
+#[allow(dead_code)]
 fn trigger_copy_menu_for_app(app_name: &str) -> bool {
     // todo, support more app
     let supported_app = ["Chromium", "Code"];
