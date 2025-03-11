@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { watchImmediate } from '@vueuse/core'
-import { computed, reactive } from 'vue'
+import { computed, nextTick, reactive, ref } from 'vue'
 import type { ChatHistory } from '../components/Chat/types'
+// biome-ignore lint/style/useImportType: <explanation>
 import ChatMessages from '../components/Chat/ChatMessages.vue'
 import { nanoid } from '@0x-jerry/utils'
 import { getPromptConf } from '../logic/config'
@@ -23,6 +24,8 @@ const state = reactive({
 		messages: [],
 	} as ChatHistory,
 })
+
+const chatRef = ref<InstanceType<typeof ChatMessages>>()
 
 const win = getCurrentWindow()
 
@@ -55,6 +58,9 @@ async function initMessages() {
 	})
 
 	state.ready = true
+	await nextTick()
+
+	chatRef.value?.continueChat()
 }
 
 async function togglePinWindow() {
@@ -87,6 +93,7 @@ async function togglePinWindow() {
 
       <div class="page flex flex-col bg-white min-h-500px">
         <ChatMessages
+          ref="chatRef"
           v-if="state.ready && promptConf?.id"
           v-model="state.chatHistory"
           :prompt-id="promptConf.id"

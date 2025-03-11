@@ -144,11 +144,15 @@ function showContextmenu(event: Event, msg: ChatCompletionMessageParam) {
 	contextMenuState.selectMsg = msg
 	menuRef.value?.show(event)
 }
+
+defineExpose({
+	continueChat,
+})
 </script>
 
 <template>
-  <div class="chat-msgs flex-1 h-0 overflow-auto p-4">
-    <div class="chat-msg-item flex flex-col mb-4" v-for="(msg, idx) in chat?.messages.toReversed()">
+  <div class="chat-msgs min-h-100px max-h-600px overflow-auto p-4">
+    <div class="chat-msg-item flex flex-col mb-4" v-for="(msg, _idx) in chat?.messages">
       <div class="role flex text-(2xl)">
         <span v-if="msg.role === 'user'" class="i-carbon-user-avatar-filled-alt text-blue-4"></span>
         <span v-else class="i-carbon-machine-learning text-rose-4"></span>
