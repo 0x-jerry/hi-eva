@@ -52,7 +52,5 @@ const style = computed(() => {
 <style lang='less' scoped>
 .auto-resize-container {
   position: fixed;
-  top: 0;
-  left: 0;
 }
 </style>

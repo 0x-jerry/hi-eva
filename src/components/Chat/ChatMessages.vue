@@ -79,25 +79,33 @@ async function chatWith(messages: ChatCompletionMessageParam[]) {
 		content: '',
 	})
 
-	const respStream = await chatWithPrompt(messages, {
-		promptId: props.promptId,
-	})
+	try {
+		const respStream = await chatWithPrompt(messages, {
+			promptId: props.promptId,
+		})
 
-	state.isThinking = false
-	state.isReplying = true
+		state.isThinking = false
+		state.isReplying = true
 
-	// biome-ignore lint/style/noNonNullAssertion: <explanation>
-	const msg = chat.value.messages.at(-1)!
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
+		const msg = chat.value.messages.at(-1)!
 
-	if (requestAbort && !requestAbort.signal.aborted) {
-		requestAbort.abort()
-	}
+		if (requestAbort && !requestAbort.signal.aborted) {
+			requestAbort.abort()
+		}
 
-	requestAbort = new AbortController()
+		requestAbort = new AbortController()
 
-	for await (const chunkItem of respStream) {
-		const chunkConent = chunkItem.choices.at(0)?.delta.content || ''
-		msg.content += chunkConent
+		for await (const chunkItem of respStream) {
+			const chunkConent = chunkItem.choices.at(0)?.delta.content || ''
+			msg.content += chunkConent
+		}
+	} catch (error) {
+		const lastMsg = chat.value.messages.at(-1)
+
+		if (lastMsg) {
+			lastMsg.content += String(error)
+		}
 	}
 
 	requestAbort = null
@@ -151,30 +159,32 @@ defineExpose({
 </script>
 
 <template>
-  <div class="chat-msgs min-h-100px max-h-600px overflow-auto p-4">
-    <div class="chat-msg-item flex flex-col mb-4" v-for="(msg, _idx) in chat?.messages">
-      <div class="role flex text-(2xl)">
-        <span v-if="msg.role === 'user'" class="i-carbon-user-avatar-filled-alt text-blue-4"></span>
-        <span v-else class="i-carbon-machine-learning text-rose-4"></span>
-      </div>
-      <div class="chat-msg-content ml-3 mt-2 p-2 bg-light-5 rounded border-(1 solid gray-2)"
-        @contextmenu.prevent="showContextmenu($event, msg)">
-        <template v-if="msg.content">
-          <Markdown :content="msg.content as string" />
-        </template>
-        <template v-else>
-          <i class="pi pi-spin pi-spinner"></i>
-          思考中...
-        </template>
+  <div class="flex flex-col bg-white min-h-100px max-h-600px">
+    <div class="chat-msgs overflow-auto p-4">
+      <div class="chat-msg-item flex flex-col mb-4" v-for="(msg, _idx) in chat?.messages.toReversed()">
+        <div class="role flex text-(2xl)">
+          <span v-if="msg.role === 'user'" class="i-carbon-user-avatar-filled-alt text-blue-4"></span>
+          <span v-else class="i-carbon-machine-learning text-rose-4"></span>
+        </div>
+        <div class="chat-msg-content ml-3 mt-2 p-2 bg-light-5 rounded border-(1 solid gray-2)"
+          @contextmenu.prevent="showContextmenu($event, msg)">
+          <template v-if="msg.content">
+            <Markdown :content="msg.content as string" />
+          </template>
+          <template v-else>
+            <i class="pi pi-spin pi-spinner"></i>
+            思考中...
+          </template>
+        </div>
       </div>
     </div>
-  </div>
 
-  <ContextMenu ref="menuRef" :model="menuItems" />
+    <ContextMenu ref="menuRef" :model="menuItems" />
 
-  <div class="reply-bar border-(0 t solid gray-2) px-2 py-2 flex gap-2">
-    <Textarea rows="3" class="flex-1" v-model="state.reply" @keydown="handleKeydown" placeholder="Please input" />
-    <Button :disabled="state.isReplying || state.isThinking" @click=onSend>Send</Button>
+    <div class="reply-bar border-(0 t solid gray-2) px-2 py-2 flex gap-2">
+      <Textarea rows="3" class="flex-1" v-model="state.reply" @keydown="handleKeydown" placeholder="Please input" />
+      <Button :disabled="state.isReplying || state.isThinking" @click=onSend>Send</Button>
+    </div>
   </div>
 </template>
 

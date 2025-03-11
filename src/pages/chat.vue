@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { watchImmediate } from '@vueuse/core'
 import { computed, nextTick, reactive, ref } from 'vue'
 import type { ChatHistory } from '../components/Chat/types'
 // biome-ignore lint/style/useImportType: <explanation>
@@ -29,25 +28,23 @@ const chatRef = ref<InstanceType<typeof ChatMessages>>()
 
 const win = getCurrentWindow()
 
-win.listen('prompt-id-changed', (evt) => {
+win.listen('show-chat', async (evt) => {
 	state.promptId = evt.payload as string
+	await resetChatMessage()
 })
 
 const promptConf = computed(() =>
 	state.promptId ? getPromptConf(state.promptId) : undefined,
 )
 
-watchImmediate(
-	() => state.promptId,
-	async () => {
-		if (!state.promptId) return
+async function resetChatMessage() {
+	if (!state.promptId) return
 
-		state.ready = false
-		state.chatHistory.messages = []
+	state.ready = false
+	state.chatHistory.messages = []
 
-		await initMessages()
-	},
-)
+	await initMessages()
+}
 
 async function initMessages() {
 	state.chatHistory.messages.push({
@@ -91,14 +88,8 @@ async function togglePinWindow() {
         </div>
       </div>
 
-      <div class="page flex flex-col bg-white min-h-500px">
-        <ChatMessages
-          ref="chatRef"
-          v-if="state.ready && promptConf?.id"
-          v-model="state.chatHistory"
-          :prompt-id="promptConf.id"
-        />
-      </div>
+      <ChatMessages ref="chatRef" v-if="state.ready && promptConf?.id" v-model="state.chatHistory"
+        :prompt-id="promptConf.id" />
     </div>
   </AutoResizeContainer>
 </template>

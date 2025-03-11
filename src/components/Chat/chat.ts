@@ -30,6 +30,7 @@ export function chatWithPrompt(
 	const client = new OpenAI({
 		baseURL: endpointConf.baseUrl,
 		apiKey: endpointConf.apiKey,
+		dangerouslyAllowBrowser: true,
 	})
 
 	const result = client.chat.completions.create({
