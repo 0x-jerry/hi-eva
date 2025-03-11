@@ -131,6 +131,7 @@ impl MyApp {
         .resizable(false)
         .visible(false)
         .skip_taskbar(true)
+        .focused(false)
         .always_on_top(true);
 
         let win = win_builder.build().expect("Create toolbar window failed!");
@@ -216,5 +217,11 @@ impl TextSelectionHandler for MyApp {
                 .emit_to(EventTarget::labeled("toolbar"), "show", ())
                 .expect("Notify toolbar window");
         }
+    }
+
+    fn on_mouse_down(&self) {
+        let win = self.get_or_create_toolbar_window();
+        win.emit_to(EventTarget::labeled("toolbar"), "hide", ())
+            .unwrap();
     }
 }

@@ -22,4 +22,5 @@ pub struct ListenResult {
 
 pub trait TextSelectionHandler {
     fn on_selection_change(&self, result: Option<ListenResult>);
+    fn on_mouse_down(&self);
 }

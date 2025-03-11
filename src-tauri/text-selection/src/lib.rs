@@ -36,7 +36,9 @@ pub fn listen<T: 'static + TextSelectionHandler + Send>(text_selection_handler: 
     let mut mouse = mouce::Mouse::new();
 
     let result = mouse.hook(Box::new(move |event| {
-        handle_mouse_event(event, &event_marker, &text_selection_handler);
+        let mut event_marker = event_marker.try_lock().unwrap();
+
+        handle_mouse_event(event, &mut event_marker, &text_selection_handler);
     }));
 
     match result {
@@ -47,7 +49,7 @@ pub fn listen<T: 'static + TextSelectionHandler + Send>(text_selection_handler: 
 
 fn handle_mouse_event<T: 'static + TextSelectionHandler + Send>(
     event: &MouseEvent,
-    event_marker: &Mutex<SelectionEventMark>,
+    event_marker: &mut SelectionEventMark,
     text_selection_handler: &T,
 ) {
     #[cfg(windows)]
@@ -57,23 +59,19 @@ fn handle_mouse_event<T: 'static + TextSelectionHandler + Send>(
 
     match event {
         MouseEvent::Press(MouseButton::Left) => {
-            let mut event_marker = event_marker.try_lock().unwrap();
-
             event_marker.mouse_down_pos = host.get_mouse_position();
             event_marker.mouse_down_ts = Instant::now();
+            text_selection_handler.on_mouse_down();
         }
         MouseEvent::Release(MouseButton::Left) => {
-            let mut event_marker = event_marker.try_lock().unwrap();
-
             let mut should_check_selection = false;
 
             let current_mouse_pos = host.get_mouse_position();
 
+            let now = Instant::now();
             let maybe_click = utils::distance(event_marker.mouse_down_pos, current_mouse_pos) < 5.0;
 
             if maybe_click {
-                let now = Instant::now();
-
                 if let Some(last_click_ts) = event_marker.last_click_ts {
                     let db_click_max_delay_check_ms = 500;
 
@@ -98,6 +96,8 @@ fn handle_mouse_event<T: 'static + TextSelectionHandler + Send>(
             }
 
             if should_check_selection {
+                log::info!("check selection start");
+
                 match host.detect_selected_text() {
                     Ok(val) => match val {
                         TextSelectionDetectResult::Selected => {
@@ -117,9 +117,11 @@ fn handle_mouse_event<T: 'static + TextSelectionHandler + Send>(
                         }
                     },
                     Err(err) => {
-                        println!("err {:?}", err);
+                        log::error!("detect selected text error {:?}", err);
                     }
                 }
+
+                log::info!("check selection end");
             } else {
                 text_selection_handler.on_selection_change(None);
             }

@@ -26,6 +26,10 @@ win.listen('show', () => {
 	timeoutHandler.start()
 })
 
+win.listen('hide', () => {
+	hideWindow()
+})
+
 async function hideWindow() {
 	timeoutHandler.stop()
 

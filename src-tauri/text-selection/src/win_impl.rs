@@ -47,36 +47,65 @@ impl HostHelperTrait for HostImpl {
     }
 }
 
-/// https://github.dev/pot-app/Selection/blob/master/src/windows.rs
-fn get_text_by_automation() -> Result<String> {
+thread_local! {
+    static AUTOMATION: IUIAutomation = init_automation();
+}
+
+fn init_automation() -> IUIAutomation {
     unsafe {
+        log::info!("COM init start");
+
         // Init COM
         let init = CoInitialize(None);
         if init.is_err() {
             let msg = init.message();
-
-            return Err(msg.into());
+            log::error!("COM init failed: {}", msg);
+            panic!("COM init failed");
         }
 
         // Create IUIAutomation instance
-        let auto: IUIAutomation = CoCreateInstance(&CUIAutomation, None, CLSCTX_ALL)?;
-        // Get Focused Element
-        let el = auto.GetFocusedElement()?;
-        // Get TextPattern
-        let res: IUIAutomationTextPattern = el.GetCurrentPatternAs(UIA_TextPatternId)?;
-        // Get TextRange Array
-        let text_array = res.GetSelection()?;
-        let length = text_array.Length()?;
-        // Iterate TextRange Array
-        let mut target = String::new();
+        let auto: IUIAutomation = CoCreateInstance(&CUIAutomation, None, CLSCTX_ALL).unwrap();
 
-        for i in 0..length {
-            let text = text_array.GetElement(i)?;
-            let str = text.GetText(-1)?;
-            let str = str.to_string();
-            target.push_str(&str);
-        }
-
-        Ok(target.trim().to_string())
+        log::info!("COM init success");
+        auto
     }
+}
+
+/// https://github.dev/pot-app/Selection/blob/master/src/windows.rs
+fn get_text_by_automation() -> Result<String> {
+    log::info!("get text by automation start");
+
+    AUTOMATION.with(|auto| -> Result<String> {
+        log::info!("get auto object {:?}", auto);
+
+        unsafe {
+            // Get Focused Element
+            let el = auto.GetFocusedElement()?;
+            log::info!("get focused element success");
+
+            // Get TextPattern
+            let res: IUIAutomationTextPattern = el.GetCurrentPatternAs(UIA_TextPatternId)?;
+            log::info!("get text pattern success");
+
+            // Get TextRange Array
+            let text_array = res.GetSelection()?;
+            log::info!("get text range array success");
+
+            let length = text_array.Length()?;
+            log::info!("text range array length: {}", length);
+
+            // Iterate TextRange Array
+            let mut target = String::new();
+
+            for i in 0..length {
+                let text = text_array.GetElement(i)?;
+                let str = text.GetText(-1)?;
+                let str = str.to_string();
+                target.push_str(&str);
+            }
+
+            log::info!("get text success");
+            Ok(target.trim().to_string())
+        }
+    })
 }
