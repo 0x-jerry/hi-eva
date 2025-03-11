@@ -2,7 +2,8 @@ use clipboard_rs::{Clipboard, ClipboardHandler, ClipboardWatcher, ClipboardWatch
 use tauri::{
     menu::{Menu, MenuItem},
     tray::{MouseButton, TrayIcon, TrayIconBuilder, TrayIconEvent},
-    AppHandle, Emitter, EventTarget, LogicalPosition, Manager, WebviewWindow, WebviewWindowBuilder,
+    AppHandle, Emitter, EventTarget, Manager, PhysicalPosition, WebviewWindow,
+    WebviewWindowBuilder,
 };
 use text_selection::{ListenResult, TextSelectionHandler};
 
@@ -32,14 +33,14 @@ impl MyApp {
             watcher.start_watch();
         });
 
-        let app_cloned = self.clone();
-        #[cfg(windows)]
-        tauri::async_runtime::spawn_blocking(move || {
-            let _ = text_selection::listen(app_cloned);
-        });
+        // let app_cloned = self.clone();
+        // #[cfg(windows)]
+        // tauri::async_runtime::spawn_blocking(move || {
+        //     let _ = text_selection::listen(app_cloned);
+        // });
 
-        #[cfg(unix)]
-        let _ = text_selection::listen(app_cloned);
+        // #[cfg(unix)]
+        // let _ = text_selection::listen(app_cloned);
     }
 
     pub fn get_selected_text(&self) -> Option<String> {
@@ -205,7 +206,7 @@ impl TextSelectionHandler for MyApp {
         let offset_pos = (8.0, 4.0);
 
         // todo, calc windows position
-        let pos = LogicalPosition::new(
+        let pos = PhysicalPosition::new(
             result.mouse_position.0 + offset_pos.0,
             result.mouse_position.1 + offset_pos.1,
         );

@@ -1,4 +1,4 @@
-use tauri::{AppHandle, Emitter, EventTarget, LogicalPosition};
+use tauri::{AppHandle, Emitter, EventTarget, PhysicalPosition};
 
 use crate::app::MyApp;
 
@@ -15,7 +15,7 @@ pub async fn open_chat(app: AppHandle, prompt_id: String) {
 
     let win = my_app.get_or_create_chat_window();
 
-    win.emit_to(EventTarget::labeled("chat"), "prompt-id-changed", prompt_id)
+    win.emit_to(EventTarget::labeled("chat"), "show-chat", prompt_id)
         .unwrap();
 
     {
@@ -24,7 +24,7 @@ pub async fn open_chat(app: AppHandle, prompt_id: String) {
         let offset_pos = (8.0, 4.0);
 
         // todo, calc windows position
-        let pos = LogicalPosition::new(mouse_pos.0 + offset_pos.0, mouse_pos.1 + offset_pos.1);
+        let pos = PhysicalPosition::new(mouse_pos.0 + offset_pos.0, mouse_pos.1 + offset_pos.1);
 
         win.set_position(pos).unwrap();
     }
