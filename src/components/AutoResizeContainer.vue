@@ -22,11 +22,11 @@ async function resizeWindow() {
 
 	const w =
 		props.width ??
-		Math.min(props.maxWidth || Number.POSITIVE_INFINITY, el.value.clientWidth)
+		Math.min(props.maxWidth || screen.availWidth, el.value.clientWidth)
 
 	const h =
 		props.height ??
-		Math.min(props.maxHeight || Number.POSITIVE_INFINITY, el.value.clientHeight)
+		Math.min(props.maxHeight || screen.availHeight, el.value.clientHeight)
 
 	const size = new LogicalSize(w, h)
 	await win.setSize(size)
