@@ -1,4 +1,4 @@
-use tauri::{AppHandle, Emitter, EventTarget, PhysicalPosition};
+use tauri::{AppHandle, Emitter, EventTarget, LogicalPosition, PhysicalPosition};
 
 use crate::app::MyApp;
 
@@ -19,12 +19,12 @@ pub async fn open_chat(app: AppHandle, prompt_id: String) {
         .unwrap();
 
     {
-        let mouse_pos = text_selection::get_mouse_pos();
+        let offset_pos: PhysicalPosition<f64> =
+            LogicalPosition::new(10.0, 5.0).to_physical(my_app.scale_factor());
 
-        let offset_pos = (8.0, 4.0);
-
+        let mouse_pos = my_app.get_cursor_position();
         // todo, calc windows position
-        let pos = PhysicalPosition::new(mouse_pos.0 + offset_pos.0, mouse_pos.1 + offset_pos.1);
+        let pos = PhysicalPosition::new(mouse_pos.x + offset_pos.x, mouse_pos.y + offset_pos.y);
 
         win.set_position(pos).unwrap();
     }

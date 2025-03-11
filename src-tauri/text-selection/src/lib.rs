@@ -59,14 +59,14 @@ fn handle_mouse_event<T: 'static + TextSelectionHandler + Send>(
 
     match event {
         MouseEvent::Press(MouseButton::Left) => {
-            event_marker.mouse_down_pos = host.get_mouse_position();
+            event_marker.mouse_down_pos = text_selection_handler.get_cursor_position();
             event_marker.mouse_down_ts = Instant::now();
             text_selection_handler.on_mouse_down();
         }
         MouseEvent::Release(MouseButton::Left) => {
             let mut should_check_selection = false;
 
-            let current_mouse_pos = host.get_mouse_position();
+            let current_mouse_pos = text_selection_handler.get_cursor_position();
 
             let now = Instant::now();
             let maybe_click = utils::distance(event_marker.mouse_down_pos, current_mouse_pos) < 5.0;
@@ -103,14 +103,11 @@ fn handle_mouse_event<T: 'static + TextSelectionHandler + Send>(
                         TextSelectionDetectResult::Selected => {
                             text_selection_handler.on_selection_change(Some(ListenResult {
                                 selected_text: String::default(),
-                                mouse_position: host.get_mouse_position(),
                             }));
                         }
                         TextSelectionDetectResult::Text(s) => {
-                            text_selection_handler.on_selection_change(Some(ListenResult {
-                                selected_text: s,
-                                mouse_position: host.get_mouse_position(),
-                            }));
+                            text_selection_handler
+                                .on_selection_change(Some(ListenResult { selected_text: s }));
                         }
                         TextSelectionDetectResult::None => {
                             text_selection_handler.on_selection_change(None);
@@ -139,13 +136,4 @@ pub fn get_selected_text() -> Result<String> {
     let selected_result = host.get_selected_text()?;
 
     return Ok(selected_result);
-}
-
-pub fn get_mouse_pos() -> (f64, f64) {
-    #[cfg(windows)]
-    let host = win_impl::HostImpl::default();
-    #[cfg(unix)]
-    let host = unix_impl::HostImpl::default();
-
-    host.get_mouse_position()
 }

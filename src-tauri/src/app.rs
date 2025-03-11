@@ -4,7 +4,7 @@ use clipboard_rs::{Clipboard, ClipboardHandler, ClipboardWatcher, ClipboardWatch
 use tauri::{
     menu::{Menu, MenuItem},
     tray::{MouseButton, TrayIcon, TrayIconBuilder, TrayIconEvent},
-    AppHandle, Emitter, EventTarget, Manager, PhysicalPosition, WebviewWindow,
+    AppHandle, Emitter, EventTarget, LogicalPosition, Manager, PhysicalPosition, WebviewWindow,
     WebviewWindowBuilder,
 };
 use text_selection::{ListenResult, TextSelectionHandler};
@@ -162,6 +162,16 @@ impl MyApp {
 
         return win;
     }
+
+    pub fn get_cursor_position(&self) -> PhysicalPosition<f64> {
+        self.app.cursor_position().unwrap()
+    }
+
+    pub fn scale_factor(&self) -> f64 {
+        let win = self.get_or_create_main_window();
+        let scale_factor = win.scale_factor().unwrap();
+        return scale_factor;
+    }
 }
 
 impl ClipboardHandler for MyApp {
@@ -174,10 +184,7 @@ impl ClipboardHandler for MyApp {
             log::info!("clipboard text: {:?}", selected_text);
 
             if selected_text.trim().len() > 0 {
-                self.on_selection_change(Some(ListenResult {
-                    selected_text,
-                    mouse_position: text_selection::get_mouse_pos(),
-                }));
+                self.on_selection_change(Some(ListenResult { selected_text }));
             }
         }
     }
@@ -202,13 +209,12 @@ impl TextSelectionHandler for MyApp {
 
             let win = self.get_or_create_toolbar_window();
 
-            let offset_pos = (8.0, 4.0);
+            let offset_pos: PhysicalPosition<f64> =
+                LogicalPosition::new(10.0, 5.0).to_physical(self.scale_factor());
 
+            let mouse_pos = self.get_cursor_position();
             // todo, calc windows position
-            let pos = PhysicalPosition::new(
-                result.mouse_position.0 + offset_pos.0,
-                result.mouse_position.1 + offset_pos.1,
-            );
+            let pos = PhysicalPosition::new(mouse_pos.x + offset_pos.x, mouse_pos.y + offset_pos.y);
 
             win.set_always_on_top(true).unwrap();
             win.set_position(pos).unwrap();
@@ -223,5 +229,10 @@ impl TextSelectionHandler for MyApp {
         let win = self.get_or_create_toolbar_window();
         win.emit_to(EventTarget::labeled("toolbar"), "hide", ())
             .unwrap();
+    }
+
+    fn get_cursor_position(&self) -> (f64, f64) {
+        let pos = self.get_cursor_position().to_logical(self.scale_factor());
+        (pos.x, pos.y)
     }
 }

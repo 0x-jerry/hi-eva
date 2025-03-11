@@ -8,10 +8,6 @@ use accessibility_sys::{
 use core_foundation::{
     base::TCFType, boolean::CFBoolean, dictionary::CFDictionary, string::CFString, ConcreteCFType,
 };
-use core_graphics::{
-    event::CGEvent,
-    event_source::{CGEventSource, CGEventSourceStateID},
-};
 use serde::Serialize;
 
 use crate::types::{HostHelperTrait, Result, TextSelectionDetectResult};
@@ -23,11 +19,19 @@ pub struct HostImpl {
     sys: AXUIElement,
 }
 
+thread_local! {
+    static AUTOMATION: () = init_automation();
+}
+
+fn init_automation() {
+    HostImpl::init();
+}
+
 impl Default for HostImpl {
     fn default() -> Self {
-        let sys_element = AXUIElement::system_wide();
+        AUTOMATION.with(|_| {});
 
-        HostImpl::init();
+        let sys_element = AXUIElement::system_wide();
 
         Self { sys: sys_element }
     }
@@ -94,21 +98,6 @@ impl HostHelperTrait for HostImpl {
             get_element_attr::<CFString>(&focused_element, kAXSelectedTextAttribute)?;
 
         return Ok(selected_text.to_string());
-    }
-
-    fn get_mouse_position(&self) -> (f64, f64) {
-        let event =
-            CGEvent::new(CGEventSource::new(CGEventSourceStateID::CombinedSessionState).unwrap());
-
-        let point = match event {
-            Ok(event) => {
-                let point = event.location();
-                return (point.x, point.y);
-            }
-            Err(_) => (0.0, 0.0),
-        };
-
-        point
     }
 }
 
