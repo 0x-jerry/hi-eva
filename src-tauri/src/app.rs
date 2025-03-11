@@ -33,14 +33,14 @@ impl MyApp {
             watcher.start_watch();
         });
 
-        // let app_cloned = self.clone();
-        // #[cfg(windows)]
-        // tauri::async_runtime::spawn_blocking(move || {
-        //     let _ = text_selection::listen(app_cloned);
-        // });
+        let app_cloned = self.clone();
+        #[cfg(windows)]
+        tauri::async_runtime::spawn_blocking(move || {
+            let _ = text_selection::listen(app_cloned);
+        });
 
-        // #[cfg(unix)]
-        // let _ = text_selection::listen(app_cloned);
+        #[cfg(unix)]
+        let _ = text_selection::listen(app_cloned);
     }
 
     pub fn get_selected_text(&self) -> Option<String> {
@@ -184,38 +184,40 @@ impl ClipboardHandler for MyApp {
             log::info!("clipboard text: {:?}", selected_text);
 
             if selected_text.trim().len() > 0 {
-                self.on_selection_change(ListenResult {
+                self.on_selection_change(Some(ListenResult {
                     selected_text,
                     mouse_position: text_selection::get_mouse_pos(),
-                });
+                }));
             }
         }
     }
 }
 
 impl TextSelectionHandler for MyApp {
-    fn on_selection_change(&self, result: ListenResult) {
-        if result.selected_text.trim().len() <= 0 {
-            return;
+    fn on_selection_change(&self, result: Option<ListenResult>) {
+        if let Some(result) = result {
+            if result.selected_text.trim().len() <= 0 {
+                return;
+            }
+
+            println!("selected: {:?}", result);
+
+            let win = self.get_or_create_toolbar_window();
+
+            let offset_pos = (8.0, 4.0);
+
+            // todo, calc windows position
+            let pos = PhysicalPosition::new(
+                result.mouse_position.0 + offset_pos.0,
+                result.mouse_position.1 + offset_pos.1,
+            );
+
+            win.set_always_on_top(true).unwrap();
+            win.set_position(pos).unwrap();
+
+            self.app
+                .emit_to(EventTarget::labeled("toolbar"), "show", ())
+                .expect("Notify toolbar window");
         }
-
-        println!("selected: {:?}", result);
-
-        let win = self.get_or_create_toolbar_window();
-
-        let offset_pos = (8.0, 4.0);
-
-        // todo, calc windows position
-        let pos = PhysicalPosition::new(
-            result.mouse_position.0 + offset_pos.0,
-            result.mouse_position.1 + offset_pos.1,
-        );
-
-        win.set_always_on_top(true).unwrap();
-        win.set_position(pos).unwrap();
-
-        self.app
-            .emit_to(EventTarget::labeled("toolbar"), "show", ())
-            .expect("Notify toolbar window");
     }
 }

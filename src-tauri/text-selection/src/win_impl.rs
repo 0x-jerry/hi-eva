@@ -49,7 +49,13 @@ impl HostHelperTrait for HostImpl {
 fn get_text_by_automation() -> Result<String> {
     unsafe {
         // Init COM
-        let _ = CoInitialize(None);
+        let init = CoInitialize(None);
+        if init.is_err() {
+            let msg = init.message();
+
+            return Err(msg.into());
+        }
+
         // Create IUIAutomation instance
         let auto: IUIAutomation = CoCreateInstance(&CUIAutomation, None, CLSCTX_ALL)?;
         // Get Focused Element

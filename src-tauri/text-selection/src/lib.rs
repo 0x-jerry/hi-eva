@@ -81,25 +81,27 @@ pub fn listen<T: 'static + TextSelectionHandler>(
                 match host.detect_selected_text() {
                     Ok(val) => match val {
                         TextSelectionDetectResult::Selected => {
-                            text_selection_handler.on_selection_change(ListenResult {
+                            text_selection_handler.on_selection_change(Some(ListenResult {
                                 selected_text: String::default(),
                                 mouse_position: host.get_mouse_position(),
-                            });
+                            }));
                         }
                         TextSelectionDetectResult::Text(s) => {
-                            text_selection_handler.on_selection_change(ListenResult {
+                            text_selection_handler.on_selection_change(Some(ListenResult {
                                 selected_text: s,
                                 mouse_position: host.get_mouse_position(),
-                            });
+                            }));
                         }
                         TextSelectionDetectResult::None => {
-                            println!("no selected text")
+                            text_selection_handler.on_selection_change(None);
                         }
                     },
                     Err(err) => {
                         println!("err {:?}", err);
                     }
                 }
+            } else {
+                text_selection_handler.on_selection_change(None);
             }
         }
         _ => {}
