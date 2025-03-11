@@ -45,12 +45,6 @@ impl MyApp {
         });
 
         let app_cloned = self.clone();
-        #[cfg(windows)]
-        tauri::async_runtime::spawn_blocking(move || {
-            let _ = text_selection::listen(app_cloned);
-        });
-
-        #[cfg(unix)]
         let _ = text_selection::listen(app_cloned);
     }
 
