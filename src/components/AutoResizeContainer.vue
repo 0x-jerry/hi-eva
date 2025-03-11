@@ -28,7 +28,9 @@ async function resizeWindow() {
 		props.height ??
 		Math.min(props.maxHeight || screen.availHeight, el.value.clientHeight)
 
-	const size = new LogicalSize(w, h)
+	const minSise = { w: 20, h: 20 }
+
+	const size = new LogicalSize(Math.max(w, minSise.w), Math.max(h, minSise.h))
 	await win.setSize(size)
 	await checkWindowPosition(size)
 }
