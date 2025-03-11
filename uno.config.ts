@@ -5,14 +5,17 @@ import {
 	transformerDirectives,
 	transformerVariantGroup,
 } from 'unocss'
-import { icons } from '@iconify-json/carbon'
 import process from 'node:process'
 
 const isDev = process.env.NODE_ENV === 'development'
 
-const carbonIcons = isDev
-	? ['i-carbon:ibm-watson-language-translator', 'i-carbon:book']
-	: Object.keys(icons.icons).map((name) => `i-${icons.prefix}:${name}`)
+const carbonIcons = isDev ? [] : await getCarbonIcons()
+
+async function getCarbonIcons() {
+	const icons = (await import('@iconify-json/carbon')).icons
+
+	return Object.keys(icons).map((name) => `i-${icons.prefix}:${name}`)
+}
 
 export default defineConfig({
 	presets: [presetWind3(), presetIcons()],

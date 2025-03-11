@@ -1,3 +1,4 @@
+// @unocss-include
 import { useLocalStorage } from '@vueuse/core'
 
 export interface ToolbarPromptConfig {
