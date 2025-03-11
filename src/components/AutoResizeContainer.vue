@@ -2,6 +2,7 @@
 import { getCurrentWindow, LogicalSize } from '@tauri-apps/api/window'
 import { useResizeObserver } from '@vueuse/core'
 import { computed, ref } from 'vue'
+import { debounce } from 'lodash-es'
 
 export interface AutoResizeContainerProps {
 	width?: number
@@ -15,9 +16,11 @@ const props = defineProps<AutoResizeContainerProps>()
 const el = ref<HTMLElement>()
 const win = getCurrentWindow()
 
+const resizeWindow = debounce(_resizeWindow, 100)
+
 useResizeObserver(el, resizeWindow)
 
-async function resizeWindow() {
+async function _resizeWindow() {
 	if (!el.value) return
 
 	const w =

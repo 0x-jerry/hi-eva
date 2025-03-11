@@ -14,7 +14,7 @@ const timeoutHandler = useTimeoutFn(
 	async () => {
 		hideWindow()
 	},
-	10_000,
+	1_500,
 	{
 		immediate: false,
 	},
