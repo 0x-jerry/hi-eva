@@ -1,27 +1,26 @@
 <script lang="ts" setup>
-import { computed, nextTick, reactive, ref } from 'vue'
-import type { ChatHistory } from '../components/Chat/types'
-// biome-ignore lint/style/useImportType: <explanation>
-import ChatMessages from '../components/Chat/ChatMessages.vue'
 import { nanoid } from '@0x-jerry/utils'
+import { getCurrentWindow } from '@tauri-apps/api/window'
+import { computed, nextTick, reactive, ref } from 'vue'
+import AutoResizeContainer from '../components/AutoResizeContainer.vue'
+import ChatMessages from '../components/Chat/ChatMessages.vue'
+import type { ChatHistory } from '../components/Chat/types'
+import CloseWindow from '../components/CloseWindow.vue'
+import DraggableArea from '../components/DraggableArea.vue'
+import Icon from '../components/Icon.vue'
+import { getSelectedText } from '../logic/commands'
 import { getPromptConf } from '../logic/config'
 import { mustache } from '../utils'
-import AutoResizeContainer from '../components/AutoResizeContainer.vue'
-import DraggableArea from '../components/DraggableArea.vue'
-import CloseWindow from '../components/CloseWindow.vue'
-import { getSelectedText } from '../logic/commands'
-import { getCurrentWindow } from '@tauri-apps/api/window'
-import Icon from '../components/Icon.vue'
 
 const state = reactive({
-	promptId: '',
-	pinned: false,
-	ready: false,
-	chatHistory: {
-		id: nanoid(),
-		name: 'temp',
-		messages: [],
-	} as ChatHistory,
+  promptId: '',
+  pinned: false,
+  ready: false,
+  chatHistory: {
+    id: nanoid(),
+    name: 'temp',
+    messages: [],
+  } as ChatHistory,
 })
 
 const chatRef = ref<InstanceType<typeof ChatMessages>>()
@@ -29,40 +28,40 @@ const chatRef = ref<InstanceType<typeof ChatMessages>>()
 const win = getCurrentWindow()
 
 win.listen('show-chat', async (evt) => {
-	state.promptId = evt.payload as string
-	await resetChatMessage()
+  state.promptId = evt.payload as string
+  await resetChatMessage()
 })
 
 const promptConf = computed(() =>
-	state.promptId ? getPromptConf(state.promptId) : undefined,
+  state.promptId ? getPromptConf(state.promptId) : undefined,
 )
 
 async function resetChatMessage() {
-	if (!state.promptId) return
+  if (!state.promptId) return
 
-	state.ready = false
-	state.chatHistory.messages = []
+  state.ready = false
+  state.chatHistory.messages = []
 
-	await initMessages()
+  await initMessages()
 }
 
 async function initMessages() {
-	state.chatHistory.messages.push({
-		role: 'user',
-		content: mustache(promptConf.value?.prompt || '', {
-			selection: (await getSelectedText()) || '',
-		}),
-	})
+  state.chatHistory.messages.push({
+    role: 'user',
+    content: mustache(promptConf.value?.prompt || '', {
+      selection: (await getSelectedText()) || '',
+    }),
+  })
 
-	state.ready = true
-	await nextTick()
+  state.ready = true
+  await nextTick()
 
-	chatRef.value?.continueChat()
+  chatRef.value?.continueChat()
 }
 
 async function togglePinWindow() {
-	state.pinned = !state.pinned
-	await win.setAlwaysOnTop(state.pinned)
+  state.pinned = !state.pinned
+  await win.setAlwaysOnTop(state.pinned)
 }
 </script>
 

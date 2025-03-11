@@ -4,7 +4,7 @@ import { getCurrentWindow } from '@tauri-apps/api/window'
 const win = getCurrentWindow()
 
 async function startDrag() {
-	await win.startDragging()
+  await win.startDragging()
 }
 </script>
 

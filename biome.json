@@ -7,11 +7,14 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "ignore": []
+    "ignore": [],
+    "include": [
+      "src"
+    ]
   },
   "formatter": {
     "enabled": true,
-    "useEditorconfig": false
+    "useEditorconfig": true
   },
   "organizeImports": {
     "enabled": true
@@ -37,5 +40,20 @@
       "attributePosition": "auto",
       "bracketSpacing": true
     }
-  }
+  },
+  "overrides": [
+    {
+      "include": [
+        "*.vue"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "useConst": "off",
+            "useImportType": "off"
+          }
+        }
+      }
+    }
+  ]
 }

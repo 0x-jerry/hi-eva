@@ -5,7 +5,7 @@ import Icon from './Icon.vue'
 const win = getCurrentWindow()
 
 async function closeWindow() {
-	await win.hide()
+  await win.hide()
 }
 </script>
 

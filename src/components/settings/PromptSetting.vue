@@ -1,36 +1,36 @@
 <script lang='ts' setup>
 import { nanoid } from '@0x-jerry/utils'
-import SettingTitle from './SettingTitle.vue'
-import InputText from 'primevue/inputtext'
-import Textarea from 'primevue/textarea'
-import Icon from '../Icon.vue'
 import Inplace from 'primevue/inplace'
-import {
-	aiEndPointConfigs,
-	promptConfigs,
-	type ToolbarPromptConfig,
-} from '../../logic/config'
+import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
+import Textarea from 'primevue/textarea'
+import {
+  type ToolbarPromptConfig,
+  aiEndPointConfigs,
+  promptConfigs,
+} from '../../logic/config'
+import Icon from '../Icon.vue'
+import SettingTitle from './SettingTitle.vue'
 
 const configs = promptConfigs
 
 async function addConfig() {
-	configs.value.push({
-		id: nanoid(),
-		name: '',
-		icon: '',
-		prompt: '',
-	})
+  configs.value.push({
+    id: nanoid(),
+    name: '',
+    icon: '',
+    prompt: '',
+  })
 }
 
 async function removeConf(idx: number) {
-	configs.value.splice(idx, 1)
+  configs.value.splice(idx, 1)
 }
 
 function getSelectedEndpointModelList(conf: ToolbarPromptConfig) {
-	return (
-		aiEndPointConfigs.value.find((c) => c.id === conf.enpointId)?.models || []
-	)
+  return (
+    aiEndPointConfigs.value.find((c) => c.id === conf.enpointId)?.models || []
+  )
 }
 </script>
 

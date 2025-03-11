@@ -1,63 +1,63 @@
 <script setup lang="ts">
+import { useScroll } from '@vueuse/core'
 import { computed, ref, useId } from 'vue'
-import AboutSetting from '../components/settings/AboutSetting.vue'
 import AISetting from '../components/settings/AISetting.vue'
+import AboutSetting from '../components/settings/AboutSetting.vue'
 import CommonSetting from '../components/settings/CommonSetting.vue'
 import PromptSetting from '../components/settings/PromptSetting.vue'
-import { useScroll } from '@vueuse/core'
 
 const scrollElRef = ref<HTMLElement>()
 
 const settings = [
-	{
-		label: '通用设置',
-		Component: CommonSetting,
-		visible: false,
-		id: useId(),
-	},
-	{
-		label: 'AI 设置',
-		Component: AISetting,
-		id: useId(),
-	},
-	{
-		label: 'Prompt 设置',
-		Component: PromptSetting,
-		id: useId(),
-	},
-	{
-		label: '关于',
-		Component: AboutSetting,
-		visible: false,
-		id: useId(),
-	},
+  {
+    label: '通用设置',
+    Component: CommonSetting,
+    visible: false,
+    id: useId(),
+  },
+  {
+    label: 'AI 设置',
+    Component: AISetting,
+    id: useId(),
+  },
+  {
+    label: 'Prompt 设置',
+    Component: PromptSetting,
+    id: useId(),
+  },
+  {
+    label: '关于',
+    Component: AboutSetting,
+    visible: false,
+    id: useId(),
+  },
 ].filter((n) => n.visible !== false)
 
 const activeMenu = computed(() => {
-	const top = scroll.y.value
+  const top = scroll.y.value
 
-	const hit = settings.find((n) => {
-		const el = document.getElementById(n.id)
-		if (!el) {
-			return false
-		}
+  const hit = settings.find((n) => {
+    const el = document.getElementById(n.id)
+    if (!el) {
+      return false
+    }
 
-		if (top > el.clientTop) {
-			return true
-		}
-	})
+    if (top > el.clientTop) {
+      return true
+    }
+  })
 
-	return hit?.id || settings.at(-1)?.id
+  return hit?.id || settings.at(-1)?.id
 })
 
 const scroll = useScroll(scrollElRef)
 
 function clickMenu(conf: { id: string }) {
-	const el = document.getElementById(conf.id)
-	el?.scrollIntoView({
-		behavior: 'smooth',
-		block: 'start',
-	})
+  const el = document.getElementById(conf.id)
+  el?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start',
+  })
 }
 </script>
 <template>

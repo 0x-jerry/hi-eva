@@ -1,48 +1,48 @@
 <script lang='ts' setup>
 import { nanoid } from '@0x-jerry/utils'
-import SettingTitle from './SettingTitle.vue'
+import { remove, uniq } from 'lodash-es'
+import Chip from 'primevue/chip'
+import Inplace from 'primevue/inplace'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
-import Icon from '../Icon.vue'
-import Inplace from 'primevue/inplace'
 import { type AIEndpointConfig, aiEndPointConfigs } from '../../logic/config'
-import Chip from 'primevue/chip'
-import { remove, uniq } from 'lodash-es'
+import Icon from '../Icon.vue'
+import SettingTitle from './SettingTitle.vue'
 
 const configs = aiEndPointConfigs
 
 async function add() {
-	configs.value.push({
-		id: nanoid(),
-		label: '',
-		baseUrl: '',
-		apiKey: '',
-		models: [],
-	})
+  configs.value.push({
+    id: nanoid(),
+    label: '',
+    baseUrl: '',
+    apiKey: '',
+    models: [],
+  })
 }
 
 async function removeConf(idx: number) {
-	configs.value.splice(idx, 1)
+  configs.value.splice(idx, 1)
 }
 
 function handleAddModel(event: KeyboardEvent, conf: AIEndpointConfig) {
-	if (event.code !== 'Enter') {
-		return
-	}
+  if (event.code !== 'Enter') {
+    return
+  }
 
-	const el = event.target as HTMLInputElement
-	const modelName = el.value.trim()
-	if (!modelName) {
-		return
-	}
+  const el = event.target as HTMLInputElement
+  const modelName = el.value.trim()
+  if (!modelName) {
+    return
+  }
 
-	const models = [...conf.models, modelName]
+  const models = [...conf.models, modelName]
 
-	conf.models = uniq(models)
+  conf.models = uniq(models)
 }
 
 function removeModel(conf: AIEndpointConfig, model: string) {
-	remove(conf.models, (v) => v === model)
+  remove(conf.models, (v) => v === model)
 }
 </script>
 

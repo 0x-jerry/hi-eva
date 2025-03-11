@@ -1,6 +1,5 @@
 <script lang='ts' setup>
-import SettingTitle from './SettingTitle.vue';
-
+import SettingTitle from './SettingTitle.vue'
 </script>
 
 <template>

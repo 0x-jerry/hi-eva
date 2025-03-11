@@ -1,6 +1,6 @@
 <script lang='ts' setup>
 import { marked } from 'marked'
-import { computed } from 'vue';
+import { computed } from 'vue'
 import 'github-markdown-css'
 
 export interface MarkdownContentProps {

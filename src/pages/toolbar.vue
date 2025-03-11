@@ -1,46 +1,46 @@
 <script lang="ts" setup>
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { useTimeoutFn } from '@vueuse/core'
-import { promptConfigs, type ToolbarPromptConfig } from '../logic/config'
 import AutoResizeContainer from '../components/AutoResizeContainer.vue'
-import Icon from '../components/Icon.vue'
-import DraggableArea from '../components/DraggableArea.vue'
 import CloseWindow from '../components/CloseWindow.vue'
+import DraggableArea from '../components/DraggableArea.vue'
+import Icon from '../components/Icon.vue'
 import { openChatWindow } from '../logic/commands'
+import { type ToolbarPromptConfig, promptConfigs } from '../logic/config'
 
 const win = getCurrentWindow()
 
 const timeoutHandler = useTimeoutFn(
-	async () => {
-		hideWindow()
-	},
-	1_500,
-	{
-		immediate: false,
-	},
+  async () => {
+    hideWindow()
+  },
+  1_500,
+  {
+    immediate: false,
+  },
 )
 
 win.listen('show', () => {
-	win.show()
+  win.show()
 
-	timeoutHandler.start()
+  timeoutHandler.start()
 })
 
 win.listen('hide', () => {
-	hideWindow()
+  hideWindow()
 })
 
 async function hideWindow() {
-	timeoutHandler.stop()
+  timeoutHandler.stop()
 
-	if (!timeoutHandler.isPending.value) {
-		await win.hide()
-	}
+  if (!timeoutHandler.isPending.value) {
+    await win.hide()
+  }
 }
 
 async function openChatPage(conf: ToolbarPromptConfig) {
-	await hideWindow()
-	await openChatWindow(conf.id)
+  await hideWindow()
+  await openChatWindow(conf.id)
 }
 </script>
 

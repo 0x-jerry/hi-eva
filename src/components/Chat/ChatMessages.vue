@@ -1,18 +1,17 @@
 <script setup lang="ts">
+import { remove } from 'lodash-es'
 import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs'
 import Button from 'primevue/button'
-import Textarea from 'primevue/textarea'
-// biome-ignore lint/style/useImportType: <explanation>
 import ContextMenu from 'primevue/contextmenu'
-import type { ChatHistory } from './types'
 import type { MenuItem } from 'primevue/menuitem'
-import { remove } from 'lodash-es'
+import Textarea from 'primevue/textarea'
 import { reactive, ref } from 'vue'
-import { chatWithPrompt } from './chat'
 import Markdown from '../Markdown.vue'
+import { chatWithPrompt } from './chat'
+import type { ChatHistory } from './types'
 
 export interface ChatMessagesProps {
-	promptId: string
+  promptId: string
 }
 
 const props = defineProps<ChatMessagesProps>()
@@ -24,137 +23,137 @@ const emit = defineEmits(['click-title'])
 const menuRef = ref<InstanceType<typeof ContextMenu>>()
 
 const contextMenuState = reactive({
-	selectMsg: null as ChatCompletionMessageParam | null,
+  selectMsg: null as ChatCompletionMessageParam | null,
 })
 
 let requestAbort: AbortController | null = null
 
 const state = reactive({
-	reply: '',
-	isThinking: false,
-	isReplying: false,
+  reply: '',
+  isThinking: false,
+  isReplying: false,
 })
 
 function handleKeydown(evt: KeyboardEvent) {
-	if (evt.key === 'Enter') {
-		onSend()
-	}
+  if (evt.key === 'Enter') {
+    onSend()
+  }
 }
 
 async function onSend() {
-	if (!chat.value) return
-	if (state.isThinking || state.isReplying) return
+  if (!chat.value) return
+  if (state.isThinking || state.isReplying) return
 
-	const reply = state.reply.trim()
-	if (!reply) return
-	state.reply = ''
+  const reply = state.reply.trim()
+  if (!reply) return
+  state.reply = ''
 
-	chat.value.messages.push({
-		role: 'user',
-		content: reply,
-	})
+  chat.value.messages.push({
+    role: 'user',
+    content: reply,
+  })
 
-	await continueChat()
+  await continueChat()
 }
 
 async function continueChat() {
-	if (!chat.value) return
+  if (!chat.value) return
 
-	state.isThinking = true
-	state.isReplying = false
+  state.isThinking = true
+  state.isReplying = false
 
-	await chatWith(chat.value.messages.slice())
+  await chatWith(chat.value.messages.slice())
 
-	state.isThinking = false
-	state.isReplying = false
+  state.isThinking = false
+  state.isReplying = false
 }
 
 async function chatWith(messages: ChatCompletionMessageParam[]) {
-	if (!chat.value) {
-		return
-	}
+  if (!chat.value) {
+    return
+  }
 
-	chat.value.messages.push({
-		role: 'assistant',
-		content: '',
-	})
+  chat.value.messages.push({
+    role: 'assistant',
+    content: '',
+  })
 
-	try {
-		const respStream = await chatWithPrompt(messages, {
-			promptId: props.promptId,
-		})
+  try {
+    const respStream = await chatWithPrompt(messages, {
+      promptId: props.promptId,
+    })
 
-		state.isThinking = false
-		state.isReplying = true
+    state.isThinking = false
+    state.isReplying = true
 
-		// biome-ignore lint/style/noNonNullAssertion: <explanation>
-		const msg = chat.value.messages.at(-1)!
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    const msg = chat.value.messages.at(-1)!
 
-		if (requestAbort && !requestAbort.signal.aborted) {
-			requestAbort.abort()
-		}
+    if (requestAbort && !requestAbort.signal.aborted) {
+      requestAbort.abort()
+    }
 
-		requestAbort = new AbortController()
+    requestAbort = new AbortController()
 
-		for await (const chunkItem of respStream) {
-			const chunkConent = chunkItem.choices.at(0)?.delta.content || ''
-			msg.content += chunkConent
-		}
-	} catch (error) {
-		const lastMsg = chat.value.messages.at(-1)
+    for await (const chunkItem of respStream) {
+      const chunkConent = chunkItem.choices.at(0)?.delta.content || ''
+      msg.content += chunkConent
+    }
+  } catch (error) {
+    const lastMsg = chat.value.messages.at(-1)
 
-		if (lastMsg) {
-			lastMsg.content += String(error)
-		}
-	}
+    if (lastMsg) {
+      lastMsg.content += String(error)
+    }
+  }
 
-	requestAbort = null
+  requestAbort = null
 
-	state.isReplying = false
+  state.isReplying = false
 }
 
 const menuItems: MenuItem[] = [
-	{
-		label: '重新生成',
-		icon: 'pi pi-sync',
-		command() {
-			if (!chat.value) return
-			if (!contextMenuState.selectMsg) return
+  {
+    label: '重新生成',
+    icon: 'pi pi-sync',
+    command() {
+      if (!chat.value) return
+      if (!contextMenuState.selectMsg) return
 
-			const idx = chat.value.messages.indexOf(contextMenuState.selectMsg)
-			if (idx == null) return
+      const idx = chat.value.messages.indexOf(contextMenuState.selectMsg)
+      if (idx == null) return
 
-			chat.value.messages = chat.value.messages.slice(0, idx)
+      chat.value.messages = chat.value.messages.slice(0, idx)
 
-			continueChat()
-		},
-	},
-	{
-		label: '删除',
-		icon: 'pi pi-trash',
-		command() {
-			if (requestAbort && !requestAbort.signal.aborted) {
-				requestAbort.abort()
-			}
+      continueChat()
+    },
+  },
+  {
+    label: '删除',
+    icon: 'pi pi-trash',
+    command() {
+      if (requestAbort && !requestAbort.signal.aborted) {
+        requestAbort.abort()
+      }
 
-			state.isReplying = false
-			state.isThinking = false
+      state.isReplying = false
+      state.isThinking = false
 
-			remove(
-				chat.value?.messages || [],
-				(msg) => msg === contextMenuState.selectMsg,
-			)
-		},
-	},
+      remove(
+        chat.value?.messages || [],
+        (msg) => msg === contextMenuState.selectMsg,
+      )
+    },
+  },
 ]
 
 function showContextmenu(event: Event, msg: ChatCompletionMessageParam) {
-	contextMenuState.selectMsg = msg
-	menuRef.value?.show(event)
+  contextMenuState.selectMsg = msg
+  menuRef.value?.show(event)
 }
 
 defineExpose({
-	continueChat,
+  continueChat,
 })
 </script>
 
