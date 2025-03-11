@@ -2,6 +2,7 @@
 import { nanoid } from '@0x-jerry/utils'
 import SettingTitle from './SettingTitle.vue'
 import InputText from 'primevue/inputtext'
+import Textarea from 'primevue/textarea'
 import Icon from '../Icon.vue'
 import Inplace from 'primevue/inplace'
 import {
@@ -67,9 +68,9 @@ function getSelectedEndpointModelList(conf: ToolbarPromptConfig) {
           <label>icon</label>
           <InputText v-model="conf.icon" />
         </div>
-        <div class="editable-row">
+        <div class="flex flex-col gap-2">
           <label>prompt</label>
-          <InputText v-model="conf.prompt" />
+          <Textarea v-model="conf.prompt" :rows="5" />
         </div>
         <div class="editable-row">
           <label>Models</label>

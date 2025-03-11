@@ -1,47 +1,48 @@
 <script lang='ts' setup>
 import { nanoid } from '@0x-jerry/utils'
-import SettingTitle from './SettingTitle.vue';
-import InputText from 'primevue/inputtext';
-import Icon from '../Icon.vue';
-import Inplace from 'primevue/inplace';
-import { type AIEndpointConfig, aiEndPointConfigs } from '../../logic/config';
-import Chip from 'primevue/chip';
-import { remove, uniq } from 'lodash-es';
+import SettingTitle from './SettingTitle.vue'
+import InputText from 'primevue/inputtext'
+import Password from 'primevue/password'
+import Icon from '../Icon.vue'
+import Inplace from 'primevue/inplace'
+import { type AIEndpointConfig, aiEndPointConfigs } from '../../logic/config'
+import Chip from 'primevue/chip'
+import { remove, uniq } from 'lodash-es'
 
 const configs = aiEndPointConfigs
 
 async function add() {
-  configs.value.push({
-    id: nanoid(),
-    label: '',
-    baseUrl: '',
-    apiKey: '',
-    models: []
-  })
+	configs.value.push({
+		id: nanoid(),
+		label: '',
+		baseUrl: '',
+		apiKey: '',
+		models: [],
+	})
 }
 
 async function removeConf(idx: number) {
-  configs.value.splice(idx, 1)
+	configs.value.splice(idx, 1)
 }
 
 function handleAddModel(event: KeyboardEvent, conf: AIEndpointConfig) {
-  if (event.code !== 'Enter') {
-    return
-  }
+	if (event.code !== 'Enter') {
+		return
+	}
 
-  const el = event.target as HTMLInputElement
-  const modelName = el.value.trim()
-  if (!modelName) {
-    return
-  }
+	const el = event.target as HTMLInputElement
+	const modelName = el.value.trim()
+	if (!modelName) {
+		return
+	}
 
-  const models = [...conf.models, modelName]
+	const models = [...conf.models, modelName]
 
-  conf.models = uniq(models)
+	conf.models = uniq(models)
 }
 
 function removeModel(conf: AIEndpointConfig, model: string) {
-  remove(conf.models, v => v === model)
+	remove(conf.models, (v) => v === model)
 }
 </script>
 
@@ -77,11 +78,11 @@ function removeModel(conf: AIEndpointConfig, model: string) {
         </div>
         <div class="editable-row">
           <label>baseUrl</label>
-          <InputText v-model="conf.baseUrl" />
+          <InputText class="content" v-model="conf.baseUrl" />
         </div>
         <div class="editable-row">
           <label>API Key</label>
-          <InputText v-model="conf.apiKey" />
+          <Password class="content" v-model="conf.apiKey" toggleMask />
         </div>
         <div class="editable-row">
           <label>Models</label>
@@ -106,8 +107,13 @@ function removeModel(conf: AIEndpointConfig, model: string) {
     margin-right: 0.5rem;
   }
 
-  &:deep(.p-inputtext) {
+  .content {
     width: calc(100% - 150px);
+
+    &:deep(.p-inputtext) {
+      width: 100%;
+    }
   }
+
 }
 </style>
