@@ -30,6 +30,20 @@ async function resizeWindow() {
 
 	const size = new LogicalSize(w, h)
 	await win.setSize(size)
+	await checkWindowPosition(size)
+}
+
+async function checkWindowPosition(size: LogicalSize) {
+	const winPos = (await win.outerPosition()).toLogical(devicePixelRatio)
+
+	const gap = 10
+
+	const bottom = screen.availHeight - (winPos.y + size.height)
+	if (bottom < gap) {
+		const nextHeight = screen.availHeight - (size.height + gap)
+		winPos.y = nextHeight
+		await win.setPosition(winPos)
+	}
 }
 
 const style = computed(() => {
