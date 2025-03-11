@@ -73,8 +73,7 @@ function getSelectedEndpointModelList(conf: ToolbarPromptConfig) {
         </div>
         <div class="editable-row">
           <label>Models</label>
-          <div>
-
+          <div class="flex gap-2">
             <Select v-model="conf.enpointId" :options="aiEndPointConfigs" optionLabel="label" optionValue="id"
               placeholder="Select a endpoint" />
 
@@ -83,7 +82,6 @@ function getSelectedEndpointModelList(conf: ToolbarPromptConfig) {
         </div>
       </div>
     </div>
-
   </div>
 </template>
 

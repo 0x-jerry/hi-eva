@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { ref, useId } from 'vue'
+import { computed, ref, useId } from 'vue'
 import AboutSetting from '../components/settings/AboutSetting.vue'
 import AISetting from '../components/settings/AISetting.vue'
 import CommonSetting from '../components/settings/CommonSetting.vue'
 import PromptSetting from '../components/settings/PromptSetting.vue'
+import { useScroll } from '@vueuse/core'
+
+const scrollElRef = ref<HTMLElement>()
 
 const settings = [
 	{
@@ -30,7 +33,32 @@ const settings = [
 	},
 ].filter((n) => n.visible !== false)
 
-const activeMenu = ref(settings[0].id)
+const activeMenu = computed(() => {
+	const top = scroll.y.value
+
+	const hit = settings.find((n) => {
+		const el = document.getElementById(n.id)
+		if (!el) {
+			return false
+		}
+
+		if (top > el.clientTop) {
+			return true
+		}
+	})
+
+	return hit?.id || settings.at(-1)?.id
+})
+
+const scroll = useScroll(scrollElRef)
+
+function clickMenu(conf: { id: string }) {
+	const el = document.getElementById(conf.id)
+	el?.scrollIntoView({
+		behavior: 'smooth',
+		block: 'start',
+	})
+}
 </script>
 <template>
   <div class="page flex h-screen">
@@ -38,11 +66,12 @@ const activeMenu = ref(settings[0].id)
       <div class="menu-item mb-4 justify-center font-mono bg-light-8 h-8">
         <span>Hi Eva</span>
       </div>
-      <div class="menu-item" v-for="conf in settings" :id="conf.id" :class="{ active: activeMenu === conf.id }">
+      <div class="menu-item" v-for="conf in settings" :id="conf.id" @click="clickMenu(conf)"
+        :class="{ active: activeMenu === conf.id }">
         {{ conf.label }}
       </div>
     </div>
-    <div class="content flex-1 px-4 overflow-auto flex flex-col gap-4">
+    <div ref="scrollElRef" class="content flex-1 px-4 overflow-auto flex flex-col gap-4">
       <div class="section-content" v-for="conf in settings">
         <span :id="conf.id"></span>
         <component :is="conf.Component" />
