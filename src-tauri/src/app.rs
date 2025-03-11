@@ -1,3 +1,5 @@
+use std::sync::Mutex;
+
 use clipboard_rs::{Clipboard, ClipboardHandler, ClipboardWatcher, ClipboardWatcherContext};
 use tauri::{
     menu::{Menu, MenuItem},
@@ -6,6 +8,13 @@ use tauri::{
     WebviewWindowBuilder,
 };
 use text_selection::{ListenResult, TextSelectionHandler};
+
+#[derive(Default)]
+struct AppStateInner {
+    selected_text: String,
+}
+
+type AppState = Mutex<AppStateInner>;
 
 #[derive(Clone)]
 pub struct MyApp {
@@ -18,6 +27,8 @@ impl MyApp {
     }
 
     pub fn init(&self) {
+        self.app.manage(Mutex::new(AppStateInner::default()));
+
         let _ = self.create_tray();
 
         let _ = self.get_or_create_main_window();
@@ -44,24 +55,10 @@ impl MyApp {
     }
 
     pub fn get_selected_text(&self) -> Option<String> {
-        if let Ok(selected) = text_selection::get_selected_text() {
-            return Some(selected);
-        }
+        let state = self.app.state::<AppState>();
+        let state = state.lock().unwrap();
 
-        return Self::get_selected_text_from_clipboard();
-    }
-
-    fn get_selected_text_from_clipboard() -> Option<String> {
-        let clipboard = clipboard_rs::ClipboardContext::new().unwrap();
-
-        if let Ok(selected_text) = clipboard.get_text() {
-            log::info!("clipboard text: {:?}", selected_text);
-
-            let selected_text = selected_text.trim();
-            return Some(selected_text.to_string());
-        }
-
-        return None;
+        return Some(state.selected_text.clone());
     }
 
     fn get_or_create_main_window(&self) -> WebviewWindow {
@@ -196,8 +193,16 @@ impl ClipboardHandler for MyApp {
 impl TextSelectionHandler for MyApp {
     fn on_selection_change(&self, result: Option<ListenResult>) {
         if let Some(result) = result {
-            if result.selected_text.trim().len() <= 0 {
+            let selected_text = result.selected_text.trim();
+            if selected_text.len() <= 0 {
                 return;
+            }
+
+            {
+                // update state
+                let state = self.app.state::<AppState>();
+                let mut state = state.lock().unwrap();
+                state.selected_text = selected_text.to_string().clone();
             }
 
             println!("selected: {:?}", result);
