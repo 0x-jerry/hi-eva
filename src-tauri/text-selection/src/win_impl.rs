@@ -1,8 +1,12 @@
 use crate::types::{HostHelperTrait, Result, TextSelectionDetectResult};
 use windows::Win32::{
+    Foundation::POINT,
     System::Com::{CoCreateInstance, CoInitialize, CLSCTX_ALL},
-    UI::Accessibility::{
-        CUIAutomation, IUIAutomation, IUIAutomationTextPattern, UIA_TextPatternId,
+    UI::{
+        Accessibility::{
+            CUIAutomation, IUIAutomation, IUIAutomationTextPattern, UIA_TextPatternId,
+        },
+        WindowsAndMessaging::GetCursorPos,
     },
 };
 
@@ -32,12 +36,10 @@ impl HostHelperTrait for HostImpl {
 
     /// https://github.com/fayez-nazzal/mouse_position/blob/master/src/impl_windows.rs
     fn get_mouse_position(&self) -> (f64, f64) {
-        use winapi::{shared::windef::POINT, um::winuser::GetCursorPos};
-
         let mut point = POINT { x: 0, y: 0 };
         let result = unsafe { GetCursorPos(&mut point) };
 
-        if result == 1 {
+        if result.is_ok() {
             return (point.x as f64, point.y as f64);
         }
 

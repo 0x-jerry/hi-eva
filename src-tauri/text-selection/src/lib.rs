@@ -7,11 +7,14 @@ mod unix_impl;
 mod win_impl;
 
 use std::{
-    result,
+    sync::Mutex,
     time::{Duration, Instant},
 };
 
-use rdev::{Button, EventType, ListenError};
+use mouce::{
+    common::{MouseButton, MouseEvent},
+    MouseActions,
+};
 pub use types::*;
 
 #[derive(Debug)]
@@ -22,29 +25,46 @@ struct SelectionEventMark {
     last_click_pos: (f64, f64),
 }
 
-pub fn listen<T: 'static + TextSelectionHandler>(
-    text_selection_handler: T,
-) -> result::Result<(), ListenError> {
+pub fn listen<T: 'static + TextSelectionHandler + Send>(text_selection_handler: T) -> Result<()> {
+    let event_marker = Mutex::new(SelectionEventMark {
+        mouse_down_pos: (0.0, 0.0),
+        mouse_down_ts: Instant::now(),
+        last_click_ts: None,
+        last_click_pos: (0.0, 0.0),
+    });
+
+    let mut mouse = mouce::Mouse::new();
+
+    let result = mouse.hook(Box::new(move |event| {
+        handle_mouse_event(event, &event_marker, &text_selection_handler);
+    }));
+
+    match result {
+        Ok(_) => Ok(()),
+        Err(err) => Err(err.into()),
+    }
+}
+
+fn handle_mouse_event<T: 'static + TextSelectionHandler + Send>(
+    event: &MouseEvent,
+    event_marker: &Mutex<SelectionEventMark>,
+    text_selection_handler: &T,
+) {
     #[cfg(windows)]
     let host = win_impl::HostImpl::default();
     #[cfg(unix)]
     let host = unix_impl::HostImpl::default();
 
-    let mut event_marker = SelectionEventMark {
-        mouse_down_pos: (0.0, 0.0),
-        mouse_down_ts: Instant::now(),
-        last_click_ts: None,
-        last_click_pos: (0.0, 0.0),
-    };
+    match event {
+        MouseEvent::Press(MouseButton::Left) => {
+            let mut event_marker = event_marker.try_lock().unwrap();
 
-    //
-    rdev::listen(move |event| match event.event_type {
-        EventType::ButtonPress(Button::Left) => {
             event_marker.mouse_down_pos = host.get_mouse_position();
             event_marker.mouse_down_ts = Instant::now();
         }
+        MouseEvent::Release(MouseButton::Left) => {
+            let mut event_marker = event_marker.try_lock().unwrap();
 
-        EventType::ButtonRelease(Button::Left) => {
             let mut should_check_selection = false;
 
             let current_mouse_pos = host.get_mouse_position();
@@ -105,7 +125,7 @@ pub fn listen<T: 'static + TextSelectionHandler>(
             }
         }
         _ => {}
-    })
+    }
 }
 
 pub fn get_selected_text() -> Result<String> {
