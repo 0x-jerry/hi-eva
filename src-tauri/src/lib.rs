@@ -6,7 +6,10 @@ mod commands;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     #[cfg(dev)]
-    dotenv::from_filename(".env.development").expect("load env failed");
+    {
+        dotenv::from_filename(".env.development").expect("load env failed");
+        std::env::set_var("RUST_BACKTRACE", "1");
+    }
 
     env_logger::init();
 
