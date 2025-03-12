@@ -33,6 +33,8 @@ impl MyAppWindowExt for MyApp {
 
         let win = win_builder.build().expect("Create main window failed!");
 
+        log::info!("Create main window");
+
         return win;
     }
 
@@ -56,6 +58,7 @@ impl MyAppWindowExt for MyApp {
         .always_on_top(true);
 
         let win = win_builder.build().expect("Create toolbar window failed!");
+        log::info!("Create toolbar window");
 
         return win;
     }
@@ -80,6 +83,7 @@ impl MyAppWindowExt for MyApp {
 
         let win = win_builder.build().expect("Create toolbar window failed!");
 
+        log::info!("Create chat window");
         return win;
     }
 

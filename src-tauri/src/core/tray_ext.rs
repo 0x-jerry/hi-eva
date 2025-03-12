@@ -30,6 +30,8 @@ impl AppTrayExt for MyApp {
                 button: MouseButton::Left,
                 button_state: _,
             } => {
+                log::info!("tray icon left click");
+
                 icon.app_handle()
                     .state::<MyApp>()
                     .open_and_focus(MAIN_WINDOW_LABEL);

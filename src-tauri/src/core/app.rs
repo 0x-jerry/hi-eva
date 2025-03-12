@@ -1,8 +1,10 @@
 use std::{ops::Deref, sync::Mutex};
 
 use clipboard_rs::{Clipboard, ClipboardHandler, ClipboardWatcher, ClipboardWatcherContext};
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Manager, PhysicalPosition, PhysicalSize, Pixel};
 use text_selection::{ListenResult, TextSelectionHandler};
+
+use crate::plugins::WebviewWindowExt;
 
 use super::{AppMessageExt, AppStateInner, AppTrayExt, MyAppWindowExt};
 
@@ -80,7 +82,17 @@ impl TextSelectionHandler for MyApp {
     }
 
     fn on_mouse_down(&self) {
-        self.hide_toolbar();
+        let win = self.get_toolbar_window();
+
+        let should_hide = if !win.is_visible().unwrap() {
+            true
+        } else {
+            win.is_cursor_in()
+        };
+
+        if should_hide {
+            self.hide_toolbar();
+        }
     }
 
     fn get_cursor_position(&self) -> (f64, f64) {
