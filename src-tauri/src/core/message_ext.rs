@@ -1,6 +1,6 @@
 use tauri::{Emitter, EventTarget, LogicalPosition, Manager, PhysicalPosition};
 
-use super::{AppState, MyApp, MyAppWindowExt, CHAT_WINDDOW_LABEL, TOOLBAR_WINDDOW_LABEL};
+use super::{AppState, MyApp, MyAppWindowExt, CHAT_WINDOW_LABEL, TOOLBAR_WINDOW_LABEL};
 
 pub trait AppMessageExt {
     fn hide_toolbar(&self);
@@ -13,7 +13,7 @@ impl AppMessageExt for MyApp {
         let win = self.get_chat_window();
 
         win.emit_to(
-            EventTarget::labeled(CHAT_WINDDOW_LABEL),
+            EventTarget::labeled(CHAT_WINDOW_LABEL),
             "show-chat",
             prompt_id,
         )
@@ -29,7 +29,7 @@ impl AppMessageExt for MyApp {
     fn hide_toolbar(&self) {
         let win = self.get_toolbar_window();
 
-        win.emit_to(EventTarget::labeled(TOOLBAR_WINDDOW_LABEL), "hide", ())
+        win.emit_to(EventTarget::labeled(TOOLBAR_WINDOW_LABEL), "hide", ())
             .unwrap();
     }
 
@@ -54,7 +54,7 @@ impl AppMessageExt for MyApp {
         win.set_position(pos).unwrap();
         win.set_always_on_top(true).unwrap();
 
-        self.emit_to(EventTarget::labeled(TOOLBAR_WINDDOW_LABEL), "show", ())
+        self.emit_to(EventTarget::labeled(TOOLBAR_WINDOW_LABEL), "show", ())
             .unwrap();
     }
 }

@@ -26,6 +26,9 @@ struct SelectionEventMark {
 }
 
 pub fn listen<T: 'static + TextSelectionHandler + Send>(text_selection_handler: T) -> Result<()> {
+    #[cfg(target_os = "macos")]
+    unix_impl::request_accessibility_access();
+
     let event_marker = Mutex::new(SelectionEventMark {
         mouse_down_pos: (0.0, 0.0),
         mouse_down_ts: Instant::now(),

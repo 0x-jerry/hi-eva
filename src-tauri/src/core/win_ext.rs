@@ -12,8 +12,8 @@ pub trait MyAppWindowExt {
 }
 
 pub static MAIN_WINDOW_LABEL: &str = "main";
-pub static TOOLBAR_WINDDOW_LABEL: &str = "toolbar";
-pub static CHAT_WINDDOW_LABEL: &str = "chat";
+pub static TOOLBAR_WINDOW_LABEL: &str = "toolbar";
+pub static CHAT_WINDOW_LABEL: &str = "chat";
 
 impl MyAppWindowExt for MyApp {
     fn get_main_window(&self) -> WebviewWindow {
@@ -37,13 +37,13 @@ impl MyAppWindowExt for MyApp {
     }
 
     fn get_toolbar_window(&self) -> WebviewWindow {
-        if let Some(win) = self.get_webview_window(TOOLBAR_WINDDOW_LABEL) {
+        if let Some(win) = self.get_webview_window(TOOLBAR_WINDOW_LABEL) {
             return win;
         }
 
         let win_builder = WebviewWindowBuilder::new(
             self.app(),
-            TOOLBAR_WINDDOW_LABEL,
+            TOOLBAR_WINDOW_LABEL,
             tauri::WebviewUrl::App("#/toolbar".into()),
         )
         .inner_size(300.0, 60.0)
@@ -61,13 +61,13 @@ impl MyAppWindowExt for MyApp {
     }
 
     fn get_chat_window(&self) -> WebviewWindow {
-        if let Some(win) = self.get_webview_window(CHAT_WINDDOW_LABEL) {
+        if let Some(win) = self.get_webview_window(CHAT_WINDOW_LABEL) {
             return win;
         }
 
         let win_builder = WebviewWindowBuilder::new(
             self.app(),
-            CHAT_WINDDOW_LABEL,
+            CHAT_WINDOW_LABEL,
             tauri::WebviewUrl::App("#/chat".into()),
         )
         .inner_size(400.0, 600.0)
