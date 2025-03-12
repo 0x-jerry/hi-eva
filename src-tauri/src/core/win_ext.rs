@@ -29,6 +29,7 @@ impl MyAppWindowExt for MyApp {
         .inner_size(800.0, 600.0)
         .center()
         .accept_first_mouse(true)
+        .visible_on_all_workspaces(true)
         .visible(true);
 
         let win = win_builder.build().expect("Create main window failed!");
@@ -58,6 +59,7 @@ impl MyAppWindowExt for MyApp {
             tauri::WebviewUrl::App("#/toolbar".into()),
         )
         .inner_size(300.0, 60.0)
+        .visible_on_all_workspaces(true)
         .decorations(false)
         .resizable(false)
         .visible(false)
@@ -87,6 +89,7 @@ impl MyAppWindowExt for MyApp {
         .resizable(false)
         .visible(false)
         .accept_first_mouse(true)
+        .visible_on_all_workspaces(true)
         .skip_taskbar(true)
         .always_on_top(false);
 

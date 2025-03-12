@@ -4,5 +4,6 @@
   },
   "[typescript]": {
     "editor.defaultFormatter": "biomejs.biome"
-  }
+  },
+  "rust-analyzer.cargo.targetDir": "./target-analyzer"
 }
