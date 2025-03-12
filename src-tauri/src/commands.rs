@@ -1,34 +1,17 @@
-use tauri::{AppHandle, Emitter, EventTarget, LogicalPosition, PhysicalPosition};
+use tauri::{Result, State};
 
-use crate::app::MyApp;
+use crate::core::{AppMessageExt, AppState, MyApp};
 
 #[tauri::command]
-pub async fn get_selected_text(app: AppHandle) -> Option<String> {
-    let my_app = MyApp::new(app);
+pub async fn get_selected_text(state: State<'_, AppState>) -> Result<String> {
+    let state = state.lock().unwrap();
 
-    my_app.get_selected_text()
+    Ok(state.selected_text.clone())
 }
 
 #[tauri::command]
-pub async fn open_chat(app: AppHandle, prompt_id: String) {
-    let my_app = MyApp::new(app);
+pub async fn open_chat(app: State<'_, MyApp>, prompt_id: String) -> Result<()> {
+    let _ = app.open_chat(prompt_id);
 
-    let win = my_app.get_or_create_chat_window();
-
-    win.emit_to(EventTarget::labeled("chat"), "show-chat", prompt_id)
-        .unwrap();
-
-    {
-        let offset_pos: PhysicalPosition<f64> =
-            LogicalPosition::new(10.0, 5.0).to_physical(my_app.scale_factor());
-
-        let mouse_pos = my_app.get_cursor_position();
-        // todo, calc windows position
-        let pos = PhysicalPosition::new(mouse_pos.x + offset_pos.x, mouse_pos.y + offset_pos.y);
-
-        win.set_position(pos).unwrap();
-    }
-
-    win.show().unwrap();
-    win.set_focus().unwrap();
+    Ok(())
 }

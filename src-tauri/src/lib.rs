@@ -1,7 +1,9 @@
-use app::MyApp;
+use core::MyApp;
 
-mod app;
+use tauri::Manager;
+
 mod commands;
+mod core;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -23,8 +25,9 @@ pub fn run() {
             let app_handle = app.handle().clone();
 
             let my_app = MyApp::new(app_handle);
-
             my_app.init();
+
+            app.manage(my_app);
 
             Ok(())
         })

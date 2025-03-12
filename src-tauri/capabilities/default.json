@@ -3,9 +3,7 @@
   "identifier": "default",
   "description": "Capability for the main and toolbar window",
   "windows": [
-    "main",
-    "toolbar",
-    "chat"
+    "*"
   ],
   "permissions": [
     "core:default",
