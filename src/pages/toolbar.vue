@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { getCurrentWindow } from '@tauri-apps/api/window'
 import AutoResizeContainer from '../components/AutoResizeContainer.vue'
 import CloseWindow from '../components/CloseWindow.vue'
 import DraggableArea from '../components/DraggableArea.vue'
@@ -8,22 +7,7 @@ import { openChatWindow } from '../logic/commands'
 import { type ToolbarPromptConfig, promptConfigs } from '../logic/config'
 import CarbonIcon from '../components/CarbonIcon.vue'
 
-const win = getCurrentWindow()
-
-win.listen('show', () => {
-  win.show()
-})
-
-win.listen('hide', () => {
-  hideWindow()
-})
-
-async function hideWindow() {
-  await win.hide()
-}
-
 async function openChatPage(conf: ToolbarPromptConfig) {
-  await hideWindow()
   await openChatWindow(conf.id)
 }
 </script>

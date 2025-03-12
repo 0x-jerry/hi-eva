@@ -91,7 +91,7 @@ impl TextSelectionHandler for MyApp {
         };
 
         if should_hide {
-            self.hide_toolbar();
+            win.hide().unwrap();
         }
     }
 
