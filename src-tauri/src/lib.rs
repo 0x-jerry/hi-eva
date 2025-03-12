@@ -1,6 +1,6 @@
-use core::MyApp;
+use core::{MyApp, MyAppWindowExt, MAIN_WINDOW_LABEL};
 
-use tauri::Manager;
+use tauri::{Manager, RunEvent};
 
 mod commands;
 mod core;
@@ -16,8 +16,7 @@ pub fn run() {
 
     env_logger::init();
 
-    tauri::Builder::default()
-        .plugin(tauri_plugin_opener::init())
+    let app = tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             commands::get_selected_text,
             commands::open_chat
@@ -32,6 +31,20 @@ pub fn run() {
 
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            let app = app.state::<MyApp>();
+            app.open_and_focus(MAIN_WINDOW_LABEL);
+        }));
+
+    let app = app
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application");
+
+    app.run(|_handle, event| match event {
+        RunEvent::Exit => {
+            log::info!("app exited");
+        }
+        _ => (),
+    });
 }

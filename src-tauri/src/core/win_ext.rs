@@ -33,6 +33,15 @@ impl MyAppWindowExt for MyApp {
 
         let win = win_builder.build().expect("Create main window failed!");
 
+        let app = self.app().clone();
+        win.on_window_event(move |event| match event {
+            tauri::WindowEvent::CloseRequested { api, .. } => {
+                api.prevent_close();
+                app.hide().unwrap();
+            }
+            _ => {}
+        });
+
         log::info!("Create main window");
 
         return win;

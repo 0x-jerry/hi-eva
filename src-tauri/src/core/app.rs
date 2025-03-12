@@ -1,7 +1,7 @@
 use std::{ops::Deref, sync::Mutex};
 
 use clipboard_rs::{Clipboard, ClipboardHandler, ClipboardWatcher, ClipboardWatcherContext};
-use tauri::{AppHandle, Manager, PhysicalPosition, PhysicalSize, Pixel};
+use tauri::{AppHandle, Manager};
 use text_selection::{ListenResult, TextSelectionHandler};
 
 use crate::plugins::WebviewWindowExt;
