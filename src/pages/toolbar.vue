@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { getCurrentWindow } from '@tauri-apps/api/window'
-import { useTimeoutFn } from '@vueuse/core'
 import AutoResizeContainer from '../components/AutoResizeContainer.vue'
 import CloseWindow from '../components/CloseWindow.vue'
 import DraggableArea from '../components/DraggableArea.vue'
@@ -11,20 +10,8 @@ import CarbonIcon from '../components/CarbonIcon.vue'
 
 const win = getCurrentWindow()
 
-const timeoutHandler = useTimeoutFn(
-  async () => {
-    hideWindow()
-  },
-  1_500,
-  {
-    immediate: false,
-  },
-)
-
 win.listen('show', () => {
   win.show()
-
-  timeoutHandler.start()
 })
 
 win.listen('hide', () => {
@@ -32,11 +19,7 @@ win.listen('hide', () => {
 })
 
 async function hideWindow() {
-  timeoutHandler.stop()
-
-  if (!timeoutHandler.isPending.value) {
-    await win.hide()
-  }
+  await win.hide()
 }
 
 async function openChatPage(conf: ToolbarPromptConfig) {
@@ -47,25 +30,16 @@ async function openChatPage(conf: ToolbarPromptConfig) {
 
 <template>
   <AutoResizeContainer>
-    <div
-      class="toolbar bg-white flex"
-      @mouseleave="timeoutHandler.start()"
-      @mouseenter="timeoutHandler.stop()"
-    >
+    <div class="toolbar bg-white flex">
       <DraggableArea class="px-1 flex items-center cursor-move bg-gray-1">
         <Icon class="i-carbon:draggable cursor-move" />
       </DraggableArea>
-      <div
-        v-for="conf in promptConfigs"
-        class="flex items-center px-2 hover:bg-gray-2 cursor-pointer"
-        @click="openChatPage(conf)"
-      >
+      <div v-for="conf in promptConfigs" class="flex items-center px-2 hover:bg-gray-2 cursor-pointer"
+        @click="openChatPage(conf)">
         <CarbonIcon v-if="conf.icon" :name="conf.icon" />
         <span v-else>{{ conf.name }}</span>
       </div>
-      <CloseWindow
-        class="py-2 px-1 flex items-center hover:bg-gray-2"
-      />
+      <CloseWindow class="py-2 px-1 flex items-center hover:bg-gray-2" />
     </div>
   </AutoResizeContainer>
 </template>
