@@ -15,61 +15,14 @@ use crate::types::{HostHelperTrait, Result, TextSelectionDetectResult};
 #[allow(non_upper_case_globals)]
 pub const kAXSelectedTextMarkerRangeAttribute: &str = "AXSelectedTextMarkerRange";
 
-pub struct HostImpl {
-    sys: AXUIElement,
-}
-
-thread_local! {
-    static AUTOMATION: () = init_automation();
-}
-
-fn init_automation() {
-    HostImpl::init();
-}
-
-impl Default for HostImpl {
-    fn default() -> Self {
-        AUTOMATION.with(|_| {
-            log::info!("Init Automation");
-        });
-
-        let sys_element = AXUIElement::system_wide();
-
-        Self { sys: sys_element }
-    }
-}
-
-impl HostImpl {
-    pub fn init() {
-        Self::_request_accessibility_access();
-        Self::_prepare();
-    }
-
-    fn _request_accessibility_access() -> bool {
-        unsafe {
-            // request accessibility permission
-            let prompt_conf_key = CFString::wrap_under_create_rule(kAXTrustedCheckOptionPrompt);
-            let conf_dict =
-                CFDictionary::from_CFType_pairs(&[(prompt_conf_key, CFBoolean::from(true))]);
-            let result = AXIsProcessTrustedWithOptions(conf_dict.as_concrete_TypeRef());
-
-            println!("prompt: {:?}", result);
-
-            return result;
-        }
-    }
-
-    fn _prepare() {
-        {
-            // 必须先模拟一次按键，否者 辅助性 获取选中的文本会报错 Ax(-25204)
-            // todo
-        }
-    }
-}
+#[derive(Default)]
+pub struct HostImpl;
 
 impl HostHelperTrait for HostImpl {
     fn detect_selected_text(&self) -> Result<TextSelectionDetectResult> {
-        let focused_app: AXUIElement = get_element_attr(&self.sys, kAXFocusedApplicationAttribute)?;
+        let sys_element = AXUIElement::system_wide();
+        let focused_app: AXUIElement =
+            get_element_attr(&sys_element, kAXFocusedApplicationAttribute)?;
 
         let focused_element: AXUIElement =
             get_element_attr(&focused_app, kAXFocusedUIElementAttribute)?;
@@ -91,7 +44,10 @@ impl HostHelperTrait for HostImpl {
     }
 
     fn get_selected_text(&self) -> Result<String> {
-        let focused_app: AXUIElement = get_element_attr(&self.sys, kAXFocusedApplicationAttribute)?;
+        let sys_element = AXUIElement::system_wide();
+
+        let focused_app: AXUIElement =
+            get_element_attr(&sys_element, kAXFocusedApplicationAttribute)?;
 
         let focused_element: AXUIElement =
             get_element_attr(&focused_app, kAXFocusedUIElementAttribute)?;
@@ -183,4 +139,18 @@ fn trigger_copy_menu_for_app(app_name: &str) -> bool {
     }
 
     return true;
+}
+
+pub fn request_accessibility_access() -> bool {
+    unsafe {
+        // request accessibility permission
+        let prompt_conf_key = CFString::wrap_under_create_rule(kAXTrustedCheckOptionPrompt);
+        let conf_dict =
+            CFDictionary::from_CFType_pairs(&[(prompt_conf_key, CFBoolean::from(true))]);
+        let result = AXIsProcessTrustedWithOptions(conf_dict.as_concrete_TypeRef());
+
+        println!("prompt: {:?}", result);
+
+        return result;
+    }
 }
