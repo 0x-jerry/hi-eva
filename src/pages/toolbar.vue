@@ -7,6 +7,7 @@ import DraggableArea from '../components/DraggableArea.vue'
 import Icon from '../components/Icon.vue'
 import { openChatWindow } from '../logic/commands'
 import { type ToolbarPromptConfig, promptConfigs } from '../logic/config'
+import CarbonIcon from '../components/CarbonIcon.vue'
 
 const win = getCurrentWindow()
 
@@ -59,7 +60,7 @@ async function openChatPage(conf: ToolbarPromptConfig) {
         class="flex items-center px-2 hover:bg-gray-2 cursor-pointer"
         @click="openChatPage(conf)"
       >
-        <Icon v-if="conf.icon" :class="conf.icon" />
+        <CarbonIcon v-if="conf.icon" :name="conf.icon" />
         <span v-else>{{ conf.name }}</span>
       </div>
       <CloseWindow

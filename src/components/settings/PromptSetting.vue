@@ -49,6 +49,7 @@ function getSelectedEndpointModelList(conf: ToolbarPromptConfig) {
     <div class="flex flex-col gap-2">
       <div class="flex flex-col gap-2 bg-light-3 p-4 rounded" v-for="(conf, idx) in configs" :key="conf.id">
         <div class="flex items-center gap-2">
+          <IconPicker v-model="conf.icon" />
           <Inplace :disabled="conf.builtin">
             <template #display>
               {{ conf.name }}
@@ -60,7 +61,6 @@ function getSelectedEndpointModelList(conf: ToolbarPromptConfig) {
               </span>
             </template>
           </Inplace>
-          <IconPicker v-model="conf.icon" />
           <div class="flex flex-1 justify-end">
             <Icon v-if="!conf.builtin" class="i-carbon:close" @click="removeConf(idx)" />
           </div>

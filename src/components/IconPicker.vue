@@ -48,7 +48,7 @@ function handleSelect(name: string) {
 
 <template>
   <div class="text-2xl inline-block">
-    <div class="border-(1 solid light-8) rounded size-8 flex items-center justify-center cursor-pointer hover:bg-light-4"
+    <div class="border-(1 solid light-8) rounded size-8 flex-center cursor-pointer hover:bg-light-6"
       @click="showPopover">
       <CarbonIcon :name="vValue || 'data-categorical'" />
     </div>
@@ -64,9 +64,9 @@ function handleSelect(name: string) {
           </InputGroup>
         </div>
 
-        <div class="h-240px overflow-auto">
+        <div class="h-200px overflow-auto">
           <div class="icons text-2xl">
-            <span class="inline-block size-8 cursor-pointer hover:bg-light-4 justify-items-center " v-for="name in filteredNames" :key="name" @click="handleSelect(name)">
+            <span class="size-8 cursor-pointer hover:bg-light-6 flex-center rounded" v-for="name in filteredNames" :key="name" @click="handleSelect(name)">
               <CarbonIcon :name="name" />
             </span>
           </div>
