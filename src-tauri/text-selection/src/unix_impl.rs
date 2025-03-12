@@ -29,7 +29,9 @@ fn init_automation() {
 
 impl Default for HostImpl {
     fn default() -> Self {
-        AUTOMATION.with(|_| {});
+        AUTOMATION.with(|_| {
+            log::info!("Init Automation");
+        });
 
         let sys_element = AXUIElement::system_wide();
 
