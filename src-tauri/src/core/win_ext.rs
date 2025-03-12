@@ -38,7 +38,9 @@ impl MyAppWindowExt for MyApp {
         win.on_window_event(move |event| match event {
             tauri::WindowEvent::CloseRequested { api, .. } => {
                 api.prevent_close();
-                app.hide().unwrap();
+                let app = app.state::<MyApp>();
+                log::info!("show main window");
+                app.get_main_window().hide().unwrap();
             }
             _ => {}
         });
