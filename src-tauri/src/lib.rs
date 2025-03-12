@@ -33,6 +33,7 @@ pub fn run() {
         })
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            log::info!("single instance");
             let app = app.state::<MyApp>();
             app.open_and_focus(MAIN_WINDOW_LABEL);
         }));

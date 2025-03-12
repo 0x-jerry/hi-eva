@@ -19,7 +19,7 @@ impl AppMessageExt for MyApp {
         )
         .unwrap();
 
-        let pos = cacl_window_position(self);
+        let pos = calc_window_position(self);
         win.set_position(pos).unwrap();
 
         win.show().unwrap();
@@ -49,7 +49,7 @@ impl AppMessageExt for MyApp {
 
         let win = self.get_toolbar_window();
 
-        let pos = cacl_window_position(&self);
+        let pos = calc_window_position(&self);
 
         win.set_position(pos).unwrap();
         win.set_always_on_top(true).unwrap();
@@ -59,7 +59,7 @@ impl AppMessageExt for MyApp {
     }
 }
 
-fn cacl_window_position(app: &MyApp) -> PhysicalPosition<f64> {
+fn calc_window_position(app: &MyApp) -> PhysicalPosition<f64> {
     let offset_pos: PhysicalPosition<f64> =
         LogicalPosition::new(10.0, 5.0).to_physical(app.scale_factor());
 
