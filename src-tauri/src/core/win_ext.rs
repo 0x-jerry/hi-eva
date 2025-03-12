@@ -13,7 +13,7 @@ pub trait MyAppWindowExt {
 
 pub static MAIN_WINDOW_LABEL: &str = "main";
 pub static TOOLBAR_WINDDOW_LABEL: &str = "toolbar";
-pub static CHAT_WINDDOW_LABEL: &str = "main";
+pub static CHAT_WINDDOW_LABEL: &str = "chat";
 
 impl MyAppWindowExt for MyApp {
     fn get_main_window(&self) -> WebviewWindow {
