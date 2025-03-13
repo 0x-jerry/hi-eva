@@ -1,6 +1,11 @@
 use tauri::{PhysicalPosition, PhysicalSize, Runtime, WebviewWindow};
 
 pub trait WebviewWindowExt<R: Runtime> {
+    /// Check if the cursor is outside the window
+    ///
+    /// If the window is invisible, return false
+    fn is_click_outside(&self) -> bool;
+
     /// Check if the cursor is in the window
     fn is_cursor_in(&self) -> bool;
 }
@@ -16,5 +21,17 @@ impl<R: Runtime> WebviewWindowExt<R> for WebviewWindow<R> {
             || cursor_pos.x > win_pos.x + size.width
             || cursor_pos.y < win_pos.y
             || cursor_pos.y > win_pos.y + size.height
+    }
+
+    fn is_click_outside(&self) -> bool {
+        if !self.is_visible().unwrap() {
+            return false;
+        }
+
+        if self.is_cursor_in() {
+            return true;
+        }
+
+        return false;
     }
 }

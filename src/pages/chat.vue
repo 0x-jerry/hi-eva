@@ -33,6 +33,14 @@ win.listen('show-chat', async (evt) => {
   await resetChatMessage()
 })
 
+win.listen('hide-chat', async () => {
+  if (state.pinned) {
+    return
+  }
+
+  await win.hide()
+})
+
 const promptConf = computed(() =>
   state.promptId ? getPromptConf(state.promptId) : undefined,
 )

@@ -83,15 +83,14 @@ impl TextSelectionHandler for MyApp {
     }
 
     fn on_mouse_down(&self) {
-        let win = self.get_toolbar_window();
+        let win_toolbar = self.get_toolbar_window();
 
-        if !win.is_visible().unwrap() {
-            return;
+        if win_toolbar.is_click_outside() {
+            win_toolbar.hide().unwrap();
         }
 
-        if win.is_cursor_in() {
-            log::info!("hide toolbar window");
-            win.hide().unwrap();
+        if self.get_chat_window().is_click_outside() {
+            self.hide_chat();
         }
     }
 

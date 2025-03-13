@@ -3,6 +3,7 @@ use tauri::{Emitter, EventTarget, LogicalPosition, Manager, PhysicalPosition};
 use super::{AppState, MyApp, MyAppWindowExt, CHAT_WINDOW_LABEL};
 
 pub trait AppMessageExt {
+    fn hide_chat(&self);
     fn open_chat(&self, prompt_id: String);
     fn open_toolbar(&self, selected_text: String);
 }
@@ -23,6 +24,13 @@ impl AppMessageExt for MyApp {
 
         win.show().unwrap();
         win.set_focus().unwrap();
+    }
+
+    fn hide_chat(&self) {
+        let win = self.get_chat_window();
+
+        win.emit_to(EventTarget::labeled(CHAT_WINDOW_LABEL), "hide-chat", ())
+            .unwrap();
     }
 
     fn open_toolbar(&self, selected_text: String) {
