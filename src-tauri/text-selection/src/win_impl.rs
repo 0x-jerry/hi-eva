@@ -1,3 +1,5 @@
+use std::thread;
+
 use uiautomation::{patterns::UITextPattern, UIAutomation};
 
 use crate::types::{HostHelperTrait, Result, TextSelectionDetectResult};
@@ -7,7 +9,20 @@ pub struct HostImpl;
 
 impl HostHelperTrait for HostImpl {
     fn detect_selected_text(&self) -> Result<TextSelectionDetectResult> {
-        let selected_text = get_text_by_automation()?;
+        // use other thread to get text, avoid break this thread
+        let auto_handle = thread::spawn(|| {
+            let selected_text = get_text_by_automation().unwrap();
+            selected_text
+        });
+
+        let selected_text = auto_handle.join();
+
+        if selected_text.is_err() {
+            log::error!("detect selected text error: {:?}", selected_text.err());
+            return Ok(TextSelectionDetectResult::None);
+        }
+
+        let selected_text = selected_text.unwrap();
 
         if !selected_text.is_empty() {
             return Ok(TextSelectionDetectResult::Text(selected_text));
