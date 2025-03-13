@@ -49,6 +49,7 @@ impl MyApp {
         });
 
         let app_cloned = self.clone();
+
         let _ = text_selection::listen(app_cloned);
     }
 }
@@ -84,13 +85,12 @@ impl TextSelectionHandler for MyApp {
     fn on_mouse_down(&self) {
         let win = self.get_toolbar_window();
 
-        let should_hide = if !win.is_visible().unwrap() {
-            true
-        } else {
-            win.is_cursor_in()
-        };
+        if !win.is_visible().unwrap() {
+            return;
+        }
 
-        if should_hide {
+        if win.is_cursor_in() {
+            log::info!("hide toolbar window");
             win.hide().unwrap();
         }
     }

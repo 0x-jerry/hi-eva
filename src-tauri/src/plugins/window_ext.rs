@@ -1,7 +1,7 @@
 use tauri::{PhysicalPosition, PhysicalSize, Runtime, WebviewWindow};
 
 pub trait WebviewWindowExt<R: Runtime> {
-    /// .
+    /// Check if the cursor is in the window
     fn is_cursor_in(&self) -> bool;
 }
 
