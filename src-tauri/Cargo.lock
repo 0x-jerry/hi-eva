@@ -573,8 +573,10 @@ checksum = "1a7964611d71df112cb1730f2ee67324fcf4d0fc6606acbbe9bfe06df124637c"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
+ "js-sys",
  "num-traits",
  "serde",
+ "wasm-bindgen",
  "windows-link",
 ]
 
@@ -4250,8 +4252,7 @@ dependencies = [
  "mouce",
  "osascript",
  "serde",
- "winapi",
- "windows 0.60.0",
+ "uiautomation",
 ]
 
 [[package]]
@@ -4568,6 +4569,29 @@ dependencies = [
  "memoffset",
  "tempfile",
  "winapi",
+]
+
+[[package]]
+name = "uiautomation"
+version = "0.17.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3512bd8b61bd564ed98e620f05f5553e56e923d47ada6763539d487bf70cc643"
+dependencies = [
+ "chrono",
+ "uiautomation_derive",
+ "windows 0.60.0",
+ "windows-core 0.60.1",
+]
+
+[[package]]
+name = "uiautomation_derive"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "edd746356ebc0d7d63d5d44047b6c4552e481229ed6c61cb5a401208fd873fc0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.100",
 ]
 
 [[package]]

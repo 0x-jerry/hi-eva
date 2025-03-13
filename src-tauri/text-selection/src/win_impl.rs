@@ -1,10 +1,6 @@
+use uiautomation::{patterns::UITextPattern, UIAutomation};
+
 use crate::types::{HostHelperTrait, Result, TextSelectionDetectResult};
-use windows::Win32::{
-    System::Com::{CoCreateInstance, CoInitialize, CLSCTX_ALL},
-    UI::Accessibility::{
-        CUIAutomation, IUIAutomation, IUIAutomationTextPattern, UIA_TextPatternId,
-    },
-};
 
 #[derive(Default)]
 pub struct HostImpl;
@@ -31,65 +27,24 @@ impl HostHelperTrait for HostImpl {
     }
 }
 
-thread_local! {
-    static AUTOMATION: IUIAutomation = init_automation();
-}
-
-fn init_automation() -> IUIAutomation {
-    unsafe {
-        log::info!("COM init start");
-
-        // Init COM
-        let init = CoInitialize(None);
-        if init.is_err() {
-            let msg = init.message();
-            log::error!("COM init failed: {}", msg);
-            panic!("COM init failed");
-        }
-
-        // Create IUIAutomation instance
-        let auto: IUIAutomation = CoCreateInstance(&CUIAutomation, None, CLSCTX_ALL).unwrap();
-
-        log::info!("COM init success");
-        auto
-    }
-}
-
-/// https://github.dev/pot-app/Selection/blob/master/src/windows.rs
 fn get_text_by_automation() -> Result<String> {
     log::info!("get text by automation start");
 
-    AUTOMATION.with(|auto| -> Result<String> {
-        log::info!("get auto object {:?}", auto);
+    let auto = UIAutomation::new()?;
 
-        unsafe {
-            // Get Focused Element
-            let el = auto.GetFocusedElement()?;
-            log::info!("get focused element success");
+    let focused = auto.get_focused_element()?;
 
-            // Get TextPattern
-            let res: IUIAutomationTextPattern = el.GetCurrentPatternAs(UIA_TextPatternId)?;
-            log::info!("get text pattern success");
+    let text = focused.get_pattern::<UITextPattern>()?;
 
-            // Get TextRange Array
-            let text_array = res.GetSelection()?;
-            log::info!("get text range array success");
+    let selection = text.get_selection()?;
 
-            let length = text_array.Length()?;
-            log::info!("text range array length: {}", length);
+    let result = selection
+        .iter()
+        .map(|s| s.get_text(-1).unwrap_or_default())
+        .collect::<Vec<String>>()
+        .join("");
 
-            // Iterate TextRange Array
-            let mut target = String::new();
+    log::info!("get text by automation end");
 
-            for i in 0..length {
-                let text = text_array.GetElement(i)?;
-                let str = text.GetText(-1)?;
-                let str = str.to_string();
-                target.push_str(&str);
-            }
-
-            log::info!("get text success");
-            Ok(target.trim().to_string())
-        }
-    })
+    Ok(result)
 }
