@@ -11,6 +11,7 @@ import Icon from '../components/Icon.vue'
 import { getPromptConf } from '../logic/config'
 import { mustache } from '../utils'
 import { commands } from '../logic/commands'
+import CarbonIcon from '../components/CarbonIcon.vue'
 
 const state = reactive({
   promptId: '',
@@ -76,8 +77,8 @@ async function togglePinWindow() {
         <div class="border-(0 r solid gray) ml-1 mr-2">&nbsp;</div>
         <DraggableArea class="flex-1 flex items-center gap-1">
           <template v-if="promptConf">
-            <Icon v-if="promptConf.icon" :class="promptConf.icon" />
-            <span class="">
+            <CarbonIcon v-if="promptConf.icon" :name="promptConf.icon" class="text-xl" />
+            <span class="pl-2">
               {{ promptConf?.name }}
             </span>
           </template>
