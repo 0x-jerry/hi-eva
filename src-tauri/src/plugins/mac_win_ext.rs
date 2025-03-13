@@ -11,30 +11,26 @@ use tauri_nspanel::{
 };
 
 pub trait MacWindowExt<R: Runtime> {
-    fn non_active_hide(&self) -> Result<()>;
-    fn non_active_show(&self) -> Result<()>;
+    fn set_none_active_panel(&self) -> Result<()>;
 
     fn set_radius(&self, radius: f64) -> Result<()>;
 }
 
 impl<R: Runtime> MacWindowExt<R> for WebviewWindow<R> {
-    fn non_active_show(&self) -> Result<()> {
+    fn set_none_active_panel(&self) -> Result<()> {
         #[cfg(unix)]
         {
-            let panel = self.to_panel()?;
+            // let panel = self.to_panel()?;
 
-            panel.set_level(NSMainMenuWindowLevel + 1);
-        }
+            // log::info!("panel");
+            // #[allow(non_upper_case_globals)]
+            // const NSWindowStyleMaskNonActivatingPanel: i32 = 1 << 7;
 
-        Ok(())
-    }
+            // panel.set_level(NSMainMenuWindowLevel + 1);
+            // log::info!("panel 1");
 
-    fn non_active_hide(&self) -> Result<()> {
-        #[cfg(unix)]
-        {
-            let panel = self.to_panel()?;
-
-            panel.order_out(None);
+            // panel.set_style_mask(NSWindowStyleMaskNonActivatingPanel);
+            // log::info!("panel 2");
         }
 
         Ok(())

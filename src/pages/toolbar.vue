@@ -7,8 +7,13 @@ import { type ToolbarPromptConfig, promptConfigs } from '../logic/config'
 import CarbonIcon from '../components/CarbonIcon.vue'
 import { commands } from '../logic/commands'
 import { getCurrentWindow } from '@tauri-apps/api/window'
+import { onMounted } from 'vue'
 
 let win = getCurrentWindow()
+
+onMounted(async () => {
+  await commands.applyAppearance()
+})
 
 async function openChatPage(conf: ToolbarPromptConfig) {
   await win.hide()

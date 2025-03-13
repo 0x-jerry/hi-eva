@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { nanoid } from '@0x-jerry/utils'
 import { getCurrentWindow } from '@tauri-apps/api/window'
-import { computed, nextTick, reactive, ref } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref } from 'vue'
 import AutoResizeContainer from '../components/AutoResizeContainer.vue'
 import ChatMessages from '../components/Chat/ChatMessages.vue'
 import type { ChatHistory } from '../components/Chat/types'
@@ -44,6 +44,10 @@ win.listen('hide-chat', async () => {
 const promptConf = computed(() =>
   state.promptId ? getPromptConf(state.promptId) : undefined,
 )
+
+onMounted(async () => {
+  await commands.applyAppearance()
+})
 
 async function resetChatMessage() {
   if (!state.promptId) return
