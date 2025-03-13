@@ -7,7 +7,9 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "ignore": [],
+    "ignore": [
+      "src/typed-router.d.ts"
+    ],
     "include": [
       "src"
     ]
