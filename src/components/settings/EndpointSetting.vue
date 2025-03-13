@@ -73,7 +73,7 @@ function handleAddModel(event: KeyboardEvent) {
       </div>
       <div class="editable-row">
         <label>API Key</label>
-        <Password class="content" v-model="conf.apiKey" toggleMask />
+        <Password class="content" v-model="conf.apiKey" toggleMask :feedback="false"/>
       </div>
       <div class="editable-row">
         <label>Models</label>
