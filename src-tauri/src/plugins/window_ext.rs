@@ -1,6 +1,6 @@
 use tauri::{PhysicalPosition, PhysicalSize, Runtime, WebviewWindow};
 
-pub trait WebviewWindowExt<R: Runtime> {
+pub trait MyWebviewWindowExt<R: Runtime> {
     /// Check if the cursor is outside the window
     ///
     /// If the window is invisible, return false
@@ -10,7 +10,7 @@ pub trait WebviewWindowExt<R: Runtime> {
     fn is_cursor_in(&self) -> bool;
 }
 
-impl<R: Runtime> WebviewWindowExt<R> for WebviewWindow<R> {
+impl<R: Runtime> MyWebviewWindowExt<R> for WebviewWindow<R> {
     fn is_cursor_in(&self) -> bool {
         let cursor_pos = self.cursor_position().unwrap();
 

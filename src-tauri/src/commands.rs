@@ -1,13 +1,9 @@
 use tauri::{Result, State, WebviewWindow};
-use tauri_nspanel::{
-    cocoa::{
-        appkit::{NSView, NSWindow},
-        base::id,
-    },
-    objc::{msg_send, sel, sel_impl},
-};
 
-use crate::core::{AppMessageExt, AppState, MyApp};
+use crate::{
+    core::{AppMessageExt, AppState, MyApp},
+    plugins::MacWindowExt,
+};
 
 #[tauri::command]
 pub async fn get_selected_text(state: State<'_, AppState>) -> Result<String> {
@@ -24,19 +20,6 @@ pub async fn open_chat(app: State<'_, MyApp>, prompt_id: String) -> Result<()> {
 }
 
 #[tauri::command]
-pub async fn apply_appearance(win: WebviewWindow) {
-    #[cfg(unix)]
-    {
-        let win: id = win.ns_window().unwrap() as _;
-
-        unsafe {
-            let view: id = win.contentView();
-
-            view.wantsLayer();
-
-            let layer: id = view.layer();
-
-            let _: () = msg_send![layer, setCornerRadius: 10.0];
-        }
-    }
+pub async fn apply_appearance(win: WebviewWindow) -> Result<()> {
+    win.set_radius(10.0)
 }

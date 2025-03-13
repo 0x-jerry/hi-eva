@@ -16,12 +16,23 @@ pub fn run() {
 
     env_logger::init();
 
-    let app = tauri::Builder::default()
+    let app = tauri::Builder::default();
+
+    #[cfg(unix)]
+    let app = app.plugin(tauri_nspanel::init());
+
+    let app = app
         .invoke_handler(tauri::generate_handler![
             commands::get_selected_text,
             commands::open_chat,
             commands::apply_appearance
         ])
+        .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            log::info!("single instance");
+            let app = app.state::<MyApp>();
+            app.open_and_focus(MAIN_WINDOW_LABEL);
+        }))
         .setup(|app| {
             let app_handle = app.handle().clone();
 
@@ -31,13 +42,7 @@ pub fn run() {
             app.manage(my_app);
 
             Ok(())
-        })
-        .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
-            log::info!("single instance");
-            let app = app.state::<MyApp>();
-            app.open_and_focus(MAIN_WINDOW_LABEL);
-        }));
+        });
 
     let app = app
         .build(tauri::generate_context!())

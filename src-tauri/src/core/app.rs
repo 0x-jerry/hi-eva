@@ -4,7 +4,7 @@ use clipboard_rs::{Clipboard, ClipboardHandler, ClipboardWatcher, ClipboardWatch
 use tauri::{AppHandle, Manager};
 use text_selection::{ListenResult, TextSelectionHandler};
 
-use crate::plugins::WebviewWindowExt;
+use crate::plugins::MyWebviewWindowExt;
 
 use super::{AppMessageExt, AppStateInner, AppTrayExt, MyAppWindowExt};
 
