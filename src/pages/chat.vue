@@ -8,9 +8,9 @@ import type { ChatHistory } from '../components/Chat/types'
 import CloseWindow from '../components/CloseWindow.vue'
 import DraggableArea from '../components/DraggableArea.vue'
 import Icon from '../components/Icon.vue'
-import { getSelectedText } from '../logic/commands'
 import { getPromptConf } from '../logic/config'
 import { mustache } from '../utils'
+import { commands } from '../logic/commands'
 
 const state = reactive({
   promptId: '',
@@ -49,7 +49,7 @@ async function initMessages() {
   state.chatHistory.messages.push({
     role: 'user',
     content: mustache(promptConf.value?.prompt || '', {
-      selection: (await getSelectedText()) || '',
+      selection: (await commands.getSelectedText()) || '',
     }),
   })
 

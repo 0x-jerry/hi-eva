@@ -38,3 +38,6 @@ clipboard-rs = { workspace = true }
 text-selection = { path = "./text-selection" }
 dotenv = "0.15.0"
 tauri-plugin-single-instance = "2"
+
+[features]
+cargo-clippy = []

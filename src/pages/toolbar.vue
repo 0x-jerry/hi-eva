@@ -3,12 +3,12 @@ import AutoResizeContainer from '../components/AutoResizeContainer.vue'
 import CloseWindow from '../components/CloseWindow.vue'
 import DraggableArea from '../components/DraggableArea.vue'
 import Icon from '../components/Icon.vue'
-import { openChatWindow } from '../logic/commands'
 import { type ToolbarPromptConfig, promptConfigs } from '../logic/config'
 import CarbonIcon from '../components/CarbonIcon.vue'
+import { commands } from '../logic/commands'
 
 async function openChatPage(conf: ToolbarPromptConfig) {
-  await openChatWindow(conf.id)
+  await commands.openChat({ promptId: conf.id })
 }
 </script>
 
