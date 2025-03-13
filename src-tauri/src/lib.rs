@@ -1,6 +1,6 @@
 use core::{MyApp, MyAppWindowExt, MAIN_WINDOW_LABEL};
 
-use tauri::{Manager, RunEvent};
+use tauri::{ActivationPolicy, Manager, RunEvent};
 
 mod commands;
 mod core;
@@ -34,6 +34,8 @@ pub fn run() {
             app.open_and_focus(MAIN_WINDOW_LABEL);
         }))
         .setup(|app| {
+            app.set_activation_policy(ActivationPolicy::Accessory);
+
             let app_handle = app.handle().clone();
 
             let my_app = MyApp::new(app_handle);

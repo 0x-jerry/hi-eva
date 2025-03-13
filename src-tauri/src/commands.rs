@@ -21,7 +21,6 @@ pub async fn open_chat(app: State<'_, MyApp>, prompt_id: String) -> Result<()> {
 
 #[tauri::command]
 pub async fn apply_appearance(win: WebviewWindow) -> Result<()> {
-    win.set_none_active_panel()?;
     win.set_radius(10.0)?;
 
     Ok(())

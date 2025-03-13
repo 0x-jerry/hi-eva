@@ -1,5 +1,7 @@
 use tauri::{Manager, WebviewWindow, WebviewWindowBuilder};
 
+use crate::plugins::MacWindowExt;
+
 use super::MyApp;
 
 pub trait MyAppWindowExt {
@@ -64,15 +66,19 @@ impl MyAppWindowExt for MyApp {
         .visible_on_all_workspaces(true)
         .decorations(false)
         .resizable(false)
+        .maximizable(false)
+        .minimizable(false)
         .visible(false)
         .transparent(true)
         .skip_taskbar(true)
-        .accept_first_mouse(true)
-        .focused(false)
         .always_on_top(true);
 
         let win = win_builder.build().expect("Create toolbar window failed!");
         log::info!("Create toolbar window");
+
+        let _ = win
+            .to_non_active_panel()
+            .expect("convert to non active panel failed");
 
         return win;
     }
@@ -95,11 +101,14 @@ impl MyAppWindowExt for MyApp {
         .accept_first_mouse(true)
         .visible_on_all_workspaces(true)
         .skip_taskbar(true)
+        .minimizable(false)
+        .maximizable(false)
         .always_on_top(false);
 
         let win = win_builder.build().expect("Create toolbar window failed!");
 
         log::info!("Create chat window");
+
         return win;
     }
 
