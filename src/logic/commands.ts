@@ -3,6 +3,7 @@ import { snakeCase } from 'lodash-es'
 
 interface ICommandType {
   getSelectedText(): Promise<string | undefined>
+  applyAppearance(): Promise<void>
   openChat(opt: { promptId: string }): Promise<void>
 }
 

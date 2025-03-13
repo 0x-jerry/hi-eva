@@ -19,7 +19,8 @@ pub fn run() {
     let app = tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             commands::get_selected_text,
-            commands::open_chat
+            commands::open_chat,
+            commands::apply_appearance
         ])
         .setup(|app| {
             let app_handle = app.handle().clone();
