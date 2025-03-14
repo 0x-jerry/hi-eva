@@ -58,7 +58,6 @@ impl AppMessageExt for MyApp {
 
         win.set_position(pos).unwrap();
         win.set_always_on_top(true).unwrap();
-        win.show().unwrap();
     }
 }
 

@@ -2,7 +2,7 @@ use tauri::{Result, State, WebviewWindow};
 
 use crate::{
     core::{AppMessageExt, AppState, MyApp},
-    plugins::MacWindowExt,
+    plugins::{MacWindowExt, MyWebviewWindowExt},
 };
 
 #[tauri::command]
@@ -35,4 +35,9 @@ pub async fn set_chat_pinned(state: State<'_, AppState>, pinned: bool) -> Result
     log::info!("set pinned {:?}", state.chat_panel_pinned);
 
     Ok(state.chat_panel_pinned)
+}
+
+#[tauri::command]
+pub async fn move_out_of_screen(win: WebviewWindow) -> Result<()> {
+    win.move_out_of_screen()
 }

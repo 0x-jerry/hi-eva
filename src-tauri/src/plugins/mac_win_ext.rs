@@ -11,7 +11,9 @@ use tauri_nspanel::{
 };
 
 pub trait MacWindowExt<R: Runtime> {
+    #[allow(dead_code)]
     fn ns_hide(&self) -> Result<()>;
+    #[allow(dead_code)]
     fn ns_show(&self) -> Result<()>;
     fn to_non_active_panel(&self) -> Result<()>;
 
@@ -99,6 +101,7 @@ impl<R: Runtime> MacWindowExt<R> for WebviewWindow<R> {
             }
         }
 
+        let _ = radius;
         Ok(())
     }
 }

@@ -31,9 +31,9 @@ impl MyApp {
     pub fn init(&self) {
         self.manage(Mutex::new(AppStateInner::default()));
 
+        let _ = self.get_main_window();
         let _ = self.get_toolbar_window();
         let _ = self.get_chat_window();
-        let _ = self.get_main_window();
 
         let _ = self.create_tray();
 
@@ -86,7 +86,7 @@ impl TextSelectionHandler for MyApp {
         let win_toolbar = self.get_toolbar_window();
 
         if win_toolbar.is_click_outside() {
-            win_toolbar.hide().unwrap();
+            win_toolbar.move_out_of_screen().unwrap();
         }
 
         if self.get_chat_window().is_click_outside() {

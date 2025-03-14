@@ -6,18 +6,19 @@ import Icon from '../components/Icon.vue'
 import { type ToolbarPromptConfig, promptConfigs } from '../logic/config'
 import CarbonIcon from '../components/CarbonIcon.vue'
 import { commands } from '../logic/commands'
-import { getCurrentWindow } from '@tauri-apps/api/window'
 import { onMounted } from 'vue'
-
-let win = getCurrentWindow()
 
 onMounted(async () => {
   await commands.applyAppearance()
 })
 
 async function openChatPage(conf: ToolbarPromptConfig) {
-  await win.hide()
+  await hideWindow()
   await commands.openChat({ promptId: conf.id })
+}
+
+async function hideWindow() {
+  await commands.moveOutOfScreen()
 }
 </script>
 
@@ -32,7 +33,7 @@ async function openChatPage(conf: ToolbarPromptConfig) {
         <CarbonIcon v-if="conf.icon" :name="conf.icon" />
         <span v-else>{{ conf.name }}</span>
       </div>
-      <CloseWindow class="py-2 px-1 flex items-center hover:bg-gray-2" />
+      <CloseWindow :close="hideWindow" class="py-2 px-1 flex items-center hover:bg-gray-2" />
     </div>
   </AutoResizeContainer>
 </template>

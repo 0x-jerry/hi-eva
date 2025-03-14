@@ -7,6 +7,7 @@ import { snakeCase } from 'lodash-es'
 type ICommandType = {
   getSelectedText(): Promise<string | undefined>
   applyAppearance(): Promise<void>
+  moveOutOfScreen(): Promise<void>
   setChatPinned(opt: { pinned: boolean }): Promise<boolean>
   openChat(opt: { promptId: string }): Promise<void>
 }

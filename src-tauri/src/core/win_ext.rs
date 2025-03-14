@@ -1,6 +1,6 @@
 use tauri::{Manager, WebviewWindow, WebviewWindowBuilder};
 
-use crate::plugins::MacWindowExt;
+use crate::plugins::{MacWindowExt, MyWebviewWindowExt};
 
 use super::MyApp;
 
@@ -62,15 +62,15 @@ impl MyAppWindowExt for MyApp {
             TOOLBAR_WINDOW_LABEL,
             tauri::WebviewUrl::App("#/toolbar".into()),
         )
-        .inner_size(300.0, 60.0)
+        .inner_size(10.0, 10.0)
         .visible_on_all_workspaces(true)
         .decorations(false)
         .resizable(false)
         .maximizable(false)
         .minimizable(false)
-        .visible(false)
         .transparent(true)
         .skip_taskbar(true)
+        .focused(false)
         .always_on_top(true);
 
         let win = win_builder.build().expect("Create toolbar window failed!");
@@ -79,6 +79,9 @@ impl MyAppWindowExt for MyApp {
         let _ = win
             .to_non_active_panel()
             .expect("convert to non active panel failed");
+
+        win.show().unwrap();
+        win.move_out_of_screen().unwrap();
 
         return win;
     }
@@ -94,6 +97,7 @@ impl MyAppWindowExt for MyApp {
             tauri::WebviewUrl::App("#/chat".into()),
         )
         .inner_size(400.0, 600.0)
+        .focused(false)
         .decorations(false)
         .resizable(false)
         .visible(false)

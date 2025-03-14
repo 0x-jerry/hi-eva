@@ -26,7 +26,8 @@ pub fn run() {
             commands::get_selected_text,
             commands::open_chat,
             commands::apply_appearance,
-            commands::set_chat_pinned
+            commands::set_chat_pinned,
+            commands::move_out_of_screen,
         ])
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
