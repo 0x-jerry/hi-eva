@@ -12,15 +12,20 @@ impl AppMessageExt for MyApp {
     fn open_chat(&self, prompt_id: String) {
         let win = self.get_chat_window();
 
+        let state = self.state::<AppState>();
+        let state = state.lock().unwrap();
+
+        if !state.chat_panel_pinned {
+            let pos = calc_window_position(self);
+            win.set_position(pos).unwrap();
+        }
+
         win.emit_to(
             EventTarget::labeled(CHAT_WINDOW_LABEL),
             "show-chat",
             prompt_id,
         )
         .unwrap();
-
-        let pos = calc_window_position(self);
-        win.set_position(pos).unwrap();
 
         win.show().unwrap();
         win.set_focus().unwrap();

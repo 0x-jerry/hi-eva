@@ -25,3 +25,14 @@ pub async fn apply_appearance(win: WebviewWindow) -> Result<()> {
 
     Ok(())
 }
+
+#[tauri::command]
+pub async fn set_chat_pinned(state: State<'_, AppState>, pinned: bool) -> Result<bool> {
+    let mut state = state.lock().unwrap();
+
+    state.chat_panel_pinned = pinned;
+
+    log::info!("set pinned {:?}", state.chat_panel_pinned);
+
+    Ok(state.chat_panel_pinned)
+}

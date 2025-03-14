@@ -1,6 +1,6 @@
 use core::{MyApp, MyAppWindowExt, MAIN_WINDOW_LABEL};
 
-use tauri::{ActivationPolicy, Manager, RunEvent};
+use tauri::{Manager, RunEvent};
 
 mod commands;
 mod core;
@@ -25,7 +25,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::get_selected_text,
             commands::open_chat,
-            commands::apply_appearance
+            commands::apply_appearance,
+            commands::set_chat_pinned
         ])
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
@@ -34,7 +35,8 @@ pub fn run() {
             app.open_and_focus(MAIN_WINDOW_LABEL);
         }))
         .setup(|app| {
-            app.set_activation_policy(ActivationPolicy::Accessory);
+            #[cfg(unix)]
+            app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 
             let app_handle = app.handle().clone();
 

@@ -1,9 +1,13 @@
 import { invoke } from '@tauri-apps/api/core'
 import { snakeCase } from 'lodash-es'
 
-interface ICommandType {
+/**
+ * Opt should be an object, and should match the signatures in [commands.rs](../../src-tauri/src/commands.rs).
+ */
+type ICommandType = {
   getSelectedText(): Promise<string | undefined>
   applyAppearance(): Promise<void>
+  setChatPinned(opt: { pinned: boolean }): Promise<boolean>
   openChat(opt: { promptId: string }): Promise<void>
 }
 
