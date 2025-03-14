@@ -1,15 +1,14 @@
 {
   "name": "hi-eva",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "tauri dev",
     "build": "tauri build",
     "ui:dev": "vite",
     "ui:build": "vite build",
-    "preview": "vite preview",
-    "tauri": "tauri"
+    "release": "x-release"
   },
   "dependencies": {
     "@0x-jerry/utils": "^5.0.0",
@@ -26,6 +25,7 @@
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
+    "@0x-jerry/x-release": "^2.4.0",
     "@biomejs/biome": "^1.9.4",
     "@iconify-json/carbon": "^1.2.8",
     "@tauri-apps/cli": "^2.3.1",
