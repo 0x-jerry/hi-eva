@@ -64,6 +64,7 @@ impl MyAppWindowExt for MyApp {
         )
         .inner_size(10.0, 10.0)
         .visible_on_all_workspaces(true)
+        .accept_first_mouse(true)
         .decorations(false)
         .resizable(false)
         .maximizable(false)
