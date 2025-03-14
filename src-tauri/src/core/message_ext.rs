@@ -1,4 +1,4 @@
-use tauri::{Emitter, EventTarget, LogicalPosition, Manager, PhysicalPosition};
+use tauri::{Emitter, EventTarget, LogicalPosition, Manager, PhysicalPosition, WebviewWindow};
 
 use super::{AppState, MyApp, MyAppWindowExt, CHAT_WINDOW_LABEL};
 
@@ -16,7 +16,7 @@ impl AppMessageExt for MyApp {
         let state = state.lock().unwrap();
 
         if !state.chat_panel_pinned {
-            let pos = calc_window_position(self);
+            let pos = calc_window_position(&win);
             win.set_position(pos).unwrap();
         }
 
@@ -54,7 +54,7 @@ impl AppMessageExt for MyApp {
 
         let win = self.get_toolbar_window();
 
-        let pos = calc_window_position(&self);
+        let pos = calc_window_position(&win);
 
         win.set_position(pos).unwrap();
         win.set_always_on_top(true).unwrap();
@@ -62,11 +62,11 @@ impl AppMessageExt for MyApp {
     }
 }
 
-fn calc_window_position(app: &MyApp) -> PhysicalPosition<f64> {
+fn calc_window_position(win: &WebviewWindow) -> PhysicalPosition<f64> {
     let offset_pos: PhysicalPosition<f64> =
-        LogicalPosition::new(10.0, 5.0).to_physical(app.scale_factor());
+        LogicalPosition::new(20.0, 16.0).to_physical(win.scale_factor().unwrap());
 
-    let mouse_pos = app.cursor_position().unwrap();
+    let mouse_pos = win.cursor_position().unwrap();
     // todo, calc windows position
     let pos = PhysicalPosition::new(mouse_pos.x + offset_pos.x, mouse_pos.y + offset_pos.y);
     pos
