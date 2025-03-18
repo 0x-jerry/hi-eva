@@ -82,6 +82,7 @@ impl MyAppWindowExt for MyApp {
             .expect("convert to non active panel failed");
 
         win.show().unwrap();
+
         win.move_out_of_screen().unwrap();
 
         return win;

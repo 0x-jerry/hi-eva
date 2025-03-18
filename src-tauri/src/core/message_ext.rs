@@ -1,6 +1,8 @@
 use serde::Serialize;
 use tauri::{Emitter, EventTarget, LogicalPosition, Manager, PhysicalPosition, WebviewWindow};
 
+use crate::plugins::MacWindowExt;
+
 use super::{AppState, MyApp, MyAppWindowExt, CHAT_WINDOW_LABEL};
 
 pub trait AppMessageExt {
@@ -54,7 +56,7 @@ impl AppMessageExt for MyApp {
         let pos = position.unwrap_or(calc_window_position(&win));
 
         win.set_position(pos).unwrap();
-        win.set_always_on_top(true).unwrap();
+        win.ns_show().unwrap();
     }
 }
 

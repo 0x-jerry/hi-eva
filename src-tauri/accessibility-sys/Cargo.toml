@@ -13,3 +13,6 @@ core-foundation-sys = "0.8"
 
 [package.metadata.docs.rs]
 default-target = "x86_64-apple-darwin"
+
+[features]
+cargo-clippy = []

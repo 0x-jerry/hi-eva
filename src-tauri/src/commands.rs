@@ -39,5 +39,7 @@ pub async fn set_chat_pinned(state: State<'_, AppState>, pinned: bool) -> Result
 
 #[tauri::command]
 pub async fn move_out_of_screen(win: WebviewWindow) -> Result<()> {
-    win.move_out_of_screen()
+    win.move_out_of_screen()?;
+
+    Ok(())
 }

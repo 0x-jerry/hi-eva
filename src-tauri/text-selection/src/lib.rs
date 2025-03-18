@@ -30,3 +30,8 @@ pub fn get_selected_rect() -> Option<SelectionRect> {
         return None;
     }
 }
+
+pub fn init() {
+    #[cfg(unix)]
+    let _ = unix_impl::request_accessibility_access();
+}

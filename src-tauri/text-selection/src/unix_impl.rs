@@ -10,7 +10,10 @@ use core_foundation::{
 };
 use serde::Serialize;
 
-use crate::types::{HostHelperTrait, Result, TextSelectionDetectResult};
+use crate::{
+    types::{HostHelperTrait, Result},
+    SelectionRect,
+};
 
 #[allow(non_upper_case_globals)]
 pub const kAXSelectedTextMarkerRangeAttribute: &str = "AXSelectedTextMarkerRange";
@@ -19,7 +22,7 @@ pub const kAXSelectedTextMarkerRangeAttribute: &str = "AXSelectedTextMarkerRange
 pub struct HostImpl;
 
 impl HostHelperTrait for HostImpl {
-    fn detect_selected_text(&self) -> Result<TextSelectionDetectResult> {
+    fn detect_selection_rect(&self) -> Result<Option<SelectionRect>> {
         let sys_element = AXUIElement::system_wide();
         let focused_app: AXUIElement =
             get_element_attr(&sys_element, kAXFocusedApplicationAttribute)?;
@@ -31,16 +34,18 @@ impl HostHelperTrait for HostImpl {
             get_element_attr::<CFString>(&focused_element, kAXSelectedTextAttribute)?.to_string();
 
         if !selected_text.is_empty() {
-            return Ok(TextSelectionDetectResult::Text(selected_text));
+            let mut rect = SelectionRect::default();
+            rect.text = Some(selected_text);
+            return Ok(Some(rect));
         }
 
         let has_selected_marker_range = has_selected_text_mark_range(&focused_element)?;
 
         if has_selected_marker_range {
-            return Ok(TextSelectionDetectResult::Selected);
+            return Ok(None);
         }
 
-        return Ok(TextSelectionDetectResult::None);
+        return Ok(None);
     }
 
     fn get_selected_text(&self) -> Result<String> {

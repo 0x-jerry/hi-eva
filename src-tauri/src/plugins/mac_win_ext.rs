@@ -1,5 +1,6 @@
 use tauri::{Result, Runtime, WebviewWindow};
 
+use tauri_nspanel::objc::class;
 #[cfg(unix)]
 use tauri_nspanel::{
     cocoa::{
@@ -11,9 +12,7 @@ use tauri_nspanel::{
 };
 
 pub trait MacWindowExt<R: Runtime> {
-    #[allow(dead_code)]
     fn ns_hide(&self) -> Result<()>;
-    #[allow(dead_code)]
     fn ns_show(&self) -> Result<()>;
     fn to_non_active_panel(&self) -> Result<()>;
 
@@ -31,7 +30,9 @@ impl<R: Runtime> MacWindowExt<R> for WebviewWindow<R> {
 
             // Allows the panel to display on the same space as the full screen window
             panel.set_collection_behaviour(
-                NSWindowCollectionBehavior::NSWindowCollectionBehaviorFullScreenAuxiliary,
+                NSWindowCollectionBehavior::NSWindowCollectionBehaviorCanJoinAllSpaces
+                    | NSWindowCollectionBehavior::NSWindowCollectionBehaviorStationary
+                    | NSWindowCollectionBehavior::NSWindowCollectionBehaviorFullScreenAuxiliary,
             );
 
             #[allow(non_upper_case_globals)]
@@ -48,18 +49,15 @@ impl<R: Runtime> MacWindowExt<R> for WebviewWindow<R> {
         #[cfg(unix)]
         {
             let panel = self.get_webview_panel(self.label()).unwrap();
-            let is_visible = panel.is_visible();
 
-            log::info!("visible {}", is_visible);
-            log::info!("label {}", self.label());
+            if !check_menubar_frontmost() {
+                self.run_on_main_thread(move || {
+                    panel.show();
+                })
+                .unwrap();
 
-            panel.show();
-            log::info!("done")
-        }
-
-        #[cfg(not(unix))]
-        {
-            self.show()?;
+                log::info!("make key window");
+            }
         }
 
         Ok(())
@@ -70,14 +68,14 @@ impl<R: Runtime> MacWindowExt<R> for WebviewWindow<R> {
         {
             let panel = self.get_webview_panel(self.label()).unwrap();
 
-            if panel.is_visible() {
-                panel.order_out(None);
-            }
-        }
+            if check_menubar_frontmost() {
+                self.run_on_main_thread(move || {
+                    panel.resign_key_window();
+                })
+                .unwrap();
 
-        #[cfg(not(unix))]
-        {
-            self.hide()?;
+                log::info!("resign key window");
+            }
         }
 
         Ok(())
@@ -104,4 +102,26 @@ impl<R: Runtime> MacWindowExt<R> for WebviewWindow<R> {
         let _ = radius;
         Ok(())
     }
+}
+
+fn app_pid() -> i32 {
+    let process_info: id = unsafe { msg_send![class!(NSProcessInfo), processInfo] };
+
+    let pid: i32 = unsafe { msg_send![process_info, processIdentifier] };
+
+    pid
+}
+
+fn get_frontmost_app_pid() -> i32 {
+    let workspace: id = unsafe { msg_send![class!(NSWorkspace), sharedWorkspace] };
+
+    let frontmost_application: id = unsafe { msg_send![workspace, frontmostApplication] };
+
+    let pid: i32 = unsafe { msg_send![frontmost_application, processIdentifier] };
+
+    pid
+}
+
+fn check_menubar_frontmost() -> bool {
+    get_frontmost_app_pid() == app_pid()
 }

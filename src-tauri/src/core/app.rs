@@ -4,7 +4,10 @@ use clipboard_rs::{Clipboard, ClipboardHandler, ClipboardWatcher, ClipboardWatch
 use tauri::{AppHandle, Manager};
 use text_selection::SelectionRect;
 
-use crate::{core::AppState, plugins::MyWebviewWindowExt};
+use crate::{
+    core::AppState,
+    plugins::{MacWindowExt, MyWebviewWindowExt},
+};
 
 use super::{
     mouse_listener, AppMessageExt, AppStateInner, AppTrayExt, MouseExtTrait, MyAppWindowExt,
@@ -38,6 +41,8 @@ impl MyApp {
         let _ = self.get_chat_window();
 
         let _ = self.create_tray();
+
+        let _ = text_selection::init();
 
         let app_cloned = self.clone();
 
@@ -114,6 +119,12 @@ impl MouseExtTrait for MyApp {
     }
 
     fn on_mouse_move(&self) {
-        // todo
+        let win_toolbar = self.get_toolbar_window();
+
+        if win_toolbar.is_cursor_in() {
+            win_toolbar.ns_show().unwrap();
+        } else {
+            win_toolbar.ns_hide().unwrap();
+        }
     }
 }
