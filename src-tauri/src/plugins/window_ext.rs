@@ -1,7 +1,5 @@
 use tauri::{PhysicalPosition, PhysicalSize, Result, Runtime, WebviewWindow};
 
-use super::MacWindowExt;
-
 pub trait MyWebviewWindowExt<R: Runtime> {
     fn move_out_of_screen(&self) -> Result<()>;
     /// Check if the cursor is outside the window
@@ -24,7 +22,10 @@ impl<R: Runtime> MyWebviewWindowExt<R> for WebviewWindow<R> {
         self.set_position(pos)?;
 
         #[cfg(unix)]
-        self.ns_hide()?;
+        {
+            use super::MacWindowExt;
+            self.ns_hide()?;
+        }
 
         Ok(())
     }

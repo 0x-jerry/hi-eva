@@ -119,8 +119,7 @@ impl MyAppWindowExt for MyApp {
     }
 
     fn scale_factor(&self) -> f64 {
-        let win = self.get_main_window();
-        let scale_factor = win.scale_factor().unwrap();
+        let scale_factor = self.primary_monitor().unwrap().unwrap().scale_factor();
         return scale_factor;
     }
 
