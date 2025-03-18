@@ -38,6 +38,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           body_path: RELEASE-NOTE.md
+          repository: 0x-jerry/hi-eva-docs
+          token: ${{ secrets.GITHUB_TOKEN }}
           prerelease: ${{steps.is-prerelease.outputs.result}}
 
   build-tauri:
@@ -105,4 +107,5 @@ jobs:
         with:
           includeUpdaterJson: true
           args: ${{ matrix.args }}
+          repo: hi-eva-docs
           releaseId: ${{ needs.create-release.outputs.release_id }}
