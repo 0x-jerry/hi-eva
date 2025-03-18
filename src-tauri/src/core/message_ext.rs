@@ -1,11 +1,18 @@
+use serde::Serialize;
 use tauri::{Emitter, EventTarget, LogicalPosition, Manager, PhysicalPosition, WebviewWindow};
 
 use super::{AppState, MyApp, MyAppWindowExt, CHAT_WINDOW_LABEL};
 
 pub trait AppMessageExt {
+    fn open_toolbar(&self, position: Option<PhysicalPosition<f64>>);
     fn hide_chat(&self);
     fn open_chat(&self, prompt_id: String);
-    fn open_toolbar(&self, selected_text: String);
+}
+
+#[derive(Debug, Serialize, Clone)]
+struct OpenChatPayload {
+    prompt_id: String,
+    selected_text: String,
 }
 
 impl AppMessageExt for MyApp {
@@ -23,7 +30,10 @@ impl AppMessageExt for MyApp {
         win.emit_to(
             EventTarget::labeled(CHAT_WINDOW_LABEL),
             "show-chat",
-            prompt_id,
+            OpenChatPayload {
+                prompt_id,
+                selected_text: state.selected_text.clone(),
+            },
         )
         .unwrap();
 
@@ -38,23 +48,10 @@ impl AppMessageExt for MyApp {
             .unwrap();
     }
 
-    fn open_toolbar(&self, selected_text: String) {
-        if selected_text.len() <= 0 {
-            return;
-        }
-
-        log::info!("selected text is {}", selected_text);
-
-        {
-            // update state
-            let state = self.state::<AppState>();
-            let mut state = state.lock().unwrap();
-            state.selected_text = selected_text.to_string().clone();
-        }
-
+    fn open_toolbar(&self, position: Option<PhysicalPosition<f64>>) {
         let win = self.get_toolbar_window();
 
-        let pos = calc_window_position(&win);
+        let pos = position.unwrap_or(calc_window_position(&win));
 
         win.set_position(pos).unwrap();
         win.set_always_on_top(true).unwrap();

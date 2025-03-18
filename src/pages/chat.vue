@@ -15,6 +15,7 @@ import CarbonIcon from '../components/CarbonIcon.vue'
 
 const state = reactive({
   promptId: '',
+  selectedText: '',
   pinned: false,
   ready: false,
   chatHistory: {
@@ -29,7 +30,10 @@ const chatRef = ref<InstanceType<typeof ChatMessages>>()
 const win = getCurrentWindow()
 
 win.listen('show-chat', async (evt) => {
-  state.promptId = evt.payload as string
+  const payload = evt.payload as { prompt_id: string; selected_text: string }
+  state.promptId = payload.prompt_id
+  state.selectedText = payload.selected_text
+
   await resetChatMessage()
 })
 
@@ -67,7 +71,7 @@ async function initMessages() {
   state.chatHistory.messages.push({
     role: 'user',
     content: mustache(promptConf.value?.prompt || '', {
-      selection: (await commands.getSelectedText()) || '',
+      selection: state.selectedText,
     }),
   })
 

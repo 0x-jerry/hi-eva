@@ -9,6 +9,7 @@ pub(crate) trait HostHelperTrait {
 
 #[derive(Debug, Default)]
 pub struct SelectionRect {
+    pub text: Option<String>,
     pub left: i32,
     pub top: i32,
     pub right: i32,

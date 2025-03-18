@@ -4,7 +4,7 @@ use clipboard_rs::{Clipboard, ClipboardHandler, ClipboardWatcher, ClipboardWatch
 use tauri::{AppHandle, Manager};
 use text_selection::SelectionRect;
 
-use crate::plugins::MyWebviewWindowExt;
+use crate::{core::AppState, plugins::MyWebviewWindowExt};
 
 use super::{
     mouse_listener, AppMessageExt, AppStateInner, AppTrayExt, MouseExtTrait, MyAppWindowExt,
@@ -65,9 +65,13 @@ impl ClipboardHandler for MyApp {
         if let Ok(selected_text) = clipboard.get_text() {
             log::info!("clipboard text: {:?}", selected_text);
 
-            if selected_text.trim().len() > 0 {
-                // todo
-                // self.on_selection_change(Some(ListenResult { selected_text }));
+            let selected_text = selected_text.trim();
+            if selected_text.len() > 0 {
+                let state = self.state::<AppState>();
+                let mut state = state.lock().unwrap();
+                state.selected_text = selected_text.to_string();
+
+                self.open_toolbar(None);
             }
         }
     }
@@ -76,14 +80,15 @@ impl ClipboardHandler for MyApp {
 impl MouseExtTrait for MyApp {
     fn on_selection_change(&self, result: Option<SelectionRect>) {
         if let Some(result) = result {
-            println!("result is {:?}", result);
+            log::info!("result is {:?}", result);
 
-            // let selected_text = result.selected_text.trim();
-            // if selected_text.len() <= 0 {
-            //     return;
-            // }
+            let state = self.state::<AppState>();
+            let mut state = state.lock().unwrap();
+            state.selected_text = result.text.unwrap_or_default();
 
-            // self.open_toolbar(selected_text.into());
+            // todo, calc window position
+
+            self.open_toolbar(None);
         }
     }
 
@@ -110,6 +115,5 @@ impl MouseExtTrait for MyApp {
 
     fn on_mouse_move(&self) {
         // todo
-        // todo!()
     }
 }

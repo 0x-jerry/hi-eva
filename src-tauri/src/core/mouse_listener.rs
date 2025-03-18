@@ -41,11 +41,12 @@ pub fn listen<T: 'static + MouseExtTrait + Send>(app: T) {
 
         match event {
             MouseEvent::AbsoluteMove(..) => {
-                // todo
+                app.on_mouse_move();
             }
             MouseEvent::Press(MouseButton::Left) => {
                 state.mouse_down_pos = app.get_cursor_position();
                 state.mouse_down_ts = Instant::now();
+                app.on_mouse_down();
             }
             MouseEvent::Release(MouseButton::Left) => {
                 let mut should_check_selection = false;
