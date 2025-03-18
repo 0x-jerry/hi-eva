@@ -73,7 +73,7 @@ impl ClipboardHandler for MyApp {
             let selected_text = selected_text.trim();
             if selected_text.len() > 0 {
                 let state = self.state::<AppState>();
-                let mut state = state.lock().unwrap();
+                let mut state = state.try_lock().unwrap();
                 state.selected_text = selected_text.to_string();
 
                 self.open_toolbar(None);
@@ -87,9 +87,11 @@ impl MouseExtTrait for MyApp {
         if let Some(result) = result {
             log::info!("result is {:?}", result);
 
-            let state = self.state::<AppState>();
-            let mut state = state.lock().unwrap();
-            state.selected_text = result.text.unwrap_or_default();
+            {
+                let state = self.state::<AppState>();
+                let mut state = state.try_lock().unwrap();
+                state.selected_text = result.text.unwrap_or_default();
+            }
 
             // todo, calc window position
 

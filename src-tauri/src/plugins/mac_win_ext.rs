@@ -1,6 +1,5 @@
-use tauri::{Result, Runtime, WebviewWindow};
+use tauri::{Manager, Result, Runtime, WebviewWindow};
 
-use tauri_nspanel::objc::class;
 #[cfg(unix)]
 use tauri_nspanel::{
     cocoa::{
@@ -10,6 +9,8 @@ use tauri_nspanel::{
     objc::{msg_send, sel, sel_impl},
     ManagerExt, WebviewWindowExt,
 };
+
+use crate::core::AppState;
 
 pub trait MacWindowExt<R: Runtime> {
     fn ns_hide(&self) -> Result<()>;
@@ -48,9 +49,11 @@ impl<R: Runtime> MacWindowExt<R> for WebviewWindow<R> {
     fn ns_show(&self) -> Result<()> {
         #[cfg(unix)]
         {
-            let panel = self.get_webview_panel(self.label()).unwrap();
+            let state = self.state::<AppState>();
+            let mut state = state.try_lock().unwrap();
 
-            if !check_menubar_frontmost() {
+            if !state.toolbar_panel_focused {
+                let panel = self.get_webview_panel(self.label()).unwrap();
                 self.run_on_main_thread(move || {
                     panel.show();
                 })
@@ -58,6 +61,7 @@ impl<R: Runtime> MacWindowExt<R> for WebviewWindow<R> {
 
                 log::info!("make key window");
             }
+            state.toolbar_panel_focused = true;
         }
 
         Ok(())
@@ -66,9 +70,11 @@ impl<R: Runtime> MacWindowExt<R> for WebviewWindow<R> {
     fn ns_hide(&self) -> Result<()> {
         #[cfg(unix)]
         {
-            let panel = self.get_webview_panel(self.label()).unwrap();
+            let state = self.state::<AppState>();
+            let mut state = state.try_lock().unwrap();
 
-            if check_menubar_frontmost() {
+            if state.toolbar_panel_focused {
+                let panel = self.get_webview_panel(self.label()).unwrap();
                 self.run_on_main_thread(move || {
                     panel.resign_key_window();
                 })
@@ -76,6 +82,7 @@ impl<R: Runtime> MacWindowExt<R> for WebviewWindow<R> {
 
                 log::info!("resign key window");
             }
+            state.toolbar_panel_focused = false;
         }
 
         Ok(())
@@ -102,26 +109,4 @@ impl<R: Runtime> MacWindowExt<R> for WebviewWindow<R> {
         let _ = radius;
         Ok(())
     }
-}
-
-fn app_pid() -> i32 {
-    let process_info: id = unsafe { msg_send![class!(NSProcessInfo), processInfo] };
-
-    let pid: i32 = unsafe { msg_send![process_info, processIdentifier] };
-
-    pid
-}
-
-fn get_frontmost_app_pid() -> i32 {
-    let workspace: id = unsafe { msg_send![class!(NSWorkspace), sharedWorkspace] };
-
-    let frontmost_application: id = unsafe { msg_send![workspace, frontmostApplication] };
-
-    let pid: i32 = unsafe { msg_send![frontmost_application, processIdentifier] };
-
-    pid
-}
-
-fn check_menubar_frontmost() -> bool {
-    get_frontmost_app_pid() == app_pid()
 }
