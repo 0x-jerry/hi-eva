@@ -2,11 +2,13 @@ use std::{ops::Deref, sync::Mutex};
 
 use clipboard_rs::{Clipboard, ClipboardHandler, ClipboardWatcher, ClipboardWatcherContext};
 use tauri::{AppHandle, Manager};
-use text_selection::{ListenResult, TextSelectionHandler};
+use text_selection::SelectionRect;
 
 use crate::plugins::MyWebviewWindowExt;
 
-use super::{AppMessageExt, AppStateInner, AppTrayExt, MyAppWindowExt};
+use super::{
+    mouse_listener, AppMessageExt, AppStateInner, AppTrayExt, MouseExtTrait, MyAppWindowExt,
+};
 
 #[derive(Clone)]
 pub struct MyApp(AppHandle);
@@ -50,7 +52,7 @@ impl MyApp {
 
         let app_cloned = self.clone();
 
-        let _ = text_selection::listen(app_cloned);
+        let _ = mouse_listener::listen(app_cloned);
     }
 }
 
@@ -64,21 +66,24 @@ impl ClipboardHandler for MyApp {
             log::info!("clipboard text: {:?}", selected_text);
 
             if selected_text.trim().len() > 0 {
-                self.on_selection_change(Some(ListenResult { selected_text }));
+                // todo
+                // self.on_selection_change(Some(ListenResult { selected_text }));
             }
         }
     }
 }
 
-impl TextSelectionHandler for MyApp {
-    fn on_selection_change(&self, result: Option<ListenResult>) {
+impl MouseExtTrait for MyApp {
+    fn on_selection_change(&self, result: Option<SelectionRect>) {
         if let Some(result) = result {
-            let selected_text = result.selected_text.trim();
-            if selected_text.len() <= 0 {
-                return;
-            }
+            println!("result is {:?}", result);
 
-            self.open_toolbar(selected_text.into());
+            // let selected_text = result.selected_text.trim();
+            // if selected_text.len() <= 0 {
+            //     return;
+            // }
+
+            // self.open_toolbar(selected_text.into());
         }
     }
 
@@ -101,5 +106,10 @@ impl TextSelectionHandler for MyApp {
             .to_logical(self.scale_factor());
 
         (pos.x, pos.y)
+    }
+
+    fn on_mouse_move(&self) {
+        // todo
+        // todo!()
     }
 }

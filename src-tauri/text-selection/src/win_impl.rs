@@ -1,65 +1,114 @@
-use std::thread;
+use std::{cmp, thread};
 
-use uiautomation::{patterns::UITextPattern, UIAutomation};
+use windows::Win32::{
+    Foundation::RECT,
+    System::Com::{CoCreateInstance, CoInitialize, CLSCTX_ALL},
+    UI::Accessibility::{
+        CUIAutomation, IUIAutomation, IUIAutomationTextPattern, UIA_TextPatternId,
+    },
+};
 
-use crate::types::{HostHelperTrait, Result, TextSelectionDetectResult};
+use crate::{
+    types::{HostHelperTrait, Result},
+    SelectionRect,
+};
 
 #[derive(Default)]
 pub struct HostImpl;
 
 impl HostHelperTrait for HostImpl {
-    fn detect_selected_text(&self) -> Result<TextSelectionDetectResult> {
+    fn detect_selection_rect(&self) -> Result<Option<SelectionRect>> {
         // use other thread to get text, avoid break this thread
         let auto_handle = thread::spawn(|| {
-            let selected_text = get_text_by_automation().unwrap();
+            let selected_text = get_selection_range().unwrap();
             selected_text
         });
 
-        let selected_text = auto_handle.join();
+        let selection = auto_handle.join();
 
-        if selected_text.is_err() {
-            log::error!("detect selected text error: {:?}", selected_text.err());
-            return Ok(TextSelectionDetectResult::None);
+        if selection.is_err() {
+            log::error!("detect selected text error: {:?}", selection.err());
+            return Ok(None);
         }
 
-        let selected_text = selected_text.unwrap();
-
-        if !selected_text.is_empty() {
-            return Ok(TextSelectionDetectResult::Text(selected_text));
-        }
-
-        return Ok(TextSelectionDetectResult::None);
+        Ok(selection.unwrap())
     }
 
     fn get_selected_text(&self) -> Result<String> {
-        match self.detect_selected_text() {
-            Ok(s) => match s {
-                TextSelectionDetectResult::Text(x) => Ok(x),
-                _ => Err("NotFound".into()),
-            },
-            Err(err) => Err(err),
-        }
+        // todo
+        Ok("".into())
     }
 }
 
-fn get_text_by_automation() -> Result<String> {
-    log::info!("get text by automation start");
+fn get_selection_range() -> Result<Option<SelectionRect>> {
+    log::info!("get selection by automation start");
 
-    let auto = UIAutomation::new()?;
+    let mut rect: Option<SelectionRect> = None;
 
-    let focused = auto.get_focused_element()?;
+    unsafe {
+        let init = CoInitialize(None);
 
-    let text = focused.get_pattern::<UITextPattern>()?;
+        log::info!("init");
+        if init.is_err() {
+            let msg = init.message();
+            log::error!("COM init failed: {}", msg);
+            panic!("COM init failed");
+        }
 
-    let selection = text.get_selection()?;
+        let auto: IUIAutomation = CoCreateInstance(&CUIAutomation, None, CLSCTX_ALL)?;
 
-    let result = selection
-        .iter()
-        .map(|s| s.get_text(-1).unwrap_or_default())
-        .collect::<Vec<String>>()
-        .join("");
+        log::info!("init automation");
 
-    log::info!("get text by automation end");
+        let el = auto.GetFocusedElement()?;
+        log::info!("get focused element success");
 
-    Ok(result)
+        // Get TextPattern
+        let res: IUIAutomationTextPattern = el.GetCurrentPatternAs(UIA_TextPatternId)?;
+        log::info!("get text pattern success");
+
+        // Get TextRange Array
+        let text_array = res.GetSelection()?;
+        log::info!("get text range array success");
+
+        let length = text_array.Length()?;
+        log::info!("text range array length: {}", length);
+
+        if length <= 0 {
+            return Ok(None);
+        }
+
+        for i in 0..length {
+            let text = text_array.GetElement(i)?;
+            let range = text.GetBoundingRectangles()?;
+
+            let mut data_ptr: *mut RECT = std::ptr::null_mut();
+            let length = auto.SafeArrayToRectNativeArray(range, &mut data_ptr)?;
+            let rects = std::slice::from_raw_parts(data_ptr, length as usize).to_vec();
+
+            log::info!("length is {}", length);
+
+            for item in rects {
+                log::info!("rect is {:?}", item);
+
+                rect = match rect {
+                    Some(rect) => Some(SelectionRect {
+                        left: cmp::min(rect.left, item.left),
+                        top: cmp::min(rect.top, item.top),
+                        right: cmp::max(rect.right, item.right),
+                        bottom: cmp::min(rect.bottom, item.bottom),
+                    }),
+                    None => Some(SelectionRect {
+                        left: item.left,
+                        top: item.top,
+                        bottom: item.bottom,
+                        right: item.right,
+                    }),
+                }
+            }
+        }
+    }
+
+    log::info!("get seletion range by automation end");
+
+    Ok(rect)
 }

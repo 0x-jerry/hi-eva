@@ -38,6 +38,7 @@ clipboard-rs = { workspace = true }
 text-selection = { path = "./text-selection" }
 dotenv = "0.15.0"
 tauri-plugin-single-instance = "2"
+mouce = "0.2.51"
 
 [target.'cfg(unix)'.dependencies]
 tauri-nspanel = { git = "https://github.com/ahkohd/tauri-nspanel", branch = "v2" }

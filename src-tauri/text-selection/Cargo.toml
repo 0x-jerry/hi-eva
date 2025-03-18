@@ -10,7 +10,7 @@ log = { workspace = true }
 mouce = "0.2.51"
 
 [target.'cfg(windows)'.dependencies]
-uiautomation = "0"
+windows = { version = "0.60.0", features = ["UI_UIAutomation"] }
 
 [target.'cfg(unix)'.dependencies]
 osascript = "0.3.0"
