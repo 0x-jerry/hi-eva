@@ -74,7 +74,7 @@ impl ClipboardHandler for MyApp {
                 let mut state = state.try_lock().unwrap();
                 state.selected_text = selected_text.to_string();
 
-                self.open_toolbar(None);
+                self.show_toolbar_win(None);
             }
         }
     }
@@ -93,7 +93,7 @@ impl MouseExtTrait for MyApp {
 
             // todo, calc window position
 
-            self.open_toolbar(None);
+            self.show_toolbar_win(None);
         }
     }
 
@@ -109,7 +109,7 @@ impl MouseExtTrait for MyApp {
     fn on_mouse_down(&self) {
         let win_toolbar = self.get_toolbar_window();
 
-        if win_toolbar.is_click_outside() {
+        if self.is_toolbar_visible() && !win_toolbar.is_cursor_in() {
             self.hide_toolbar_win();
         }
 

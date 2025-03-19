@@ -1,10 +1,10 @@
 use serde::Serialize;
-use tauri::{Emitter, EventTarget, LogicalPosition, Manager, PhysicalPosition, WebviewWindow};
+use tauri::{Emitter, EventTarget, Manager};
 
-use super::{AppState, MyApp, MyAppWindowExt, CHAT_WINDOW_LABEL};
+use super::{utils::calc_window_position, AppState, MyApp, MyAppWindowExt, CHAT_WINDOW_LABEL};
 
+/// Emit messages to content view
 pub trait AppMessageExt {
-    fn open_toolbar(&self, position: Option<PhysicalPosition<f64>>);
     fn hide_chat(&self);
     fn open_chat(&self, prompt_id: String);
 }
@@ -47,30 +47,4 @@ impl AppMessageExt for MyApp {
         win.emit_to(EventTarget::labeled(CHAT_WINDOW_LABEL), "hide-chat", ())
             .unwrap();
     }
-
-    fn open_toolbar(&self, position: Option<PhysicalPosition<f64>>) {
-        let win = self.get_toolbar_window();
-
-        let pos = position.unwrap_or(calc_window_position(&win));
-
-        win.set_position(pos).unwrap();
-
-        #[cfg(unix)]
-        {
-            use super::AppStateExt;
-            use crate::plugins::MacWindowExt;
-            win.ns_focus().unwrap();
-            self.set_toolbar_focused(true);
-        }
-    }
-}
-
-fn calc_window_position(win: &WebviewWindow) -> PhysicalPosition<f64> {
-    let offset_pos: PhysicalPosition<f64> =
-        LogicalPosition::new(20.0, 16.0).to_physical(win.scale_factor().unwrap());
-
-    let mouse_pos = win.cursor_position().unwrap();
-    // todo, calc windows position
-    let pos = PhysicalPosition::new(mouse_pos.x + offset_pos.x, mouse_pos.y + offset_pos.y);
-    pos
 }

@@ -42,6 +42,7 @@ impl<R: Runtime> MacWindowExt<R> for WebviewWindow<R> {
         Ok(())
     }
 
+    // todo, rename to ns_toolbar_focus
     fn ns_focus(&self) -> Result<()> {
         let state = self.state::<AppState>();
         let mut state = state.try_lock().unwrap();
@@ -60,6 +61,7 @@ impl<R: Runtime> MacWindowExt<R> for WebviewWindow<R> {
         Ok(())
     }
 
+    // todo, rename to ns_toolbar_resign_focus
     fn ns_resign_focus(&self) -> Result<()> {
         let state = self.state::<AppState>();
         let mut state = state.try_lock().unwrap();

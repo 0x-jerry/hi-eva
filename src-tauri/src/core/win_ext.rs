@@ -1,10 +1,9 @@
 use tauri::{Manager, PhysicalPosition, WebviewWindow, WebviewWindowBuilder};
 
-use crate::plugins::MyWebviewWindowExt;
-
-use super::{AppStateExt, MyApp};
+use super::{utils::calc_window_position, AppStateExt, MyApp};
 
 pub trait MyAppWindowExt {
+    fn show_toolbar_win(&self, position: Option<PhysicalPosition<f64>>);
     fn hide_toolbar_win(&self);
     fn get_main_window(&self) -> WebviewWindow;
     fn get_toolbar_window(&self) -> WebviewWindow;
@@ -148,6 +147,24 @@ impl MyAppWindowExt for MyApp {
             self.ns_hide().unwrap();
         }
 
+        self.set_toolbar_focused(false);
         self.set_toolbar_visible(false);
+    }
+
+    fn show_toolbar_win(&self, position: Option<PhysicalPosition<f64>>) {
+        let win = self.get_toolbar_window();
+
+        let pos = position.unwrap_or(calc_window_position(&win));
+
+        win.set_position(pos).unwrap();
+
+        #[cfg(unix)]
+        {
+            use crate::plugins::MacWindowExt;
+            win.ns_focus().unwrap();
+        }
+
+        self.set_toolbar_focused(true);
+        self.set_toolbar_visible(true);
     }
 }
