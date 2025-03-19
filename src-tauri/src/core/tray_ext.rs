@@ -1,5 +1,4 @@
 use tauri::{
-    image::Image,
     menu::{Menu, MenuItem},
     tray::{MouseButton, TrayIcon, TrayIconBuilder, TrayIconEvent},
     Manager, Result,
@@ -21,19 +20,13 @@ impl AppTrayExt for MyApp {
         let tray = TrayIconBuilder::new()
             .menu(&menu)
             .show_menu_on_left_click(false)
-            .icon(
-                Image::from_bytes(include_bytes!("../../icons/icon.png"))
-                    .expect("build icon failed"),
-            )
+            .icon(self.default_window_icon().unwrap().clone())
             .build(app)?;
 
         tray.on_tray_icon_event(move |icon, event| match event {
             TrayIconEvent::Click {
-                id: _,
-                position: _,
-                rect: _,
                 button: MouseButton::Left,
-                button_state: _,
+                ..
             } => {
                 log::info!("tray icon left click");
 
