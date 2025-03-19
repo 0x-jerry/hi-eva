@@ -1,9 +1,6 @@
 use tauri::{Result, State, WebviewWindow};
 
-use crate::{
-    core::{AppMessageExt, AppState, MyApp},
-    plugins::MyWebviewWindowExt,
-};
+use crate::core::{AppMessageExt, AppState, MyApp, MyAppWindowExt};
 
 #[tauri::command]
 pub async fn get_selected_text(state: State<'_, AppState>) -> Result<String> {
@@ -43,8 +40,8 @@ pub async fn set_chat_pinned(state: State<'_, AppState>, pinned: bool) -> Result
 }
 
 #[tauri::command]
-pub async fn move_out_of_screen(win: WebviewWindow) -> Result<()> {
-    win.move_out_of_screen()?;
+pub async fn hide_toolbar_window(state: State<'_, MyApp>) -> Result<()> {
+    state.hide_toolbar_win();
 
     Ok(())
 }

@@ -1,7 +1,6 @@
 use tauri::{PhysicalPosition, PhysicalSize, Result, Runtime, WebviewWindow};
 
 pub trait MyWebviewWindowExt<R: Runtime> {
-    fn move_out_of_screen(&self) -> Result<()>;
     /// Check if the cursor is outside the window
     ///
     /// If the window is invisible, return false
@@ -12,24 +11,6 @@ pub trait MyWebviewWindowExt<R: Runtime> {
 }
 
 impl<R: Runtime> MyWebviewWindowExt<R> for WebviewWindow<R> {
-    fn move_out_of_screen(&self) -> Result<()> {
-        if !self.is_visible()? {
-            return Ok(());
-        }
-
-        let pos = PhysicalPosition::new(0.0, -9999999.0);
-
-        self.set_position(pos)?;
-
-        #[cfg(unix)]
-        {
-            use super::MacWindowExt;
-            self.ns_hide()?;
-        }
-
-        Ok(())
-    }
-
     fn is_cursor_in(&self) -> bool {
         let cursor_pos = self.cursor_position().unwrap();
 

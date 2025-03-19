@@ -110,8 +110,7 @@ impl MouseExtTrait for MyApp {
         let win_toolbar = self.get_toolbar_window();
 
         if win_toolbar.is_click_outside() {
-            win_toolbar.move_out_of_screen().unwrap();
-            self.set_toolbar_visible(false);
+            self.hide_toolbar_win();
         }
 
         if self.get_chat_window().is_click_outside() {

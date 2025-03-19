@@ -18,7 +18,7 @@ async function openChatPage(conf: ToolbarPromptConfig) {
 }
 
 async function hideWindow() {
-  await commands.moveOutOfScreen()
+  await commands.hideToolbarWindow()
 }
 </script>
 

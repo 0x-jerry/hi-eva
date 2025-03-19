@@ -27,7 +27,7 @@ pub fn run() {
             commands::open_chat,
             commands::apply_appearance,
             commands::set_chat_pinned,
-            commands::move_out_of_screen,
+            commands::hide_toolbar_window,
         ])
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
