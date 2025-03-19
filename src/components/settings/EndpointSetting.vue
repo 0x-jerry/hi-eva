@@ -68,7 +68,7 @@ function handleAddModel(event: KeyboardEvent) {
         </div>
       </div>
       <div class="editable-row">
-        <label>baseUrl</label>
+        <label>Base URL</label>
         <InputText class="content" v-model="conf.baseUrl" />
       </div>
       <div class="editable-row">
@@ -76,7 +76,7 @@ function handleAddModel(event: KeyboardEvent) {
         <Password class="content" v-model="conf.apiKey" toggleMask :feedback="false"/>
       </div>
       <div class="editable-row">
-        <label>Models</label>
+        <label>Model List</label>
         <div class="flex flex-wrap gap-2 flex-1">
           <Chip v-for="model in conf.models" :label="model" removable @remove="removeModel(model)" />
           <InputText v-model="state.model" @keydown="handleAddModel($event)" />

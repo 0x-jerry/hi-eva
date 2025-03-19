@@ -48,7 +48,7 @@ const modelList = computed(
       <Textarea v-model="conf.prompt" :rows="5" />
     </div>
     <div class="editable-row">
-      <label>Models</label>
+      <label>Model</label>
       <div class="flex gap-2">
         <Select v-model="conf.enpointId" :options="aiEndPointConfigs" optionLabel="label" optionValue="id"
           placeholder="Select a endpoint" />
