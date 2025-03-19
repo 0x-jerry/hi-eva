@@ -144,7 +144,7 @@ impl MyAppWindowExt for MyApp {
         #[cfg(unix)]
         {
             use crate::plugins::MacWindowExt;
-            self.ns_resign_focus().unwrap();
+            win.ns_resign_focus().unwrap();
         }
 
         self.set_toolbar_focused(false);
