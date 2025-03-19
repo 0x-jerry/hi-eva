@@ -1,4 +1,4 @@
-use tauri::{PhysicalPosition, PhysicalSize, Result, Runtime, WebviewWindow};
+use tauri::{PhysicalPosition, PhysicalSize, Runtime, WebviewWindow};
 
 pub trait MyWebviewWindowExt<R: Runtime> {
     /// Check if the cursor is outside the window

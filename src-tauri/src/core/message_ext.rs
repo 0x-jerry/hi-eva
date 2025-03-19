@@ -23,7 +23,7 @@ impl AppMessageExt for MyApp {
         let state = state.try_lock().unwrap();
 
         if !state.chat_panel_pinned {
-            let pos = calc_window_position(&win);
+            let pos = calc_window_position(&win, None);
             win.set_position(pos).unwrap();
         }
 

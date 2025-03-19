@@ -9,11 +9,19 @@ use mouce::{
 };
 use text_selection::SelectionRect;
 
+use super::VerticalMoveDir;
+
 pub trait MouseExtTrait {
-    fn on_selection_change(&self, result: Option<SelectionRect>);
+    fn on_selection_change(&self, result: Option<SelectionResult>);
     fn on_mouse_down(&self);
     fn on_mouse_move(&self);
     fn get_cursor_position(&self) -> (f64, f64);
+}
+
+#[derive(Debug, Default)]
+pub struct SelectionResult {
+    pub rect: SelectionRect,
+    pub mouse_move_dir: VerticalMoveDir,
 }
 
 #[derive(Debug)]
@@ -88,6 +96,20 @@ pub fn listen<T: 'static + MouseExtTrait + Send>(app: T) {
                         log::info!("check selection start");
 
                         let result = text_selection::get_selected_rect();
+
+                        let result = result.map(|rect| {
+                            let dir = if current_mouse_pos.1 > state.mouse_down_pos.1 {
+                                VerticalMoveDir::Down
+                            } else {
+                                VerticalMoveDir::Up
+                            };
+
+                            return SelectionResult {
+                                rect,
+                                mouse_move_dir: dir,
+                            };
+                        });
+
                         app.on_selection_change(result);
 
                         log::info!("check selection end");

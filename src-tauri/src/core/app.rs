@@ -2,13 +2,12 @@ use std::{ops::Deref, sync::Mutex};
 
 use clipboard_rs::{Clipboard, ClipboardHandler, ClipboardWatcher, ClipboardWatcherContext};
 use tauri::{AppHandle, Manager};
-use text_selection::SelectionRect;
 
 use crate::{core::AppState, plugins::MyWebviewWindowExt};
 
 use super::{
     mouse_listener, AppMessageExt, AppStateExt, AppStateInner, AppTrayExt, MouseExtTrait,
-    MyAppWindowExt,
+    MyAppWindowExt, SelectionResult,
 };
 
 #[derive(Clone)]
@@ -81,19 +80,17 @@ impl ClipboardHandler for MyApp {
 }
 
 impl MouseExtTrait for MyApp {
-    fn on_selection_change(&self, result: Option<SelectionRect>) {
+    fn on_selection_change(&self, result: Option<SelectionResult>) {
         if let Some(result) = result {
             log::info!("result is {:?}", result);
 
             {
                 let state = self.state::<AppState>();
                 let mut state = state.try_lock().unwrap();
-                state.selected_text = result.text.unwrap_or_default();
+                state.selected_text = result.rect.text.unwrap_or_default();
             }
 
-            // todo, calc window position
-
-            self.show_toolbar_win(None);
+            self.show_toolbar_win(Some(result.mouse_move_dir));
         }
     }
 

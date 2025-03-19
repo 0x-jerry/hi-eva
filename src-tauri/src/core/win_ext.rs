@@ -1,9 +1,9 @@
 use tauri::{Manager, PhysicalPosition, WebviewWindow, WebviewWindowBuilder};
 
-use super::{utils::calc_window_position, AppStateExt, MyApp};
+use super::{utils::calc_window_position, AppStateExt, MyApp, VerticalMoveDir};
 
 pub trait MyAppWindowExt {
-    fn show_toolbar_win(&self, position: Option<PhysicalPosition<f64>>);
+    fn show_toolbar_win(&self, dir: Option<VerticalMoveDir>);
     fn hide_toolbar_win(&self);
     fn get_main_window(&self) -> WebviewWindow;
     fn get_toolbar_window(&self) -> WebviewWindow;
@@ -151,10 +151,10 @@ impl MyAppWindowExt for MyApp {
         self.set_toolbar_visible(false);
     }
 
-    fn show_toolbar_win(&self, position: Option<PhysicalPosition<f64>>) {
+    fn show_toolbar_win(&self, dir: Option<VerticalMoveDir>) {
         let win = self.get_toolbar_window();
 
-        let pos = position.unwrap_or(calc_window_position(&win));
+        let pos = calc_window_position(&win, dir);
 
         win.set_position(pos).unwrap();
 
