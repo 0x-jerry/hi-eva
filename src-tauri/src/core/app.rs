@@ -4,13 +4,11 @@ use clipboard_rs::{Clipboard, ClipboardHandler, ClipboardWatcher, ClipboardWatch
 use tauri::{AppHandle, Manager};
 use text_selection::SelectionRect;
 
-use crate::{
-    core::AppState,
-    plugins::{MacWindowExt, MyWebviewWindowExt},
-};
+use crate::{core::AppState, plugins::MyWebviewWindowExt};
 
 use super::{
-    mouse_listener, AppMessageExt, AppStateInner, AppTrayExt, MouseExtTrait, MyAppWindowExt,
+    mouse_listener, AppMessageExt, AppStateExt, AppStateInner, AppTrayExt, MouseExtTrait,
+    MyAppWindowExt,
 };
 
 #[derive(Clone)]
@@ -99,18 +97,6 @@ impl MouseExtTrait for MyApp {
         }
     }
 
-    fn on_mouse_down(&self) {
-        let win_toolbar = self.get_toolbar_window();
-
-        if win_toolbar.is_click_outside() {
-            win_toolbar.move_out_of_screen().unwrap();
-        }
-
-        if self.get_chat_window().is_click_outside() {
-            self.hide_chat();
-        }
-    }
-
     fn get_cursor_position(&self) -> (f64, f64) {
         let pos = self
             .cursor_position()
@@ -120,13 +106,35 @@ impl MouseExtTrait for MyApp {
         (pos.x, pos.y)
     }
 
-    fn on_mouse_move(&self) {
+    fn on_mouse_down(&self) {
         let win_toolbar = self.get_toolbar_window();
 
-        if win_toolbar.is_cursor_in() {
-            win_toolbar.ns_show().unwrap();
-        } else {
-            win_toolbar.ns_hide().unwrap();
+        if win_toolbar.is_click_outside() {
+            win_toolbar.move_out_of_screen().unwrap();
+            self.set_toolbar_visible(false);
+        }
+
+        if self.get_chat_window().is_click_outside() {
+            self.hide_chat();
+        }
+    }
+
+    fn on_mouse_move(&self) {
+        if !self.is_toolbar_visible() {
+            return;
+        }
+
+        #[cfg(unix)]
+        {
+            use crate::plugins::MacWindowExt;
+
+            let win_toolbar = self.get_toolbar_window();
+
+            if win_toolbar.is_cursor_in() {
+                win_toolbar.ns_focus().unwrap();
+            } else {
+                win_toolbar.ns_resign_focus().unwrap();
+            }
         }
     }
 }

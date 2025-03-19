@@ -1,6 +1,6 @@
 use tauri::{Manager, WebviewWindow, WebviewWindowBuilder};
 
-use crate::plugins::{MacWindowExt, MyWebviewWindowExt};
+use crate::plugins::MyWebviewWindowExt;
 
 use super::MyApp;
 
@@ -77,9 +77,13 @@ impl MyAppWindowExt for MyApp {
         let win = win_builder.build().expect("Create toolbar window failed!");
         log::info!("Create toolbar window");
 
-        let _ = win
-            .to_non_active_panel()
-            .expect("convert to non active panel failed");
+        #[cfg(unix)]
+        {
+            use crate::plugins::MacWindowExt;
+            let _ = win
+                .to_non_active_panel()
+                .expect("convert to non active panel failed");
+        }
 
         win.show().unwrap();
 

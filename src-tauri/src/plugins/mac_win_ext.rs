@@ -1,6 +1,5 @@
 use tauri::{Manager, Result, Runtime, WebviewWindow};
 
-#[cfg(unix)]
 use tauri_nspanel::{
     cocoa::{
         appkit::{NSMainMenuWindowLevel, NSView, NSWindow, NSWindowCollectionBehavior},
@@ -13,8 +12,8 @@ use tauri_nspanel::{
 use crate::core::AppState;
 
 pub trait MacWindowExt<R: Runtime> {
-    fn ns_hide(&self) -> Result<()>;
-    fn ns_show(&self) -> Result<()>;
+    fn ns_resign_focus(&self) -> Result<()>;
+    fn ns_focus(&self) -> Result<()>;
     fn to_non_active_panel(&self) -> Result<()>;
 
     fn set_radius(&self, radius: f64) -> Result<()>;
@@ -22,91 +21,77 @@ pub trait MacWindowExt<R: Runtime> {
 
 impl<R: Runtime> MacWindowExt<R> for WebviewWindow<R> {
     fn to_non_active_panel(&self) -> Result<()> {
-        #[cfg(unix)]
-        {
-            let panel = self.to_panel()?;
+        let panel = self.to_panel()?;
 
-            // Set panel level
-            panel.set_level(NSMainMenuWindowLevel + 1);
+        // Set panel level
+        panel.set_level(NSMainMenuWindowLevel + 1);
 
-            // Allows the panel to display on the same space as the full screen window
-            panel.set_collection_behaviour(
-                NSWindowCollectionBehavior::NSWindowCollectionBehaviorCanJoinAllSpaces
-                    | NSWindowCollectionBehavior::NSWindowCollectionBehaviorStationary
-                    | NSWindowCollectionBehavior::NSWindowCollectionBehaviorFullScreenAuxiliary,
-            );
+        // Allows the panel to display on the same space as the full screen window
+        panel.set_collection_behaviour(
+            NSWindowCollectionBehavior::NSWindowCollectionBehaviorCanJoinAllSpaces
+                | NSWindowCollectionBehavior::NSWindowCollectionBehaviorStationary
+                | NSWindowCollectionBehavior::NSWindowCollectionBehaviorFullScreenAuxiliary,
+        );
 
-            #[allow(non_upper_case_globals)]
-            const NSWindowStyleMaskNonActivatingPanel: i32 = 1 << 7;
+        #[allow(non_upper_case_globals)]
+        const NSWindowStyleMaskNonActivatingPanel: i32 = 1 << 7;
 
-            // Ensures the panel cannot activate the App
-            panel.set_style_mask(NSWindowStyleMaskNonActivatingPanel);
-        }
+        // Ensures the panel cannot activate the App
+        panel.set_style_mask(NSWindowStyleMaskNonActivatingPanel);
 
         Ok(())
     }
 
-    fn ns_show(&self) -> Result<()> {
-        #[cfg(unix)]
-        {
-            let state = self.state::<AppState>();
-            let mut state = state.try_lock().unwrap();
+    fn ns_focus(&self) -> Result<()> {
+        let state = self.state::<AppState>();
+        let mut state = state.try_lock().unwrap();
 
-            if !state.toolbar_panel_focused {
-                let panel = self.get_webview_panel(self.label()).unwrap();
-                self.run_on_main_thread(move || {
-                    panel.show();
-                })
-                .unwrap();
+        if !state.toolbar.focused {
+            let panel = self.get_webview_panel(self.label()).unwrap();
+            self.run_on_main_thread(move || {
+                panel.show();
+            })
+            .unwrap();
 
-                log::info!("make key window");
-            }
-            state.toolbar_panel_focused = true;
+            log::info!("make key window");
         }
+        state.toolbar.focused = true;
 
         Ok(())
     }
 
-    fn ns_hide(&self) -> Result<()> {
-        #[cfg(unix)]
-        {
-            let state = self.state::<AppState>();
-            let mut state = state.try_lock().unwrap();
+    fn ns_resign_focus(&self) -> Result<()> {
+        let state = self.state::<AppState>();
+        let mut state = state.try_lock().unwrap();
 
-            if state.toolbar_panel_focused {
-                let panel = self.get_webview_panel(self.label()).unwrap();
-                self.run_on_main_thread(move || {
-                    panel.resign_key_window();
-                })
-                .unwrap();
+        if state.toolbar.focused {
+            let panel = self.get_webview_panel(self.label()).unwrap();
+            self.run_on_main_thread(move || {
+                panel.resign_key_window();
+            })
+            .unwrap();
 
-                log::info!("resign key window");
-            }
-            state.toolbar_panel_focused = false;
+            log::info!("resign key window");
         }
+        state..toolbar.focused = false;
 
         Ok(())
     }
 
     fn set_radius(&self, radius: f64) -> Result<()> {
-        #[cfg(unix)]
-        {
-            let win = self.ns_window()?;
-            let win = win as id;
+        let win = self.ns_window()?;
+        let win = win as id;
 
-            // Set window radius
-            unsafe {
-                let view: id = win.contentView();
+        // Set window radius
+        unsafe {
+            let view: id = win.contentView();
 
-                view.wantsLayer();
+            view.wantsLayer();
 
-                let layer: id = view.layer();
+            let layer: id = view.layer();
 
-                let _: () = msg_send![layer, setCornerRadius: radius];
-            }
+            let _: () = msg_send![layer, setCornerRadius: radius];
         }
-
-        let _ = radius;
         Ok(())
     }
 }

@@ -2,7 +2,7 @@ use tauri::{Result, State, WebviewWindow};
 
 use crate::{
     core::{AppMessageExt, AppState, MyApp},
-    plugins::{MacWindowExt, MyWebviewWindowExt},
+    plugins::MyWebviewWindowExt,
 };
 
 #[tauri::command]
@@ -21,7 +21,12 @@ pub async fn open_chat(app: State<'_, MyApp>, prompt_id: String) -> Result<()> {
 
 #[tauri::command]
 pub async fn apply_appearance(win: WebviewWindow) -> Result<()> {
-    win.set_radius(10.0)?;
+    #[cfg(unix)]
+    {
+        use crate::plugins::MacWindowExt;
+        win.set_radius(10.0)?;
+    }
+    let _ = win;
 
     Ok(())
 }
