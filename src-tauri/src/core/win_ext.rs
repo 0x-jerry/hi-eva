@@ -143,7 +143,7 @@ impl MyAppWindowExt for MyApp {
 
         #[cfg(unix)]
         {
-            use super::MacWindowExt;
+            use crate::plugins::MacWindowExt;
             self.ns_hide().unwrap();
         }
 

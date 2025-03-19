@@ -75,7 +75,7 @@ impl<R: Runtime> MacWindowExt<R> for WebviewWindow<R> {
 
             log::info!("resign key window");
         }
-        state..toolbar.focused = false;
+        state.toolbar.focused = false;
 
         Ok(())
     }
