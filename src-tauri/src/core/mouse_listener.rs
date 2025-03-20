@@ -45,7 +45,7 @@ pub fn listen<T: 'static + MouseExtTrait + Send>(app: T) {
     let mut mouse = mouce::Mouse::new();
 
     let result = mouse.hook(Box::new(move |event| {
-        let mut state = state.try_lock().unwrap();
+        let mut state = state.lock().unwrap();
 
         match event {
             MouseEvent::AbsoluteMove(..) => {

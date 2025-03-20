@@ -24,10 +24,12 @@ pub fn get_selected_rect() -> Option<SelectionRect> {
     #[cfg(unix)]
     let host = unix_impl::HostImpl::default();
 
-    if let Ok(result) = host.detect_selection_rect() {
-        return result;
-    } else {
-        return None;
+    match host.detect_selection_rect() {
+        Ok(result) => return result,
+        Err(err) => {
+            log::error!("get_selected_rect error: {}", err);
+            return None;
+        }
     }
 }
 

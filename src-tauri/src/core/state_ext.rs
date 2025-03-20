@@ -15,28 +15,28 @@ pub trait AppStateExt {
 impl AppStateExt for MyApp {
     fn is_toolbar_focused(&self) -> bool {
         let state = self.state::<AppState>();
-        let state = state.try_lock().unwrap();
+        let state = state.lock().unwrap();
 
         state.toolbar.focused
     }
 
     fn set_toolbar_focused(&self, focused: bool) {
         let state = self.state::<AppState>();
-        let mut state = state.try_lock().unwrap();
+        let mut state = state.lock().unwrap();
 
         state.toolbar.focused = focused;
     }
 
     fn is_toolbar_visible(&self) -> bool {
         let state = self.state::<AppState>();
-        let state = state.try_lock().unwrap();
+        let state = state.lock().unwrap();
 
         state.toolbar.visible
     }
 
     fn set_toolbar_visible(&self, visible: bool) {
         let state = self.state::<AppState>();
-        let mut state = state.try_lock().unwrap();
+        let mut state = state.lock().unwrap();
 
         state.toolbar.visible = visible;
     }

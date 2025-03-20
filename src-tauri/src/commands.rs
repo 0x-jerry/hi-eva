@@ -4,7 +4,7 @@ use crate::core::{AppMessageExt, AppState, MyApp, MyAppWindowExt};
 
 #[tauri::command]
 pub async fn get_selected_text(state: State<'_, AppState>) -> Result<String> {
-    let state = state.try_lock().unwrap();
+    let state = state.lock().unwrap();
 
     Ok(state.selected_text.clone())
 }
@@ -30,7 +30,7 @@ pub async fn apply_appearance(win: WebviewWindow) -> Result<()> {
 
 #[tauri::command]
 pub async fn set_chat_pinned(state: State<'_, AppState>, pinned: bool) -> Result<bool> {
-    let mut state = state.try_lock().unwrap();
+    let mut state = state.lock().unwrap();
 
     state.chat_panel_pinned = pinned;
 

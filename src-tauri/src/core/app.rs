@@ -39,8 +39,6 @@ impl MyApp {
 
         let _ = self.create_tray();
 
-        let _ = text_selection::init();
-
         let app_cloned = self.clone();
 
         // Watch clipboard change
@@ -55,6 +53,8 @@ impl MyApp {
         let app_cloned = self.clone();
 
         let _ = mouse_listener::listen(app_cloned);
+
+        let _ = text_selection::init();
     }
 }
 
@@ -69,9 +69,11 @@ impl ClipboardHandler for MyApp {
 
             let selected_text = selected_text.trim();
             if selected_text.len() > 0 {
-                let state = self.state::<AppState>();
-                let mut state = state.try_lock().unwrap();
-                state.selected_text = selected_text.to_string();
+                {
+                    let state = self.state::<AppState>();
+                    let mut state = state.lock().unwrap();
+                    state.selected_text = selected_text.to_string();
+                }
 
                 self.show_toolbar_win(None);
             }
@@ -86,7 +88,7 @@ impl MouseExtTrait for MyApp {
 
             {
                 let state = self.state::<AppState>();
-                let mut state = state.try_lock().unwrap();
+                let mut state = state.lock().unwrap();
                 state.selected_text = result.rect.text.unwrap_or_default();
             }
 
