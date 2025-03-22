@@ -4385,17 +4385,11 @@ dependencies = [
 name = "text-selection-helper"
 version = "0.1.0"
 dependencies = [
- "accessibility",
- "accessibility-sys",
  "clap",
- "clipboard-rs",
- "core-foundation",
- "core-foundation-sys",
- "core-graphics",
  "log",
- "osascript",
  "serde",
  "serde_json",
+ "text-selection",
 ]
 
 [[package]]

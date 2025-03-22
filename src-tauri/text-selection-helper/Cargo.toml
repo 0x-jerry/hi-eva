@@ -6,13 +6,8 @@ license = "MIT / Apache-2.0"
 
 [dependencies]
 clap = { version = "4.5", features = ["derive"] }
-clipboard-rs = { workspace = true }
 log = { workspace = true }
-osascript = "0.3.0"
-core-foundation-sys = "0.8"
-core-foundation = "0.10.0"
-core-graphics = "0.24.0"
-accessibility-sys = { path = "../accessibility-sys" }
-accessibility = { path = "../accessibility" }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
+
+text-selection = { path = "../text-selection" }

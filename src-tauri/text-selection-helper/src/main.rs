@@ -1,10 +1,5 @@
-mod types;
-mod unix_impl;
-mod utils;
-
 use clap::{command, Parser};
 use serde::Serialize;
-use unix_impl::{get_selected_text, request_accessibility_access};
 
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
@@ -20,11 +15,11 @@ struct CliResult {
 fn main() {
     let _args = Args::parse();
 
-    let _ = request_accessibility_access();
+    text_selection::init();
 
     let mut cli_result: CliResult = Default::default();
 
-    let text = get_selected_text();
+    let text = text_selection::get_selected_text();
 
     match text {
         Ok(text) => {
