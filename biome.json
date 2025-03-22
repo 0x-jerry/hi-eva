@@ -11,7 +11,8 @@
       "src/typed-router.d.ts"
     ],
     "include": [
-      "src"
+      "src",
+      "scripts"
     ]
   },
   "formatter": {
