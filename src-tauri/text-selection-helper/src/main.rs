@@ -1,4 +1,7 @@
+mod utils;
+
 use clap::{command, Parser};
+use mouce::{common::MouseButton, MouseActions};
 use serde::Serialize;
 
 /// Simple program to greet a person
@@ -17,19 +20,34 @@ fn main() {
 
     text_selection::init();
 
-    let mut cli_result: CliResult = Default::default();
+    utils::listen_focused_app();
 
-    let text = text_selection::get_selected_text();
+    let mut mouse = mouce::Mouse::new();
 
-    match text {
-        Ok(text) => {
-            cli_result.selected_text = Some(text);
-        }
-        Err(err) => {
-            cli_result.err = Some(err.to_string());
-        }
-    }
+    mouse
+        .hook(Box::new(|e| {
+            //
+            match e {
+                mouce::common::MouseEvent::Release(MouseButton::Left) => {
+                    let mut cli_result: CliResult = Default::default();
+                    let text = text_selection::get_selected_text();
 
-    let json = serde_json::to_string(&cli_result).unwrap();
-    println!("{}", json);
+                    match text {
+                        Ok(text) => {
+                            cli_result.selected_text = Some(text);
+                        }
+                        Err(err) => {
+                            cli_result.err = Some(err.to_string());
+                        }
+                    }
+
+                    let json = serde_json::to_string(&cli_result).unwrap();
+                    println!("{}", json);
+                }
+                _ => {}
+            }
+        }))
+        .unwrap();
+
+    utils::run_loop();
 }

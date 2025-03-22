@@ -1,4 +1,5 @@
 pub mod types;
+mod utils;
 
 #[cfg(unix)]
 mod unix_impl;
@@ -35,5 +36,8 @@ pub fn get_selected_rect() -> Option<SelectionRect> {
 
 pub fn init() {
     #[cfg(unix)]
-    let _ = unix_impl::request_accessibility_access();
+    {
+        let _ = unix_impl::request_accessibility_access();
+        let _ = utils::simulate_esc_key_press();
+    }
 }
