@@ -139,7 +139,7 @@ fn trigger_copy_menu_for_app(app_name: &str) -> bool {
     if let Err(err) = script.execute_with_params::<ScriptParams, ()>(ScriptParams {
         name: app_name.to_string(),
     }) {
-        println!("Error: {}", err);
+        log::error!("Error: {}", err);
         return false;
     }
 
@@ -154,7 +154,7 @@ pub fn request_accessibility_access() -> bool {
             CFDictionary::from_CFType_pairs(&[(prompt_conf_key, CFBoolean::from(true))]);
         let result = AXIsProcessTrustedWithOptions(conf_dict.as_concrete_TypeRef());
 
-        println!("prompt: {:?}", result);
+        log::info!("prompt: {:?}", result);
 
         return result;
     }

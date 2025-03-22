@@ -30,6 +30,7 @@ pub fn run() {
             commands::hide_toolbar_window,
         ])
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             log::info!("single instance");
             let app = app.state::<MyApp>();

@@ -61,7 +61,7 @@ pub fn request_accessibility_access() -> bool {
             CFDictionary::from_CFType_pairs(&[(prompt_conf_key, CFBoolean::from(true))]);
         let result = AXIsProcessTrustedWithOptions(conf_dict.as_concrete_TypeRef());
 
-        println!("prompt: {:?}", result);
+        log::info!("prompt: {:?}", result);
 
         return result;
     }

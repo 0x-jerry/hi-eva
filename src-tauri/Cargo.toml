@@ -38,7 +38,6 @@ tauri = { version = "2", features = [
   "image-ico",
   "tray-icon",
 ] }
-tauri-plugin-opener = "2"
 serde = { workspace = true }
 serde_json = { workspace = true }
 log = { workspace = true }
@@ -46,8 +45,10 @@ env_logger = { workspace = true }
 clipboard-rs = { workspace = true }
 text-selection = { path = "./text-selection" }
 dotenv = "0.15.0"
-tauri-plugin-single-instance = "2"
 mouce = "0.2.51"
+tauri-plugin-opener = "2"
+tauri-plugin-single-instance = "2"
+tauri-plugin-shell = "2"
 
 
 [target.'cfg(unix)'.dependencies]
