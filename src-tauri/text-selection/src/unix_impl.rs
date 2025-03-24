@@ -8,6 +8,7 @@ use accessibility_sys::{
 use core_foundation::{
     base::TCFType, boolean::CFBoolean, dictionary::CFDictionary, string::CFString, ConcreteCFType,
 };
+use objc2_app_kit::NSWorkspace;
 use serde::Serialize;
 
 use crate::{
@@ -23,9 +24,10 @@ pub struct HostImpl;
 
 impl HostHelperTrait for HostImpl {
     fn detect_selection_rect(&self) -> Result<Option<SelectionRect>> {
-        let sys_element = AXUIElement::system_wide();
-        let focused_app: AXUIElement =
-            get_element_attr(&sys_element, kAXFocusedApplicationAttribute)?;
+        let pid = get_frontmost_app().unwrap();
+        let focused_app = AXUIElement::application(pid);
+
+        enable_screen_reader_accessibility(&focused_app)?;
 
         let focused_element: AXUIElement =
             get_element_attr(&focused_app, kAXFocusedUIElementAttribute)?;
@@ -158,4 +160,38 @@ pub fn request_accessibility_access() -> bool {
 
         return result;
     }
+}
+
+fn get_frontmost_app() -> Option<i32> {
+    unsafe {
+        let app = NSWorkspace::sharedWorkspace().frontmostApplication()?;
+
+        let pid = app.processIdentifier();
+
+        Some(pid)
+    }
+}
+
+fn enable_screen_reader_accessibility(application: &AXUIElement) -> Result<()> {
+    #[allow(non_snake_case)]
+    let kAXInspectorEnabled = CFString::new("AXInspectorEnabled");
+    #[allow(non_snake_case)]
+    let kAXEnhancedUserInterface = CFString::new("AXEnhancedUserInterface");
+    #[allow(non_snake_case)]
+    let kAXManualAccessibility = CFString::new("AXManualAccessibility");
+
+    let bool_true = CFBoolean::true_value().as_CFType();
+
+    application.set_messaging_timeout(5.0)?;
+    let _ = application.set_attribute(&AXAttribute::new(&kAXInspectorEnabled), bool_true.clone());
+    let _ = application.set_attribute(
+        &AXAttribute::new(&kAXEnhancedUserInterface),
+        bool_true.clone(),
+    );
+    let _ = application.set_attribute(
+        &AXAttribute::new(&kAXManualAccessibility),
+        bool_true.clone(),
+    );
+
+    Ok(())
 }

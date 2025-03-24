@@ -135,8 +135,4 @@ impl MouseExtTrait for MyApp {
             }
         }
     }
-
-    fn app_handle(&self) -> AppHandle {
-        self.app().clone()
-    }
 }

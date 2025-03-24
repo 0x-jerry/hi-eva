@@ -8,15 +8,12 @@ use mouce::{
     MouseActions,
 };
 use serde::{Deserialize, Serialize};
-use tauri::{async_runtime::block_on, AppHandle};
-use tauri_plugin_shell::ShellExt;
 use text_selection::SelectionRect;
 
 use super::VerticalMoveDir;
 
 pub trait MouseExtTrait {
     fn on_selection_change(&self, result: Option<SelectionResult>);
-    fn app_handle(&self) -> AppHandle;
     fn on_mouse_down(&self);
     fn on_mouse_move(&self);
     fn get_cursor_position(&self) -> (f64, f64);
@@ -101,11 +98,6 @@ pub fn listen<T: 'static + MouseExtTrait + Send>(app: T) {
 
                         let result = text_selection::get_selected_rect();
 
-                        #[cfg(unix)]
-                        {
-                            Some(get_selected_text(&app.app_handle()));
-                        }
-
                         let result = result.map(|rect| {
                             let dir = if current_mouse_pos.1 > state.mouse_down_pos.1 {
                                 VerticalMoveDir::Down
@@ -142,28 +134,6 @@ pub fn listen<T: 'static + MouseExtTrait + Send>(app: T) {
 struct CliResult {
     selected_text: Option<String>,
     err: Option<String>,
-}
-
-fn get_selected_text(app: &AppHandle) -> String {
-    let sidecar_command = app
-        .shell()
-        .sidecar("text-selection-helper")
-        .expect("sidecar failed");
-
-    let t = sidecar_command.output();
-    let t = block_on(t)
-        .expect("failed to get selected text output")
-        .stdout;
-
-    let t = String::from_utf8(t).expect("failed to parse selected text output");
-
-    log::info!("cli result: {}", t);
-
-    let t = serde_json::from_str::<CliResult>(&t).expect("failed to parse selected text output");
-
-    log::info!("selected text: {:?}", t);
-
-    t.selected_text.unwrap_or_default()
 }
 
 fn distance(p1: (f64, f64), p2: (f64, f64)) -> f64 {

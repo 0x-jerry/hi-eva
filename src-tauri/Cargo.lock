@@ -4445,6 +4445,8 @@ dependencies = [
  "core-graphics",
  "enigo",
  "log",
+ "objc2 0.6.0",
+ "objc2-app-kit 0.3.0",
  "osascript",
  "serde",
  "windows 0.60.0",

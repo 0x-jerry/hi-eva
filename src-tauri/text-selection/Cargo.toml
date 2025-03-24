@@ -14,6 +14,8 @@ windows = { version = "0.60.0", features = ["UI_UIAutomation"] }
 
 [target.'cfg(unix)'.dependencies]
 osascript = "0.3.0"
+objc2 = "0.6"
+objc2-app-kit = "0.3"
 core-foundation-sys = "0.8"
 core-foundation = "0.10.0"
 core-graphics = "0.24.0"
