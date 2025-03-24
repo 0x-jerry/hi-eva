@@ -8,12 +8,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace]
-members = [
-  "accessibility",
-  "accessibility-sys",
-  "text-selection",
-  "text-selection-helper",
-]
+members = ["accessibility", "accessibility-sys", "text-selection"]
 
 [workspace.dependencies]
 clipboard-rs = "0.2"

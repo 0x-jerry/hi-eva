@@ -8,7 +8,6 @@
     "build": "tauri build",
     "ui:dev": "vite",
     "ui:build": "vite build",
-    "build:helper": "tsx scripts/build-helper.ts",
     "release": "x-release"
   },
   "dependencies": {

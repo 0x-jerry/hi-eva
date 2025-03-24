@@ -8,9 +8,6 @@
     "macOS": {
       "providerShortName": "Hi-Eva",
       "signingIdentity": "-"
-    },
-    "externalBin": [
-      "bin/text-selection-helper"
-    ]
+    }
   }
 }
