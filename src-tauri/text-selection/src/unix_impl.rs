@@ -2,8 +2,8 @@ use std::any::type_name;
 
 use accessibility::{AXAttribute, AXTextMarkerRange, AXUIElement};
 use accessibility_sys::{
-    kAXFocusedApplicationAttribute, kAXFocusedUIElementAttribute, kAXSelectedTextAttribute,
-    kAXTrustedCheckOptionPrompt, AXIsProcessTrustedWithOptions,
+    kAXFocusedUIElementAttribute, kAXSelectedTextAttribute, kAXTrustedCheckOptionPrompt,
+    AXIsProcessTrustedWithOptions,
 };
 use core_foundation::{
     base::TCFType, boolean::CFBoolean, dictionary::CFDictionary, string::CFString, ConcreteCFType,
@@ -51,10 +51,10 @@ impl HostHelperTrait for HostImpl {
     }
 
     fn get_selected_text(&self) -> Result<String> {
-        let sys_element = AXUIElement::system_wide();
+        let pid = get_frontmost_app().unwrap();
+        let focused_app = AXUIElement::application(pid);
 
-        let focused_app: AXUIElement =
-            get_element_attr(&sys_element, kAXFocusedApplicationAttribute)?;
+        enable_screen_reader_accessibility(&focused_app)?;
 
         let focused_element: AXUIElement =
             get_element_attr(&focused_app, kAXFocusedUIElementAttribute)?;
