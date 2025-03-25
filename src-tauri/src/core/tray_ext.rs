@@ -4,7 +4,7 @@ use tauri::{
     Manager, Result,
 };
 
-use super::{MyApp, MyAppWindowExt, MAIN_WINDOW_LABEL};
+use super::{MyApp, MyAppWindowExt, MyUpdaterExt, MAIN_WINDOW_LABEL};
 
 pub trait AppTrayExt {
     fn create_tray(&self) -> Result<TrayIcon>;
@@ -15,7 +15,9 @@ impl AppTrayExt for MyApp {
         let app = self.app();
 
         let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
-        let menu = Menu::with_items(app, &[&quit_i])?;
+        let check_update_i =
+            MenuItem::with_id(app, "check-update", "Check Update", true, None::<&str>)?;
+        let menu = Menu::with_items(app, &[&quit_i, &check_update_i])?;
 
         let tray = TrayIconBuilder::new()
             .menu(&menu)
@@ -40,6 +42,9 @@ impl AppTrayExt for MyApp {
         tray.on_menu_event(move |app, event| match event.id.as_ref() {
             "quit" => {
                 app.exit(0);
+            }
+            "check-update" => {
+                app.state::<MyApp>().check_update();
             }
             _ => {}
         });
