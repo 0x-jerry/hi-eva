@@ -46,6 +46,7 @@ mouce = { workspace = true }
 tauri-plugin-opener = "2"
 tauri-plugin-single-instance = "2"
 tauri-plugin-shell = "2"
+tauri-plugin-updater = "2"
 
 
 [target.'cfg(unix)'.dependencies]
