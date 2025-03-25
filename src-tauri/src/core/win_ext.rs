@@ -158,13 +158,6 @@ impl MyAppWindowExt for MyApp {
 
         win.set_position(pos).unwrap();
 
-        #[cfg(unix)]
-        {
-            use crate::plugins::MacWindowExt;
-            win.ns_focus().unwrap();
-        }
-
-        self.set_toolbar_focused(true);
         self.set_toolbar_visible(true);
     }
 }
