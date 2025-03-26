@@ -69,21 +69,17 @@ pub fn listen<T: 'static + MouseExtTrait + Send>(app: T) {
                     if let Some(last_click_ts) = state.last_click_ts {
                         let db_click_max_delay_check_ms = 500;
 
-                        let maybe_double_click = now.duration_since(last_click_ts)
+                        let maybe_multiple_click = now.duration_since(last_click_ts)
                             < Duration::from_millis(db_click_max_delay_check_ms)
                             && distance(state.last_click_pos, current_mouse_pos) < 5.0;
 
-                        if maybe_double_click {
+                        if maybe_multiple_click {
                             should_check_selection = true;
-                            state.last_click_ts = None;
-                        } else {
-                            state.last_click_ts = Some(now);
-                            state.last_click_pos = current_mouse_pos.clone();
                         }
-                    } else {
-                        state.last_click_ts = Some(now);
-                        state.last_click_pos = current_mouse_pos.clone();
                     }
+
+                    state.last_click_ts = Some(now);
+                    state.last_click_pos = current_mouse_pos.clone();
                 } else {
                     should_check_selection = true;
                     state.last_click_ts = None;
