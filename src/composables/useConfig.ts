@@ -2,11 +2,11 @@ import {
   execMigration,
   type Awaitable,
   type UpgradeConfig,
-  type VersionedData
+  type VersionedData,
 } from '@0x-jerry/utils'
 import { LazyStore } from '@tauri-apps/plugin-store'
-import { watchPausable } from '@vueuse/core'
-import { onUnmounted, ref } from 'vue'
+import { tryOnUnmounted, watchPausable } from '@vueuse/core'
+import { ref } from 'vue'
 
 export interface UseConfigInnerOption<T> {
   init?(data: T): Awaitable<void>
@@ -19,7 +19,7 @@ export function useConfig<T extends VersionedData>(
   fileName: string,
   key: string,
   defaultConfig: T,
-  option?: UseConfigInnerOption<T>
+  option?: UseConfigInnerOption<T>,
 ) {
   const config = new LazyStore(fileName)
 
@@ -27,7 +27,7 @@ export function useConfig<T extends VersionedData>(
 
   const loadingState = {
     isLoading: false,
-    loaded: false
+    loaded: false,
   }
 
   const _watcher = watchPausable(
@@ -38,11 +38,11 @@ export function useConfig<T extends VersionedData>(
     },
     {
       deep: true,
-      flush: 'post'
-    }
+      flush: 'post',
+    },
   )
 
-  onUnmounted(saveConfig)
+  tryOnUnmounted(saveConfig)
 
   loadConfig()
   return state

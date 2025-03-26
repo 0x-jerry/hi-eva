@@ -1,6 +1,6 @@
 // @unocss-include
-import { useConfig, UseConfigOption } from './useConfig'
-import { VersionedData } from '@0x-jerry/utils'
+import { useConfig, type UseConfigOption } from './useConfig'
+import type { VersionedData } from '@0x-jerry/utils'
 
 export interface PromptConfig {
   id: string
