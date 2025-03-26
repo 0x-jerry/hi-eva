@@ -63,7 +63,7 @@ export function usePromptsConfig(
     items: builtinPromptConfigs,
   }
 
-  return useConfig<PromptsConfigV1>('endpoints.json', 'data', defaultConfig, {
+  return useConfig<PromptsConfigV1>('prompts.json', 'data', defaultConfig, {
     ...option,
     migrations: [
       {

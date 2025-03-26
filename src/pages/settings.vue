@@ -2,19 +2,13 @@
 import { onMounted, reactive, ref, useId } from 'vue'
 import AISetting from '../components/settings/AISetting.vue'
 import AboutSetting from '../components/settings/AboutSetting.vue'
-import CommonSetting from '../components/settings/CommonSetting.vue'
 import PromptSetting from '../components/settings/PromptSetting.vue'
+import BasicSetting from '../components/settings/BasicSetting.vue'
 import { useEventListener } from '@vueuse/core'
 
 const scrollElRef = ref<HTMLElement>()
 
 const settings = [
-  {
-    label: '通用设置',
-    Component: CommonSetting,
-    visible: false,
-    id: useId(),
-  },
   {
     label: 'AI 设置',
     Component: AISetting,
@@ -23,6 +17,11 @@ const settings = [
   {
     label: 'Prompt 设置',
     Component: PromptSetting,
+    id: useId(),
+  },
+  {
+    label: '基础设置',
+    Component: BasicSetting,
     id: useId(),
   },
   {

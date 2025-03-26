@@ -13,7 +13,7 @@ export function useBasicConfig(option?: UseConfigOption<BasicConfigLatest>) {
   const defaultConfig: BasicConfigLatest = {
     version: 1,
     proxy: '',
-    listenClipboard: false,
+    listenClipboard: true,
   }
 
   return useConfig<BasicConfigV1>('config.json', 'data', defaultConfig, {
