@@ -17,7 +17,7 @@ impl AppTrayExt for MyApp {
         let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
         let check_update_i =
             MenuItem::with_id(app, "check-update", "Check Update", true, None::<&str>)?;
-        let menu = Menu::with_items(app, &[&quit_i, &check_update_i])?;
+        let menu = Menu::with_items(app, &[&check_update_i, &quit_i])?;
 
         let tray = TrayIconBuilder::new()
             .menu(&menu)
