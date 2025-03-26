@@ -1,4 +1,4 @@
-use tauri::{Manager, Runtime, WebviewWindow};
+use tauri::{Runtime, WebviewWindow};
 
 pub trait MyWebviewWindowExt<R: Runtime> {
     /// Check if the cursor is outside the window
@@ -23,7 +23,7 @@ impl<R: Runtime> MyWebviewWindowExt<R> for WebviewWindow<R> {
             && cursor_pos.y > win_pos.y
             && cursor_pos.y < win_pos.y + size.height;
 
-        log::info!("is_cursor_in: {:?}", is_in);
+        // log::info!("is_cursor_in: {:?}", is_in);
 
         is_in
     }

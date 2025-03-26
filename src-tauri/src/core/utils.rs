@@ -20,7 +20,7 @@ pub fn calc_window_position(
         .app_handle()
         .monitor_from_point(mouse_pos.x, mouse_pos.y)
         .unwrap()
-        .unwrap()
+        .unwrap_or(win.app_handle().primary_monitor().unwrap().unwrap())
         .scale_factor();
 
     let offset_pos =
