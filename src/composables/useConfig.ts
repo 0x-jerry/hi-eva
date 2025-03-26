@@ -6,7 +6,7 @@ import {
 } from '@0x-jerry/utils'
 import { LazyStore } from '@tauri-apps/plugin-store'
 import { tryOnUnmounted, watchPausable } from '@vueuse/core'
-import { ref } from 'vue'
+import { type Ref, ref } from 'vue'
 
 export interface UseConfigInnerOption<T> {
   init?(data: T): Awaitable<void>
@@ -45,7 +45,16 @@ export function useConfig<T extends VersionedData>(
   tryOnUnmounted(saveConfig)
 
   loadConfig()
-  return state
+
+  Object.defineProperty(state, 'save', {
+    get() {
+      return saveConfig
+    },
+  })
+
+  return state as Ref<T> & {
+    save: () => Promise<void>
+  }
 
   async function loadConfig() {
     if (loadingState.isLoading || loadingState.loaded) {

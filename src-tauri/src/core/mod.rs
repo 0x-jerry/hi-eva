@@ -26,3 +26,9 @@ pub use common::*;
 
 pub mod updater_ext;
 pub use updater_ext::*;
+
+pub mod store_ext;
+pub use store_ext::*;
+
+pub mod clipboard_listener_ext;
+pub use clipboard_listener_ext::*;

@@ -1,6 +1,8 @@
 use tauri::{Result, State, WebviewWindow};
 
-use crate::core::{AppMessageExt, AppState, MyApp, MyAppWindowExt};
+use crate::core::{
+    AppMessageExt, AppState, AppStoreExt, ClipboardListenerExt, MyApp, MyAppWindowExt,
+};
 
 #[tauri::command]
 pub async fn get_selected_text(state: State<'_, AppState>) -> Result<String> {
@@ -40,8 +42,21 @@ pub async fn set_chat_pinned(state: State<'_, AppState>, pinned: bool) -> Result
 }
 
 #[tauri::command]
-pub async fn hide_toolbar_window(state: State<'_, MyApp>) -> Result<()> {
-    state.hide_toolbar_win();
+pub async fn hide_toolbar_window(app: State<'_, MyApp>) -> Result<()> {
+    app.hide_toolbar_win();
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn toggle_clipboard_listener(app: State<'_, MyApp>) -> Result<()> {
+    let conf = app.get_basic_config();
+
+    if conf.listen_clipboard {
+        app.start_clipboard_listener();
+    } else {
+        app.stop_clipboard_listener();
+    }
 
     Ok(())
 }

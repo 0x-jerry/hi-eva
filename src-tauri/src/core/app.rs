@@ -1,13 +1,13 @@
 use std::{ops::Deref, sync::Mutex};
 
-use clipboard_rs::{Clipboard, ClipboardHandler, ClipboardWatcher, ClipboardWatcherContext};
+use clipboard_rs::{Clipboard, ClipboardHandler};
 use tauri::{AppHandle, Manager};
 
 use crate::{core::AppState, plugins::MyWebviewWindowExt};
 
 use super::{
-    mouse_listener, AppMessageExt, AppStateExt, AppStateInner, AppTrayExt, MouseExtTrait,
-    MyAppWindowExt, SelectionResult,
+    mouse_listener, AppMessageExt, AppStateExt, AppStateInner, AppStoreExt, AppTrayExt,
+    ClipboardListenerExt, MouseExtTrait, MyAppWindowExt, SelectionResult,
 };
 
 #[derive(Clone)]
@@ -39,16 +39,9 @@ impl MyApp {
 
         let _ = self.create_tray();
 
-        let app_cloned = self.clone();
-
-        // Watch clipboard change
-        tauri::async_runtime::spawn_blocking(move || {
-            let mut watcher =
-                ClipboardWatcherContext::<MyApp>::new().expect("Init clipboard watcher");
-
-            watcher.add_handler(app_cloned);
-            watcher.start_watch();
-        });
+        if self.get_basic_config().listen_clipboard {
+            self.start_clipboard_listener();
+        }
 
         let app_cloned = self.clone();
 

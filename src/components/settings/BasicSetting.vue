@@ -3,6 +3,7 @@ import SettingTitle from './SettingTitle.vue'
 import { useBasicConfig } from '../../composables'
 import { InputText, Checkbox } from 'primevue'
 import { useId, watch } from 'vue'
+import { commands } from '../../logic/commands'
 
 const basicConfig = useBasicConfig()
 
@@ -10,8 +11,9 @@ const listenClipboardFieldId = useId()
 
 watch(
   () => basicConfig.value.listenClipboard,
-  (val) => {
-    console.log(val)
+  async () => {
+    await basicConfig.save()
+    await commands.toggleClipboardListener()
   },
 )
 </script>

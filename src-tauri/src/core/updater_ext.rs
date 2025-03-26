@@ -1,9 +1,9 @@
-use std::env;
-
-use tauri::{async_runtime::block_on, AppHandle, Url};
+use tauri::{async_runtime::block_on, AppHandle, Manager, Url};
 use tauri_plugin_dialog::{DialogExt, MessageDialogButtons};
 use tauri_plugin_notification::NotificationExt;
 use tauri_plugin_updater::UpdaterExt;
+
+use crate::core::AppStoreExt;
 
 use super::MyApp;
 
@@ -37,12 +37,18 @@ fn check_update(app: &AppHandle) -> tauri_plugin_updater::Result<()> {
 
     let mut updater_builder = app.updater_builder();
 
-    if let Ok(proxy) = env::var("http_proxy") {
-        let url = Url::parse(proxy.as_str()).expect("parse proxy url");
+    let proxy = {
+        let state = app.state::<MyApp>();
+        let state = state.get_basic_config();
+        state.proxy
+    };
 
-        log::info!("set proxy {}", url);
+    let url = Url::parse(proxy.as_str());
 
-        updater_builder = updater_builder.proxy(url);
+    if url.is_ok() {
+        log::info!("set proxy {:?}", url);
+
+        updater_builder = updater_builder.proxy(url.unwrap());
     }
 
     let updater = updater_builder.build()?;
