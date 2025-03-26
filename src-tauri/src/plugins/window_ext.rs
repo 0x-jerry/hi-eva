@@ -12,29 +12,20 @@ pub trait MyWebviewWindowExt<R: Runtime> {
 
 impl<R: Runtime> MyWebviewWindowExt<R> for WebviewWindow<R> {
     fn is_cursor_in(&self) -> bool {
-        let app_scale_factor = self
-            .app_handle()
-            .primary_monitor()
-            .unwrap()
-            .unwrap()
-            .scale_factor();
-        let cursor_pos = self
-            .cursor_position()
-            .unwrap()
-            .to_logical::<f64>(app_scale_factor);
+        let cursor_pos = self.cursor_position().unwrap();
 
-        let scale_factor = self.scale_factor().unwrap();
+        let size = self.outer_size().unwrap().cast::<f64>();
 
-        let size = self.outer_size().unwrap().to_logical::<f64>(scale_factor);
-        let win_pos = self
-            .outer_position()
-            .unwrap()
-            .to_logical::<f64>(scale_factor);
+        let win_pos = self.outer_position().unwrap().cast::<f64>();
 
-        cursor_pos.x > win_pos.x
+        let is_in = cursor_pos.x > win_pos.x
             && cursor_pos.x < win_pos.x + size.width
             && cursor_pos.y > win_pos.y
-            && cursor_pos.y < win_pos.y + size.height
+            && cursor_pos.y < win_pos.y + size.height;
+
+        log::info!("is_cursor_in: {:?}", is_in);
+
+        is_in
     }
 
     fn is_click_outside(&self) -> bool {
