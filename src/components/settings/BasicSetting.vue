@@ -1,7 +1,7 @@
 <script lang='ts' setup>
 import SettingTitle from './SettingTitle.vue'
 import { useBasicConfig } from '../../composables'
-import { InputText, Checkbox } from 'primevue'
+import { InputText, Checkbox, Button } from 'primevue'
 import { useId, watch } from 'vue'
 import { commands } from '../../logic/commands'
 
@@ -16,6 +16,10 @@ watch(
     await commands.toggleClipboardListener()
   },
 )
+
+function openSettingFolder() {
+  commands.openSettingFolder()
+}
 </script>
 
 <template>
@@ -24,6 +28,9 @@ watch(
       <span>
         基础配置
       </span>
+      <div class="flex-1 flex justify-end">
+        <Button variant="text" @click="openSettingFolder">打开配置文件夹</Button>
+      </div>
     </SettingTitle>
 
     <div class="flex flex-col gap-2">

@@ -11,6 +11,7 @@ type ICommandType = {
   setChatPinned(opt: { pinned: boolean }): Promise<boolean>
   openChat(opt: { promptId: string }): Promise<void>
   toggleClipboardListener(): Promise<void>
+  openSettingFolder(): Promise<void>
 }
 
 function buildCommands<T>(): T {

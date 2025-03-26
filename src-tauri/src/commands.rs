@@ -1,4 +1,5 @@
-use tauri::{Result, State, WebviewWindow};
+use tauri::{AppHandle, Manager, Result, State, WebviewWindow};
+use tauri_plugin_opener::OpenerExt;
 
 use crate::core::{
     AppMessageExt, AppState, AppStoreExt, ClipboardListenerExt, MyApp, MyAppWindowExt,
@@ -57,6 +58,15 @@ pub async fn toggle_clipboard_listener(app: State<'_, MyApp>) -> Result<()> {
     } else {
         app.stop_clipboard_listener();
     }
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn open_setting_folder(app: AppHandle) -> Result<()> {
+    let conf_dir = app.path().app_config_dir()?;
+
+    app.opener().reveal_item_in_dir(conf_dir).unwrap();
 
     Ok(())
 }

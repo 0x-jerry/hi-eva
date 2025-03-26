@@ -29,6 +29,7 @@ pub fn run() {
             commands::set_chat_pinned,
             commands::hide_toolbar_window,
             commands::toggle_clipboard_listener,
+            commands::open_setting_folder,
         ])
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
