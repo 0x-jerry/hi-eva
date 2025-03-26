@@ -1,5 +1,5 @@
 import OpenAI from 'openai'
-import { aiEndPointConfigs, promptConfigs } from '../../logic/config'
+import { getEndpointConf, getPromptConf } from '../../logic/config'
 
 export interface ChatWithOption {
   promptId: string
@@ -9,18 +9,16 @@ export function chatWithPrompt(
   messages: OpenAI.Chat.ChatCompletionMessageParam[],
   opt: ChatWithOption,
 ) {
-  const conf = promptConfigs.value.find((n) => n.id === opt.promptId)
+  const conf = getPromptConf(opt.promptId)
 
-  if (!conf) {
+  if (!conf?.endpointId) {
     throw new Error('Can not find the prompt setting')
   }
 
-  const endpointConf = aiEndPointConfigs.value.find(
-    (n) => n.id === conf.enpointId,
-  )
+  const endpointConf = getEndpointConf(conf.endpointId)
 
   if (!endpointConf) {
-    throw new Error('Pease select an enpoint')
+    throw new Error('Pease select an endpoint')
   }
 
   if (!conf.model) {

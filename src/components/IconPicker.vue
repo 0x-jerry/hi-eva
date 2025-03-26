@@ -66,7 +66,8 @@ function handleSelect(name: string) {
 
         <div class="h-200px overflow-auto">
           <div class="icons text-2xl">
-            <span class="size-8 cursor-pointer hover:bg-light-6 flex-center rounded" v-for="name in filteredNames" :key="name" @click="handleSelect(name)">
+            <span class="size-8 cursor-pointer hover:bg-light-6 flex-center rounded" v-for="name in filteredNames"
+              :key="name" @click="handleSelect(name)" :title="name">
               <CarbonIcon :name="name" />
             </span>
           </div>

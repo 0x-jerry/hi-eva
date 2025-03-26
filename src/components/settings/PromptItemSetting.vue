@@ -3,7 +3,7 @@ import Inplace from 'primevue/inplace'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
-import { aiEndPointConfigs, getPromptConf } from '../../logic/config'
+import { endPointConfigs, getPromptConf } from '../../logic/config'
 import Icon from '../Icon.vue'
 import IconPicker from '../IconPicker.vue'
 import { computed } from 'vue'
@@ -20,7 +20,7 @@ const conf = computed(() => getPromptConf(props.confId))
 
 const modelList = computed(
   () =>
-    aiEndPointConfigs.value.find((c) => c.id === conf.value?.enpointId)
+    endPointConfigs.value.find((c) => c.id === conf.value?.endpointId)
       ?.models || [],
 )
 </script>
@@ -50,7 +50,7 @@ const modelList = computed(
     <div class="editable-row">
       <label>Model</label>
       <div class="flex gap-2">
-        <Select v-model="conf.enpointId" :options="aiEndPointConfigs" optionLabel="label" optionValue="id"
+        <Select v-model="conf.endpointId" :options="endPointConfigs" optionLabel="label" optionValue="id"
           placeholder="Select a endpoint" />
 
         <Select v-model="conf.model" :options="modelList" placeholder="Select a model" />

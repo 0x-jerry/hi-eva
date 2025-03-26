@@ -1,30 +1,10 @@
-import { useLocalStorage } from '@vueuse/core'
+import { computed } from 'vue'
+import { useEndpointsConfig } from '../../composables'
 
-export interface AIEndpointConfig {
-  id: string
-  builtin?: boolean
-  label: string
-  baseUrl: string
-  apiKey: string
-  models: string[]
-}
+const _endPointConfigs = useEndpointsConfig()
 
-const builtinEndpointConfigs: AIEndpointConfig[] = [
-  {
-    id: 'dashscope',
-    builtin: true,
-    label: '百炼',
-    baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
-    apiKey: '',
-    models: [],
-  },
-]
-
-export const aiEndPointConfigs = useLocalStorage<AIEndpointConfig[]>(
-  'ai-endpoint-config',
-  builtinEndpointConfigs,
-)
+export const endPointConfigs = computed(() => _endPointConfigs.value.items)
 
 export function getEndpointConf(id: string) {
-  return aiEndPointConfigs.value.find((n) => n.id === id)
+  return endPointConfigs.value.find((n) => n.id === id)
 }

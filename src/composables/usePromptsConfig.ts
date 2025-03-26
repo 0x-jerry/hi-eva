@@ -23,7 +23,7 @@ export interface PromptConfig {
   /**
    * ID for endpoint
    */
-  enpointId?: string
+  endpointId?: string
 
   /**
    * Model from endpoint config

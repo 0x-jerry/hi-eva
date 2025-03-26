@@ -1,11 +1,11 @@
 <script lang='ts' setup>
 import { nanoid } from '@0x-jerry/utils'
-import { aiEndPointConfigs } from '../../logic/config'
+import { endPointConfigs } from '../../logic/config'
 import Icon from '../Icon.vue'
 import SettingTitle from './SettingTitle.vue'
 import EndpointSetting from './EndpointSetting.vue'
 
-const configs = aiEndPointConfigs
+const configs = endPointConfigs
 
 async function addConfig() {
   configs.value.push({
