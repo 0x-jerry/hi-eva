@@ -86,13 +86,15 @@ impl MouseExtTrait for MyApp {
         if let Some(result) = result {
             log::info!("result is {:?}", result);
 
-            {
-                let state = self.state::<AppState>();
-                let mut state = state.lock().unwrap();
-                state.selected_text = result.rect.text.unwrap_or_default();
-            }
+            if result.rect.text.clone().is_some_and(|x| x.len() > 0) {
+                {
+                    let state = self.state::<AppState>();
+                    let mut state = state.lock().unwrap();
+                    state.selected_text = result.rect.text.unwrap_or_default();
+                }
 
-            self.show_toolbar_win(Some(result.mouse_move_dir));
+                self.show_toolbar_win(Some(result.mouse_move_dir));
+            }
         }
     }
 
