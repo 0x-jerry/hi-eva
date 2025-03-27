@@ -2,9 +2,9 @@ import {
   execMigration,
   type Awaitable,
   type UpgradeConfig,
-  type VersionedData
+  type VersionedData,
 } from '@0x-jerry/utils'
-import { UnlistenFn } from '@tauri-apps/api/event'
+import type { UnlistenFn } from '@tauri-apps/api/event'
 import { LazyStore } from '@tauri-apps/plugin-store'
 import { tryOnUnmounted, watchPausable } from '@vueuse/core'
 import { isEqual } from 'lodash-es'
@@ -21,7 +21,7 @@ export function useConfig<T extends VersionedData>(
   fileName: string,
   key: string,
   defaultConfig: T,
-  option?: UseConfigInnerOption<T>
+  option?: UseConfigInnerOption<T>,
 ) {
   const store = new LazyStore(fileName)
 
@@ -30,7 +30,7 @@ export function useConfig<T extends VersionedData>(
   const state = {
     isLoading: false,
     loaded: false,
-    unlistenHandle: null as null | UnlistenFn
+    unlistenHandle: null as null | UnlistenFn,
   }
 
   const _watcher = watchPausable(
@@ -40,8 +40,8 @@ export function useConfig<T extends VersionedData>(
     },
     {
       deep: true,
-      flush: 'post'
-    }
+      flush: 'post',
+    },
   )
 
   tryOnUnmounted(() => {
@@ -54,7 +54,7 @@ export function useConfig<T extends VersionedData>(
   Object.defineProperty(config, 'save', {
     get() {
       return saveConfig
-    }
+    },
   })
 
   return config as Ref<T> & {
