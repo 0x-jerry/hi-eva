@@ -27,7 +27,7 @@ async function removeConf(idx: number) {
       <span>
         Prompt 配置
       </span>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 cursor-pointer">
         <Icon class="i-carbon:add" @click="addConfig" />
       </div>
     </SettingTitle>
