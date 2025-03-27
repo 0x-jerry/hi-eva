@@ -1,4 +1,4 @@
-use tauri::{Manager, Runtime, WebviewWindow};
+use tauri::{Runtime, WebviewWindow};
 
 pub trait MyWebviewWindowExt<R: Runtime> {
     /// Check if the cursor is outside the window
@@ -12,20 +12,23 @@ pub trait MyWebviewWindowExt<R: Runtime> {
 
 impl<R: Runtime> MyWebviewWindowExt<R> for WebviewWindow<R> {
     fn is_cursor_in(&self) -> bool {
-        let app_scale_factor = self
-            .app_handle()
-            .primary_monitor()
-            .unwrap()
-            .unwrap()
-            .scale_factor();
+        let cursor_pos = self.cursor_position().unwrap();
 
-        let win_scale_factor = self.scale_factor().unwrap();
+        #[cfg(unix)]
+        let cursor_pos = {
+            use tauri::Manager;
+            let app_scale_factor = self
+                .app_handle()
+                .primary_monitor()
+                .unwrap()
+                .unwrap()
+                .scale_factor();
 
-        let cursor_pos = self
-            .cursor_position()
-            .unwrap()
-            .to_logical::<f64>(app_scale_factor)
-            .to_physical::<f64>(win_scale_factor);
+            let win_scale_factor = self.scale_factor().unwrap();
+            cursor_pos
+                .to_logical::<f64>(app_scale_factor)
+                .to_physical::<f64>(win_scale_factor)
+        };
 
         let size = self.outer_size().unwrap().cast::<f64>();
 
