@@ -1,14 +1,15 @@
 import {
   execMigration,
+  nanoid,
   type Awaitable,
   type UpgradeConfig,
   type VersionedData,
 } from '@0x-jerry/utils'
-import type { UnlistenFn } from '@tauri-apps/api/event'
+import { emit, listen, type UnlistenFn } from '@tauri-apps/api/event'
 import { LazyStore } from '@tauri-apps/plugin-store'
 import { tryOnUnmounted, watchPausable } from '@vueuse/core'
-import { isEqual } from 'lodash-es'
-import { type Ref, ref } from 'vue'
+import { debounce, isEqual } from 'lodash-es'
+import { nextTick, type Ref, ref } from 'vue'
 
 export interface UseConfigInnerOption<T> {
   init?(data: T): Awaitable<void>
@@ -16,6 +17,32 @@ export interface UseConfigInnerOption<T> {
 }
 
 export type UseConfigOption<T> = Omit<UseConfigInnerOption<T>, 'migrations'>
+
+interface SyncEventPayload<T = unknown> {
+  fileName: string
+  key: string
+  data: T
+  id: string
+}
+
+const syncId = `${nanoid()}-${location.href}`
+const SYNC_EVENT_NAME = 'store-changed'
+
+function emitSyncEvent<T>(opt: SyncEventPayload<T>) {
+  return emit(SYNC_EVENT_NAME, opt)
+}
+
+function listenStoreChange<T>(cb: (data: SyncEventPayload<T>) => void) {
+  return listen(SYNC_EVENT_NAME, (evt) => {
+    const payload = evt.payload as SyncEventPayload<T>
+
+    if (payload.id === syncId) {
+      return
+    }
+
+    cb(payload)
+  })
+}
 
 export function useConfig<T extends VersionedData>(
   fileName: string,
@@ -33,29 +60,33 @@ export function useConfig<T extends VersionedData>(
     unlistenHandle: null as null | UnlistenFn,
   }
 
+  const triggerSyncEvent = debounce(() => {
+    return emitSyncEvent({
+      fileName,
+      key,
+      id: syncId,
+      data: config.value,
+    })
+  }, 100)
+
   const watcher = watchPausable(
     config,
     () => {
       store.set(key, config.value)
+
+      triggerSyncEvent()
     },
     {
       deep: true,
-      flush: 'post',
+      initialState: 'paused',
     },
   )
 
   tryOnUnmounted(() => {
-    saveConfig()
     state.unlistenHandle?.()
   })
 
   initStore()
-
-  Object.defineProperty(config, 'save', {
-    get() {
-      return saveConfig
-    },
-  })
 
   return config as Ref<T> & {
     save: () => Promise<void>
@@ -63,13 +94,21 @@ export function useConfig<T extends VersionedData>(
 
   async function initStore() {
     await loadConfig()
+    watcher.resume()
 
-    state.unlistenHandle = await store.onKeyChange(key, (newValue) => {
-      if (!isEqual(newValue, config.value)) {
-        watcher.pause()
-        config.value = newValue
-        watcher.resume()
+    state.unlistenHandle = await listenStoreChange(async (payload) => {
+      if (payload.fileName !== fileName || payload.key !== key) {
+        return
       }
+
+      if (isEqual(payload.data, config.value)) {
+        return
+      }
+
+      watcher.pause()
+      config.value = payload.data
+      await nextTick()
+      watcher.resume()
     })
   }
 
@@ -90,11 +129,6 @@ export function useConfig<T extends VersionedData>(
 
     state.isLoading = false
     state.loaded = true
-    option?.init?.(config.value)
-  }
-
-  async function saveConfig() {
-    await store.set(key, config.value)
-    await store.save()
+    await option?.init?.(config.value)
   }
 }
