@@ -33,7 +33,7 @@ export function useConfig<T extends VersionedData>(
     unlistenHandle: null as null | UnlistenFn,
   }
 
-  const _watcher = watchPausable(
+  const watcher = watchPausable(
     config,
     () => {
       store.set(key, config.value)
@@ -66,7 +66,9 @@ export function useConfig<T extends VersionedData>(
 
     state.unlistenHandle = await store.onKeyChange(key, (newValue) => {
       if (!isEqual(newValue, config.value)) {
+        watcher.pause()
         config.value = newValue
+        watcher.resume()
       }
     })
   }
