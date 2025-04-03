@@ -5,10 +5,11 @@ import Button from 'primevue/button'
 import ContextMenu from 'primevue/contextmenu'
 import type { MenuItem } from 'primevue/menuitem'
 import Textarea from 'primevue/textarea'
-import { reactive, ref } from 'vue'
+import { nextTick, reactive, ref } from 'vue'
 import Markdown from '../Markdown.vue'
 import { chatWithPrompt } from './chat'
 import type { ChatHistory } from './types'
+import { useEventListener } from '@vueuse/core'
 
 export interface ChatMessagesProps {
   promptId: string
@@ -26,13 +27,38 @@ const contextMenuState = reactive({
   selectMsg: null as ChatCompletionMessageParam | null,
 })
 
+const scrollEl = ref<HTMLDivElement>()
+
 let requestAbort: AbortController | null = null
 
 const state = reactive({
+  autoScrollToBottom: true,
   reply: '',
   isThinking: false,
   isReplying: false,
 })
+
+useEventListener(scrollEl, 'wheel', (_evt) => {
+  const el = scrollEl.value
+  if (!el) return
+
+  const gap = 10
+
+  state.autoScrollToBottom =
+    el.scrollTop + el.clientHeight + gap >= el.scrollHeight
+})
+
+async function scrollToBottom() {
+  if (!state.autoScrollToBottom) {
+    return
+  }
+
+  await nextTick()
+  scrollEl.value?.scrollTo({
+    top: scrollEl.value.scrollHeight,
+    behavior: 'instant',
+  })
+}
 
 function handleKeydown(evt: KeyboardEvent) {
   if (evt.key === 'Enter') {
@@ -52,6 +78,7 @@ async function onSend() {
     role: 'user',
     content: reply,
   })
+  scrollToBottom()
 
   await continueChat()
 }
@@ -96,8 +123,10 @@ async function chatWith(messages: ChatCompletionMessageParam[]) {
     requestAbort = new AbortController()
 
     for await (const chunkItem of respStream) {
-      const chunkConent = chunkItem.choices.at(0)?.delta.content || ''
-      msg.content += chunkConent
+      const chunkContent = chunkItem.choices.at(0)?.delta.content || ''
+      msg.content += chunkContent
+
+      scrollToBottom()
     }
   } catch (error) {
     const lastMsg = chat.value.messages.at(-1)
@@ -159,8 +188,8 @@ defineExpose({
 
 <template>
   <div class="flex flex-col bg-white min-h-100px max-h-600px">
-    <div class="chat-msgs overflow-auto p-4">
-      <div class="chat-msg-item flex flex-col mb-4" v-for="(msg, _idx) in chat?.messages.toReversed()">
+    <div ref="scrollEl" class="chat-msgs overflow-auto p-4">
+      <div class="chat-msg-item flex flex-col mb-4" v-for="(msg, _idx) in chat?.messages">
         <div class="role flex text-(2xl)">
           <span v-if="msg.role === 'user'" class="i-carbon-user-avatar-filled-alt text-blue-4"></span>
           <span v-else class="i-carbon-machine-learning text-rose-4"></span>
@@ -190,6 +219,6 @@ defineExpose({
 <style scoped>
 .chat-msgs {
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
 }
 </style>
