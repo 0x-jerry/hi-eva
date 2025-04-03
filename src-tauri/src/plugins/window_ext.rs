@@ -24,10 +24,16 @@ impl<R: Runtime> MyWebviewWindowExt<R> for WebviewWindow<R> {
                 .unwrap()
                 .scale_factor();
 
-            let win_scale_factor = self.scale_factor().unwrap();
+            let current_monitor_scale_factor = self
+                .app_handle()
+                .monitor_from_point(cursor_pos.x, cursor_pos.y)
+                .unwrap()
+                .unwrap_or(self.app_handle().primary_monitor().unwrap().unwrap())
+                .scale_factor();
+
             cursor_pos
                 .to_logical::<f64>(app_scale_factor)
-                .to_physical::<f64>(win_scale_factor)
+                .to_physical::<f64>(current_monitor_scale_factor)
         };
 
         let size = self.outer_size().unwrap().cast::<f64>();

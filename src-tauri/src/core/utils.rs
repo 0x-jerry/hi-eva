@@ -14,19 +14,34 @@ pub fn calc_window_position(
         offset_y
     };
 
-    let mouse_pos = win.cursor_position().unwrap().cast::<f64>();
+    let cursor_pos = win.cursor_position().unwrap();
 
-    let current_scale_factor = win
+    let current_monitor_scale_factor = win
         .app_handle()
-        .monitor_from_point(mouse_pos.x, mouse_pos.y)
+        .monitor_from_point(cursor_pos.x, cursor_pos.y)
         .unwrap()
         .unwrap_or(win.app_handle().primary_monitor().unwrap().unwrap())
         .scale_factor();
 
-    let offset_pos =
-        LogicalPosition::new(offset_x, offset_y).to_physical::<f64>(current_scale_factor);
+    #[cfg(unix)]
+    let cursor_pos = {
+        use tauri::Manager;
+        let app_scale_factor = win
+            .app_handle()
+            .primary_monitor()
+            .unwrap()
+            .unwrap()
+            .scale_factor();
 
-    let pos = PhysicalPosition::new(mouse_pos.x + offset_pos.x, mouse_pos.y + offset_pos.y);
+        cursor_pos
+            .to_logical::<f64>(app_scale_factor)
+            .to_physical::<f64>(current_monitor_scale_factor)
+    };
+
+    let offset_pos =
+        LogicalPosition::new(offset_x, offset_y).to_physical::<f64>(current_monitor_scale_factor);
+
+    let pos = PhysicalPosition::new(cursor_pos.x + offset_pos.x, cursor_pos.y + offset_pos.y);
 
     log::info!("calc_window_position: {:?}", pos);
 
