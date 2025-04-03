@@ -136,9 +136,12 @@ impl MyAppWindowExt for MyApp {
 
     /// Move toolbar to invisible area
     fn hide_toolbar_win(&self) {
-        let pos = PhysicalPosition::new(0.0, -9999999.0);
-
         let win = self.get_toolbar_window();
+
+        let old_pos = win.outer_position().unwrap();
+
+        let pos = PhysicalPosition::new(old_pos.x, -99999);
+
         win.set_position(pos).unwrap();
 
         #[cfg(unix)]
