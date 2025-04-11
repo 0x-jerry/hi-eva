@@ -16,12 +16,7 @@ pub fn calc_window_position(
 
     let cursor_pos = win.cursor_position().unwrap();
 
-    let current_monitor_scale_factor = win
-        .app_handle()
-        .monitor_from_point(cursor_pos.x, cursor_pos.y)
-        .unwrap()
-        .unwrap_or(win.app_handle().primary_monitor().unwrap().unwrap())
-        .scale_factor();
+    let current_scale_factor = win.scale_factor().unwrap();
 
     #[cfg(unix)]
     let cursor_pos = {
@@ -35,11 +30,11 @@ pub fn calc_window_position(
 
         cursor_pos
             .to_logical::<f64>(app_scale_factor)
-            .to_physical::<f64>(current_monitor_scale_factor)
+            .to_physical::<f64>(current_scale_factor)
     };
 
     let offset_pos =
-        LogicalPosition::new(offset_x, offset_y).to_physical::<f64>(current_monitor_scale_factor);
+        LogicalPosition::new(offset_x, offset_y).to_physical::<f64>(current_scale_factor);
 
     let pos = PhysicalPosition::new(cursor_pos.x + offset_pos.x, cursor_pos.y + offset_pos.y);
 
