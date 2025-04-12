@@ -1,4 +1,4 @@
-use tauri::{LogicalPosition, Manager, PhysicalPosition, WebviewWindow};
+use tauri::{LogicalPosition, PhysicalPosition, WebviewWindow};
 
 use super::VerticalMoveDir;
 
