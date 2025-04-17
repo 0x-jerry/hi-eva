@@ -1,9 +1,8 @@
 use tauri::Manager;
 
-use super::{AppState, MyApp};
+use super::{AppState, MyApp, MyAppWindowExt, TOOLBAR_HIDDEN_LOWEST_Y_POS};
 
 pub trait AppStateExt {
-    fn set_toolbar_visible(&self, visible: bool);
     fn is_toolbar_visible(&self) -> bool;
 
     #[allow(dead_code)]
@@ -28,16 +27,9 @@ impl AppStateExt for MyApp {
     }
 
     fn is_toolbar_visible(&self) -> bool {
-        let state = self.state::<AppState>();
-        let state = state.lock().unwrap();
+        let win = self.get_toolbar_window();
+        let y = win.outer_position().unwrap().y;
 
-        state.toolbar.visible
-    }
-
-    fn set_toolbar_visible(&self, visible: bool) {
-        let state = self.state::<AppState>();
-        let mut state = state.lock().unwrap();
-
-        state.toolbar.visible = visible;
+        y > TOOLBAR_HIDDEN_LOWEST_Y_POS
     }
 }

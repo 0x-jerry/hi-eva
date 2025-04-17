@@ -17,6 +17,8 @@ pub static MAIN_WINDOW_LABEL: &str = "main";
 pub static TOOLBAR_WINDOW_LABEL: &str = "toolbar";
 pub static CHAT_WINDOW_LABEL: &str = "chat";
 
+pub static TOOLBAR_HIDDEN_LOWEST_Y_POS: i32 = -9999;
+
 impl MyAppWindowExt for MyApp {
     fn get_main_window(&self) -> WebviewWindow {
         if let Some(win) = self.get_webview_window(MAIN_WINDOW_LABEL) {
@@ -140,7 +142,7 @@ impl MyAppWindowExt for MyApp {
 
         let old_pos = win.outer_position().unwrap();
 
-        let pos = PhysicalPosition::new(old_pos.x, -99999);
+        let pos = PhysicalPosition::new(old_pos.x, TOOLBAR_HIDDEN_LOWEST_Y_POS - 100);
 
         win.set_position(pos).unwrap();
 
@@ -151,7 +153,6 @@ impl MyAppWindowExt for MyApp {
         }
 
         self.set_toolbar_focused(false);
-        self.set_toolbar_visible(false);
     }
 
     fn show_toolbar_win(&self, dir: Option<VerticalMoveDir>) {
@@ -160,7 +161,5 @@ impl MyAppWindowExt for MyApp {
         let pos = calc_window_position(&win, dir);
 
         win.set_position(pos).unwrap();
-
-        self.set_toolbar_visible(true);
     }
 }

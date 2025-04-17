@@ -13,7 +13,6 @@ pub struct AppStateInner {
 #[derive(Default)]
 pub struct ToolbarStateInner {
     pub focused: bool,
-    pub visible: bool,
 }
 
 pub type AppState = Mutex<AppStateInner>;
