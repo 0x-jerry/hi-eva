@@ -37,7 +37,7 @@ importers:
         version: 15.0.8
       openai:
         specifier: ^4.93.0
-        version: 4.93.0
+        version: 4.95.0
       primevue:
         specifier: ^4.3.3
         version: 4.3.3(vue@3.5.13(typescript@5.8.3))
@@ -1136,8 +1136,8 @@ packages:
   ofetch@1.4.1:
     resolution: {integrity: sha512-QZj2DfGplQAr2oj9KzceK9Hwz6Whxazmn85yYeVuS3u9XTMOGMRx0kO95MQ+vLsj/S/NwBDMMLU5hpxvI6Tklw==}
 
-  openai@4.93.0:
-    resolution: {integrity: sha512-2kONcISbThKLfm7T9paVzg+QCE1FOZtNMMUfXyXckUAoXRRS/mTP89JSDHPMp8uM5s0bz28RISbvQjArD6mgUQ==}
+  openai@4.95.0:
+    resolution: {integrity: sha512-tWHLTA+/HHyWlP8qg0mQLDSpI2NQLhk6zHLJL8yb59qn2pEI8rbEiAGSDPViLvi3BRDoQZIX5scaJ3xYGr2nhw==}
     hasBin: true
     peerDependencies:
       ws: ^8.18.0
@@ -2396,7 +2396,7 @@ snapshots:
       node-fetch-native: 1.6.6
       ufo: 1.6.1
 
-  openai@4.93.0:
+  openai@4.95.0:
     dependencies:
       '@types/node': 18.19.86
       '@types/node-fetch': 2.6.12
