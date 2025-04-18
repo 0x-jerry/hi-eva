@@ -41,7 +41,7 @@
     "normalize.css": "^8.0.1",
     "tsx": "^4.19.3",
     "typescript": "^5.8.3",
-    "unocss": "66.1.0-beta.11",
+    "unocss": "66.1.0-beta.12",
     "unplugin-vue-router": "^0.12.0",
     "vite": "^6.2.6"
   }
