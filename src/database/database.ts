@@ -4,6 +4,10 @@ import { snakeCase } from 'lodash-es'
 
 export const db = await Database.load('sqlite:data.db')
 
+window.addEventListener('beforeunload', async () => {
+  await db.close()
+})
+
 export interface BaseModel {
   id: number
   createdDate: number
@@ -34,9 +38,13 @@ export abstract class BaseModelManager<T extends BaseModel> {
   abstract readonly TABLE_NAME: string
 
   /**
-   * Only custom columns, no need to include id/createdDate/updatedDate
+   * Only custom columns, no need to include id/createdDate/updatedDate.
+   *
+   * Must use camel case.
    */
   abstract readonly COLUMN_NAMES: string[]
+
+  readonly db = db
 
   async page(opt: PaginationParam) {
     const { size = 10, current } = opt
@@ -82,7 +90,8 @@ export abstract class BaseModelManager<T extends BaseModel> {
       values,
     )
 
-    return resp
+    // biome-ignore lint/style/noNonNullAssertion: lastInsertId always exists.
+    return await this.getById(resp.lastInsertId!)
   }
 
   async updateOne(data: UpdatedModel<T>) {

@@ -12,6 +12,9 @@ import { getPromptConf } from '../logic/config'
 import { mustache } from '../utils'
 import { commands } from '../logic/commands'
 import CarbonIcon from '../components/CarbonIcon.vue'
+import { selectionTable } from '../database/selection'
+
+const chatRef = ref<InstanceType<typeof ChatMessages>>()
 
 const state = reactive({
   promptId: '',
@@ -25,7 +28,9 @@ const state = reactive({
   } as ChatHistory,
 })
 
-const chatRef = ref<InstanceType<typeof ChatMessages>>()
+const promptConf = computed(() =>
+  state.promptId ? getPromptConf(state.promptId) : undefined,
+)
 
 const win = getCurrentWindow()
 
@@ -33,6 +38,11 @@ win.listen('show-chat', async (evt) => {
   const payload = evt.payload as { prompt_id: string; selected_text: string }
   state.promptId = payload.prompt_id
   state.selectedText = payload.selected_text
+
+  selectionTable.addCountForSelected(
+    payload.selected_text,
+    promptConf.value?.name || '',
+  )
 
   await resetChatMessage()
 })
@@ -48,10 +58,6 @@ win.listen('hide-chat', async () => {
 watch(
   () => state.pinned,
   () => commands.setChatPinned({ pinned: state.pinned }),
-)
-
-const promptConf = computed(() =>
-  state.promptId ? getPromptConf(state.promptId) : undefined,
 )
 
 onMounted(async () => {
