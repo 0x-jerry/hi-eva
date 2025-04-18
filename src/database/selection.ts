@@ -1,8 +1,8 @@
+import dayjs from 'dayjs'
 import { type BaseModel, BaseModelManager } from './database'
 
 interface ISelectionModel extends BaseModel {
   selected: string
-  count: number
   promptName: string
 }
 
@@ -22,14 +22,30 @@ class SelectionTable extends BaseModelManager<ISelectionModel> {
       return await this.createOne({
         promptName,
         selected,
-        count: 1,
       })
     }
 
-    data.count += 1
     await this.updateOne(data)
 
     return data
+  }
+
+  async groupDataBySelectedText(opt: {
+    start: dayjs.ConfigType
+    end: dayjs.ConfigType
+  }) {
+    type IGroupedSelectionModel = ISelectionModel & { count: number }
+
+    const datas = await this.db.select<IGroupedSelectionModel[]>(
+      `select *, count(selected) as count 
+        from ${this.TABLE_NAME} 
+        where created_date between $1 and $2 
+        group by selected
+      `,
+      [dayjs(opt.start).unix(), dayjs(opt.end).unix()],
+    )
+
+    return datas
   }
 }
 

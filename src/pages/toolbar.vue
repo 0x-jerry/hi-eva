@@ -1,15 +1,16 @@
 <script lang="ts" setup>
 import AutoResizeContainer from '../components/AutoResizeContainer.vue'
-import { type ToolbarPromptConfig, promptConfigs } from '../logic/config'
+import { promptConfigs } from '../logic/config'
 import CarbonIcon from '../components/CarbonIcon.vue'
 import { commands } from '../logic/commands'
 import { onMounted } from 'vue'
+import type { PromptConfig } from '../composables'
 
 onMounted(async () => {
   await commands.applyAppearance()
 })
 
-async function openChatPage(conf: ToolbarPromptConfig) {
+async function openChatPage(conf: PromptConfig) {
   await hideWindow()
   await commands.openChat({ promptId: conf.id })
 }
