@@ -15,6 +15,7 @@
     "@primeuix/themes": "^1.0.3",
     "@tauri-apps/api": "^2.4.1",
     "@tauri-apps/plugin-opener": "^2.2.6",
+    "@tauri-apps/plugin-sql": "^2.2.0",
     "@tauri-apps/plugin-store": "^2.2.0",
     "@vueuse/core": "^13.1.0",
     "github-markdown-css": "^5.8.1",
