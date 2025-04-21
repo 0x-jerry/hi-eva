@@ -2,7 +2,7 @@
 import Chart from 'primevue/chart'
 import { computed, reactive, watch } from 'vue'
 import { useAsyncData } from '@0x-jerry/vue-kit'
-import { selectionTable } from '../database/selection'
+import { selectionTable } from '../database'
 import DatePicker from 'primevue/datepicker'
 import dayjs from 'dayjs'
 

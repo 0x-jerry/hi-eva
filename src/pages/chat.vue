@@ -12,7 +12,7 @@ import { getPromptConf } from '../logic/config'
 import { mustache } from '../utils'
 import { commands } from '../logic/commands'
 import CarbonIcon from '../components/CarbonIcon.vue'
-import { selectionTable } from '../database/selection'
+import { selectionTable } from '../database'
 
 const chatRef = ref<InstanceType<typeof ChatMessages>>()
 

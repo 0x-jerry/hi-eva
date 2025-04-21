@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import Database from '@tauri-apps/plugin-sql'
 import { snakeCase } from 'lodash-es'
 
-export const db = await Database.load('sqlite:data.db')
+export const db = Database.get('sqlite:data.db')
 
 window.addEventListener('beforeunload', async () => {
   await db.close()

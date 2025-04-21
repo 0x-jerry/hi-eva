@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import { type BaseModel, BaseModelManager } from './database'
 
-interface ISelectionModel extends BaseModel {
+export interface ISelectionModel extends BaseModel {
   selected: string
   promptName: string
 }
