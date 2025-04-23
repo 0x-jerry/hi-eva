@@ -39,10 +39,10 @@ win.listen('show-chat', async (evt) => {
   state.promptId = payload.prompt_id
   state.selectedText = payload.selected_text
 
-  selectionTable.addCountForSelected(
-    payload.selected_text,
-    promptConf.value?.name || '',
-  )
+  await selectionTable.createOne({
+    selected: payload.selected_text,
+    promptName: promptConf.value?.name || '',
+  })
 
   await resetChatMessage()
 })

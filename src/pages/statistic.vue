@@ -14,8 +14,6 @@ const query = reactive({
 })
 
 const selectionData = useAsyncData(() => {
-  if (query.dates.length < 2) return
-
   const start = dayjs(query.dates[0]).startOf('d')
   const end = dayjs(query.dates[1]).endOf('d')
 
@@ -25,10 +23,14 @@ const selectionData = useAsyncData(() => {
 watch(
   () => query,
   () => {
+    const length = query.dates.filter((n) => n).length
+    if (length < 2) return
+
     selectionData.load()
   },
   {
     deep: true,
+    immediate: true,
   },
 )
 
@@ -36,7 +38,7 @@ const chartData = computed(() => {
   const data = selectionData.data.value || []
 
   return {
-    labels: data.map((n) => n.promptName),
+    labels: data.map((n) => n.selected),
     datasets: [
       {
         data: data.map((n) => n.count),
@@ -59,12 +61,16 @@ const chartOptions = computed(() => {
 </script>
 
 <template>
-  <div>
-    <div class="query">
+  <div class="p-4">
+    <div class="query mb-2">
+      <span>选择时间：</span>
       <DatePicker v-model="query.dates" selectionMode="range" :numberOfMonths="2" :manualInput="false" />
     </div>
-    <div class="selection">
-      <Chart type="pie" :data="chartData" :options="chartOptions" class="w-full" />
+    <div class="flex justify-center">
+      <Chart v-if="chartData.labels.length" type="pie" :data="chartData" :options="chartOptions" class="w-400px" />
+      <div v-else class="text-center text-gray h-100px text-2xl flex items-center">
+        <div>暂无数据</div>
+      </div>
     </div>
   </div>
 </template>

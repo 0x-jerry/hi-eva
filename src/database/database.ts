@@ -1,12 +1,7 @@
 import dayjs from 'dayjs'
 import Database from '@tauri-apps/plugin-sql'
-import { snakeCase } from 'lodash-es'
 
 export const db = Database.get('sqlite:data.db')
-
-window.addEventListener('beforeunload', async () => {
-  await db.close()
-})
 
 export interface BaseModel {
   id: number
@@ -26,7 +21,7 @@ type CreatedModel<T extends BaseModel> = Omit<
 
 type UpdatedModel<T extends BaseModel> = Omit<T, 'createdDate' | 'updatedDate'>
 
-const COMMON_COLUMN = {
+export const COMMON_COLUMN = {
   id: 'id',
   createdDate: 'createdDate',
   updatedDate: 'updatedDate',
@@ -39,8 +34,6 @@ export abstract class BaseModelManager<T extends BaseModel> {
 
   /**
    * Only custom columns, no need to include id/createdDate/updatedDate.
-   *
-   * Must use camel case.
    */
   abstract readonly COLUMN_NAMES: string[]
 
@@ -49,27 +42,25 @@ export abstract class BaseModelManager<T extends BaseModel> {
   async page(opt: PaginationParam) {
     const { size = 10, current } = opt
 
-    const resp = await db.select<T[]>(
-      `select * from ${this.TABLE_NAME} limit ${size} offset ${size * current}`,
-    )
+    const sql = `select * from ${this.TABLE_NAME} limit ${size} offset ${size * current}`
+
+    const resp = await db.select<T[]>(sql)
 
     return resp
   }
 
   async getById(id: number) {
-    const resp = await db.select<T[]>(
-      `select * from ${this.TABLE_NAME} where id = $1`,
-      [id],
-    )
+    const sql = `select * from ${this.TABLE_NAME} where id = $1`
+
+    const resp = await db.select<T[]>(sql, [id])
 
     return resp.at(0)
   }
 
   async deleteById(id: number) {
-    const resp = await db.execute(
-      `delete from ${this.TABLE_NAME} where id = $1`,
-      [id],
-    )
+    const sql = `delete from ${this.TABLE_NAME} where id = $1`
+
+    const resp = await db.execute(sql, [id])
 
     return resp
   }
@@ -77,18 +68,17 @@ export abstract class BaseModelManager<T extends BaseModel> {
   async createOne(data: CreatedModel<T>) {
     const columns = [...commonColumn, ...this.COLUMN_NAMES]
 
-    const columnNames = columns.map((name) => snakeCase(name)).join(', ')
-    const placeholders = columns.map((_, idx) => `${idx + 1}`).join(', ')
+    const columnNames = columns.join(', ')
+    const placeholders = columns.map((_, idx) => `$${idx + 1}`).join(', ')
 
     const values = [
       ...commonColumn.map((_) => dayjs().unix()),
       ...this.COLUMN_NAMES.map((key) => Reflect.get(data, key)),
     ]
 
-    const resp = await db.execute(
-      `insert into ${this.TABLE_NAME} (${columnNames}) values (${placeholders})`,
-      values,
-    )
+    const sql = `insert into ${this.TABLE_NAME} (${columnNames}) values (${placeholders})`
+
+    const resp = await db.execute(sql, values)
 
     // biome-ignore lint/style/noNonNullAssertion: lastInsertId always exists.
     return await this.getById(resp.lastInsertId!)
@@ -98,7 +88,7 @@ export abstract class BaseModelManager<T extends BaseModel> {
     const columns = [COMMON_COLUMN.updatedDate, ...this.COLUMN_NAMES]
 
     const placeholders = columns
-      .map((name, idx) => `${snakeCase(name)} = ${idx + 1}`)
+      .map((name, idx) => `${name} = $${idx + 1}`)
       .join(', ')
 
     const values = [
@@ -107,10 +97,9 @@ export abstract class BaseModelManager<T extends BaseModel> {
       data.id,
     ]
 
-    const resp = await db.execute(
-      `update ${this.TABLE_NAME} set ${placeholders} where id = ${columns.length + 1}`,
-      values,
-    )
+    const sql = `update ${this.TABLE_NAME} set ${placeholders} where id = ${columns.length + 1}`
+
+    const resp = await db.execute(sql, values)
 
     return resp
   }

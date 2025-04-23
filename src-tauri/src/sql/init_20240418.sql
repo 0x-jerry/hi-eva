@@ -3,7 +3,7 @@
 create table if not exists selection (
   id integer primary key autoincrement not null,
   selected text,
-  prompt_name varchar(255),
-  created_date datetime not null,
-  updated_date datetime not null
+  promptName varchar(255),
+  createdDate datetime not null,
+  updatedDate datetime not null
 );

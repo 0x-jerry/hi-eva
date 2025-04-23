@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { type BaseModel, BaseModelManager } from './database'
+import { type BaseModel, BaseModelManager, COMMON_COLUMN } from './database'
 
 export interface ISelectionModel extends BaseModel {
   selected: string
@@ -8,27 +8,7 @@ export interface ISelectionModel extends BaseModel {
 
 class SelectionTable extends BaseModelManager<ISelectionModel> {
   TABLE_NAME = 'selection'
-  COLUMN_NAMES = ['selected', 'count', 'promptName']
-
-  async addCountForSelected(selected: string, promptName: string) {
-    const datas = await this.db.select<ISelectionModel[]>(
-      `select * from ${this.TABLE_NAME} where selected = $1 and prompt_name = $2`,
-      [selected, promptName],
-    )
-
-    const data = datas.at(0)
-
-    if (!data) {
-      return await this.createOne({
-        promptName,
-        selected,
-      })
-    }
-
-    await this.updateOne(data)
-
-    return data
-  }
+  COLUMN_NAMES = ['selected', 'promptName']
 
   async groupDataBySelectedText(opt: {
     start: dayjs.ConfigType
@@ -36,14 +16,20 @@ class SelectionTable extends BaseModelManager<ISelectionModel> {
   }) {
     type IGroupedSelectionModel = ISelectionModel & { count: number }
 
-    const datas = await this.db.select<IGroupedSelectionModel[]>(
-      `select *, count(selected) as count 
+    const sql = `select *, count(selected) as count 
         from ${this.TABLE_NAME} 
-        where created_date between $1 and $2 
+        where ${COMMON_COLUMN.createdDate} between $1 and $2 
         group by selected
-      `,
-      [dayjs(opt.start).unix(), dayjs(opt.end).unix()],
-    )
+      `
+
+    const values = [
+      //
+      dayjs(opt.start).unix(),
+      dayjs(opt.end).unix(),
+    ]
+
+    console.log('sql', sql, values)
+    const datas = await this.db.select<IGroupedSelectionModel[]>(sql, values)
 
     return datas
   }
