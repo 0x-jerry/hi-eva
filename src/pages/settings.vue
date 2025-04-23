@@ -110,12 +110,12 @@ function clickMenu(conf: { id: string }) {
 
 .section-content {
   &:first-child {
-    @apply pt-2;
+    --uno: pt-2;
   }
 
   &:last-child {
     min-height: 100vh;
-    @apply pb-2;
+    --uno: pb-2;
   }
 }
 

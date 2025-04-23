@@ -4,7 +4,7 @@ import SettingTitle from './SettingTitle.vue'
 
 <template>
   <div>
-    <SettingTitle>
+    <SettingTitle class="mb-2">
       关于
     </SettingTitle>
   </div>

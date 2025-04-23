@@ -42,13 +42,16 @@ function openSettingFolder() {
         <label :for="listenClipboardFieldId"> 监听剪贴板 </label>
         <Checkbox :input-id="listenClipboardFieldId" v-model="basicConfig.listenClipboard" binary>  </Checkbox>
       </div>
+      <div>
+        <Button size="small" @click="commands.openSettingFolder()">打开配置文件夹</Button>
+      </div>
     </div>
   </div>
 </template>
 
 <style lang='less' scoped>
 .field-row {
-  @apply flex items-center gap-2;
+  --uno: flex items-center gap-2;
 
   label {
     width: 6em;
