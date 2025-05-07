@@ -1,5 +1,11 @@
-<script lang='ts' setup>
+<script lang="ts">
 import { marked } from 'marked'
+import markedKatex from 'marked-katex-extension'
+
+marked.use(markedKatex({ throwOnError: false }))
+</script>
+
+<script lang='ts' setup>
 import { computed } from 'vue'
 import 'github-markdown-css'
 
@@ -9,7 +15,7 @@ export interface MarkdownContentProps {
 
 const props = defineProps<MarkdownContentProps>()
 
-const html = computed(() => marked(props.content || ''))
+const html = computed(() => marked.parse(props.content || ''))
 </script>
 
 <template>
