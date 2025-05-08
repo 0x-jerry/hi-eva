@@ -117,11 +117,7 @@ async function chatWith(messages: ChatCompletionMessageParam[]) {
     // biome-ignore lint/style/noNonNullAssertion: <explanation>
     const msg = chat.value.messages.at(-1)!
 
-    if (requestAbort && !requestAbort.signal.aborted) {
-      requestAbort.abort()
-    }
-
-    requestAbort = new AbortController()
+    requestAbort = respStream.controller
 
     for await (const chunkItem of respStream) {
       const chunkContent = chunkItem.choices.at(0)?.delta.content || ''
@@ -140,6 +136,14 @@ async function chatWith(messages: ChatCompletionMessageParam[]) {
   requestAbort = null
 
   state.isReplying = false
+}
+
+function stopChatStream() {
+  if (requestAbort?.signal.aborted === false) {
+    requestAbort.abort()
+    state.isReplying = false
+    requestAbort = null
+  }
 }
 
 const menuItems: MenuItem[] = [
@@ -162,9 +166,7 @@ const menuItems: MenuItem[] = [
     label: '删除',
     icon: 'pi pi-trash',
     command() {
-      if (requestAbort && !requestAbort.signal.aborted) {
-        requestAbort.abort()
-      }
+      stopChatStream()
 
       state.isReplying = false
       state.isThinking = false
@@ -217,7 +219,8 @@ defineExpose({
 
     <div class="reply-bar border-(0 t solid gray-2) px-2 py-2 flex gap-2">
       <Textarea rows="3" class="flex-1" v-model="state.reply" @keydown="handleKeydown" placeholder="Please input" />
-      <Button :disabled="state.isReplying || state.isThinking" @click=onSend>Send</Button>
+      <Button severity="danger" v-if="state.isReplying || state.isThinking" @click="stopChatStream">Stop</Button>
+      <Button v-else @click=onSend>Send</Button>
     </div>
   </div>
 </template>
