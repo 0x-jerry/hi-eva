@@ -41,6 +41,9 @@ importers:
       github-markdown-css:
         specifier: ^5.8.1
         version: 5.8.1
+      katex:
+        specifier: ^0.16.22
+        version: 0.16.22
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21
