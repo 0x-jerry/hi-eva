@@ -219,8 +219,12 @@ defineExpose({
 
     <div class="reply-bar border-(0 t solid gray-2) px-2 py-2 flex gap-2">
       <Textarea rows="3" class="flex-1" v-model="state.reply" @keydown="handleKeydown" placeholder="Please input" />
-      <Button severity="danger" v-if="state.isReplying || state.isThinking" @click="stopChatStream">Stop</Button>
-      <Button v-else @click=onSend>Send</Button>
+      <Button severity="danger" v-if="state.isReplying || state.isThinking" @click="stopChatStream">
+        <span class="i-carbon-pause-outline text-3xl"></span>
+      </Button>
+      <Button v-else @click=onSend>
+        <span class="i-carbon-send-alt text-3xl"></span>
+      </Button>
     </div>
   </div>
 </template>
