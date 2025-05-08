@@ -25,13 +25,13 @@ function triggerCopied() {
 
   setTimeout(() => {
     isCopied.value = false
-  }, 500)
+  }, 1000)
 }
 </script>
 
 <template>
-  <span class="inline-block text-gray border-(1 solid current)" :class="{ 'text-green-4': isCopied }" @click="onCopy">
+  <span class="inline-flex text-gray border-(1 solid current) p-1 rounded cursor-pointer" :class="{ 'text-green-5': isCopied }" @click="onCopy">
     <span v-if="isCopied" class="i-carbon-checkmark"></span>
-    <span class="i-carbon-copy"></span>
+    <span v-else class="i-carbon-copy"></span>
   </span>
 </template>

@@ -191,13 +191,13 @@ defineExpose({
   <div class="flex flex-col bg-white min-h-100px max-h-600px">
     <div ref="scrollEl" class="chat-msgs overflow-auto p-4">
       <div class="chat-msg-item flex flex-col mb-4" v-for="(msg, _idx) in chat?.messages">
-        <div class="role flex text-(2xl)">
-          <div class="flex-1 w-0 truncate">
+        <div class="role flex items-center text-(2xl)">
+          <div class="flex flex-1 w-0 truncate">
             <span v-if="msg.role === 'user'" class="i-carbon-user-avatar-filled-alt text-blue-4"></span>
             <span v-else class="i-carbon-machine-learning text-rose-4"></span>
           </div>
           <div class="flex gap-1">
-            <CopyBtn :content="msg.content as string" />
+            <CopyBtn class="text-sm" :content="msg.content as string" />
           </div>
         </div>
         <div class="chat-msg-content ml-3 mt-2 p-2 bg-light-5 rounded border-(1 solid gray-2)"
