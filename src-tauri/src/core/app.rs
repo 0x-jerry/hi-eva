@@ -7,7 +7,7 @@ use crate::{core::AppState, plugins::MyWebviewWindowExt};
 
 use super::{
     mouse_listener, AppMessageExt, AppStateExt, AppStateInner, AppStoreExt, AppTrayExt,
-    ClipboardListenerExt, MouseExtTrait, MyAppWindowExt, SelectionResult,
+    ClipboardListenerExt, MouseExtTrait, MyAppWindowExt, SelectionResult, MAIN_WINDOW_LABEL,
 };
 
 #[derive(Clone)]
@@ -44,6 +44,8 @@ impl MyApp {
         }
 
         let app_cloned = self.clone();
+
+        self.open_and_focus(MAIN_WINDOW_LABEL);
 
         let _ = mouse_listener::listen(app_cloned);
 
