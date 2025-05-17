@@ -66,7 +66,7 @@ function clickMenu(conf: { id: string }) {
 <template>
   <div class="page flex h-screen">
     <div class="sidebar">
-      <div class="menu-item mb-4 justify-center font-mono bg-light-8 h-8">
+      <div class="flex-center mb-4 font-mono bg-light-8 h-8">
         <span>Hi Eva</span>
       </div>
       <div class="menu-item" v-for="conf in settings" :key="conf.id" @click="clickMenu(conf)"
