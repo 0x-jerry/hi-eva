@@ -83,7 +83,7 @@ function clickMenu(conf: { id: string }) {
   </div>
 </template>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .sidebar {
   --uno: bg-light gap-2 border-(0 r solid light-8);
 

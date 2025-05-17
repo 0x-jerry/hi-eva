@@ -82,7 +82,7 @@ const style = computed(() => {
 
 </template>
 
-<style lang='less' scoped>
+<style lang='scss' scoped>
 .auto-resize-container {
   position: fixed;
 }

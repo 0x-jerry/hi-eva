@@ -59,7 +59,7 @@ const modelList = computed(
   </div>
 </template>
 
-<style lang='less' scoped>
+<style lang='scss' scoped>
 .editable-row {
   @apply flex items-center;
 

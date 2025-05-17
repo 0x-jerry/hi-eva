@@ -49,7 +49,7 @@ function openSettingFolder() {
   </div>
 </template>
 
-<style lang='less' scoped>
+<style lang='scss' scoped>
 .field-row {
   --uno: flex items-center gap-2;
 

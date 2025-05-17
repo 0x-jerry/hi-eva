@@ -8,11 +8,13 @@
   "files": {
     "ignoreUnknown": true,
     "ignore": [
+      "node_modules",
       "src/typed-router.d.ts"
     ],
     "include": [
       "src",
-      "scripts"
+      "scripts",
+      "*.ts"
     ]
   },
   "formatter": {

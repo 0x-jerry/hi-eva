@@ -15,5 +15,5 @@ async function startDrag() {
 
 </template>
 
-<style lang='less' scoped>
+<style lang='scss' scoped>
 </style>

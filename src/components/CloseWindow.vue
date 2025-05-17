@@ -30,4 +30,4 @@ async function closeWindow() {
   </div>
 </template>
 
-<style lang="less" scoped></style>
+<style lang="scss" scoped></style>
