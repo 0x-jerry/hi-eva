@@ -2628,9 +2628,9 @@ dependencies = [
 
 [[package]]
 name = "mouce"
-version = "0.2.51"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67bbbd75eec9f37d76663801d4c5664fc1f2fc1e8705f4ec7421a562b69b249f"
+checksum = "33ffe1e3e71e33fd3e4ef4a3552a7e79bcc4ab3c30cb93b5c8d801ba55f6819e"
 dependencies = [
  "glob",
  "thiserror 1.0.69",
