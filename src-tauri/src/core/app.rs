@@ -115,13 +115,13 @@ impl MouseExtTrait for MyApp {
     }
 
     fn on_mouse_move(&self) {
-        if !self.is_toolbar_visible() {
-            return;
-        }
-
         #[cfg(unix)]
         {
             use crate::plugins::MacWindowExt;
+
+            if !self.is_toolbar_visible() {
+                return;
+            }
 
             let win_toolbar = self.get_toolbar_window();
 

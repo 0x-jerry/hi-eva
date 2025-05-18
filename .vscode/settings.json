@@ -1,7 +1,12 @@
 {
-  "editor.defaultFormatter": "biomejs.biome",
   "[vue]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
-  "rust-analyzer.cargo.targetDir": "./target-analyzer"
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "rust-analyzer.cargo.targetDir": "./target-analyzer",
 }
