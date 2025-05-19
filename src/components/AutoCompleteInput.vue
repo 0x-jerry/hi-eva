@@ -8,9 +8,10 @@ import { shallowRef } from 'vue'
 import Fuse, { type FuseResult, type IFuseOptions } from 'fuse.js'
 import { get } from 'lodash-es'
 import { isString } from '@0x-jerry/utils'
+import { watchImmediate } from '@vueuse/core'
 
 export interface AutoCompleteInputProps<T> extends AutoCompleteProps {
-  items: T[]
+  items?: T[]
   optionValue?: keyof T | ({} & string)
   fuse?: IFuseOptions<NoInfer<T>>
 }
@@ -27,7 +28,17 @@ const vValue = defineModel<string>()
 
 const suggestions = shallowRef<FuseResult<T>[]>([])
 
-const fuse = new Fuse<T>(items, option)
+const fuse = new Fuse<T>(items || [], option)
+
+watchImmediate(
+  () => items,
+  () => {
+    fuse.remove(() => true)
+    ;(items || []).forEach((newItem) => {
+      fuse.add(newItem)
+    })
+  },
+)
 
 function onSearchEndpoint(event: AutoCompleteCompleteEvent) {
   const q = event.query

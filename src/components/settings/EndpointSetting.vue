@@ -7,7 +7,10 @@ import { getEndpointConf } from '../../logic/config'
 import Icon from '../Icon.vue'
 import type { IFuseOptions } from 'fuse.js'
 import AutoCompleteInput from '../AutoCompleteInput.vue'
-import { type SimpleOption } from '@0x-jerry/utils'
+import {
+  BuiltinConfigItem,
+  BuiltinEndpointsConfig,
+} from '../../logic/builtinConfig'
 
 export interface EndpointSettingProps {
   confId: string
@@ -19,14 +22,7 @@ const props = defineProps<EndpointSettingProps>()
 
 const conf = computed(() => getEndpointConf(props.confId))
 
-const builtinEndpoints: SimpleOption[] = [
-  {
-    label: '百炼',
-    value: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
-  },
-]
-
-const fuseOption: IFuseOptions<SimpleOption> = {
+const fuseOption: IFuseOptions<BuiltinConfigItem> = {
   includeScore: true,
   keys: ['label', 'value'],
 }
@@ -54,7 +50,7 @@ const fuseOption: IFuseOptions<SimpleOption> = {
       </div>
       <div class="editable-row">
         <label>Base URL</label>
-        <AutoCompleteInput class="content" v-model="conf.baseUrl" :items="builtinEndpoints" :fuse="fuseOption" />
+        <AutoCompleteInput class="content" v-model="conf.baseUrl" :items="BuiltinEndpointsConfig" optionValue="baseUrl" :fuse="fuseOption" />
       </div>
       <div class="editable-row">
         <label>API Key</label>

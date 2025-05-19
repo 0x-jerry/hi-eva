@@ -7,6 +7,8 @@ import { endPointConfigs, getPromptConf } from '../../logic/config'
 import Icon from '../Icon.vue'
 import IconPicker from '../IconPicker.vue'
 import { computed } from 'vue'
+import AutoCompleteInput from '../AutoCompleteInput.vue'
+import { BuiltinEndpointsConfig } from '../../logic/builtinConfig'
 
 export interface PromptItemSettingProps {
   confId: string
@@ -18,11 +20,13 @@ const props = defineProps<PromptItemSettingProps>()
 
 const conf = computed(() => getPromptConf(props.confId))
 
-const modelList = computed(
-  () =>
-    endPointConfigs.value.find((c) => c.id === conf.value?.endpointId)
-      ?.models || [],
-)
+const modelList = computed(() => {
+  const baseUrl = endPointConfigs.value.find(
+    (c) => c.id === conf.value?.endpointId,
+  )?.baseUrl
+
+  return BuiltinEndpointsConfig.find((n) => n.value === baseUrl)?.models || []
+})
 </script>
 
 <template>
@@ -53,7 +57,7 @@ const modelList = computed(
         <Select v-model="conf.endpointId" :options="endPointConfigs" optionLabel="label" optionValue="id"
           placeholder="Select a endpoint" />
 
-        <Select v-model="conf.model" :options="modelList" placeholder="Select a model" />
+        <AutoCompleteInput v-model="conf.model" :items="modelList" />
       </div>
     </div>
   </div>
