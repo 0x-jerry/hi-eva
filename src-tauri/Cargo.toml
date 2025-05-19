@@ -17,7 +17,7 @@ serde_json = "1"
 log = "0.4"
 env_logger = "0.11"
 enigo = "0.3"
-mouce = "0.2"
+mouce = "0.3"
 
 [lib]
 # The `_lib` suffix may seem redundant but it is necessary

@@ -68,9 +68,9 @@ const modelList = computed(() => {
   @apply flex items-center;
 
   label {
-    width: 100px;
+    width: 50px;
     text-align: right;
-    margin-right: 0.5rem;
+    margin-right: 1rem;
   }
 }
 </style>

@@ -5,14 +5,12 @@ import AutoComplete, {
 } from 'primevue/autocomplete'
 import { shallowRef } from 'vue'
 import Fuse, { type IFuseOptions } from 'fuse.js'
-import { get } from 'lodash-es'
-import { isString } from '@0x-jerry/utils'
 import { watchImmediate } from '@vueuse/core'
+import { isString } from '@0x-jerry/utils'
 
 export interface AutoCompleteInputProps<T> {
   items?: T[]
   optionLabel?: keyof T | ({} & string)
-  optionValue?: keyof T | ({} & string)
   fuse?: IFuseOptions<NoInfer<T>>
 }
 
@@ -20,7 +18,6 @@ const slots = defineSlots<AutoCompleteSlots>()
 const {
   items,
   fuse: option,
-  optionValue = 'value',
   ...restProps
 } = defineProps<AutoCompleteInputProps<T>>()
 
@@ -28,12 +25,11 @@ const vValue = defineModel<string>()
 
 const suggestions = shallowRef<T[]>([])
 
-const fuse = new Fuse<T>(items || [], option)
+const fuse = new Fuse<T>([], option)
 
 watchImmediate(
   () => items,
   () => {
-    console.log(items)
     fuse.setCollection(items || [])
   },
 )
@@ -42,15 +38,13 @@ function onSearchEndpoint(event: AutoCompleteCompleteEvent) {
   const q = event.query
 
   suggestions.value = fuse.search(q).map((r) => r.item)
-
-  console.log(q, suggestions.value)
 }
 
-function updateValue(value: Record<string, string> | string) {
-  if (isString(value)) {
-    vValue.value = value
+function updateValue(newValue: Record<string, string> | string) {
+  if (isString(newValue)) {
+    vValue.value = newValue
   } else {
-    vValue.value = get(value, [optionValue])
+    vValue.value = newValue[restProps.optionLabel]
   }
 }
 </script>

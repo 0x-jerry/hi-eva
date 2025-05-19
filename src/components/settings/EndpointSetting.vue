@@ -50,7 +50,7 @@ const fuseOption: IFuseOptions<BuiltinConfigItem> = {
       </div>
       <div class="editable-row">
         <label>Base URL</label>
-        <AutoCompleteInput class="content" v-model="conf.baseUrl" :items="BuiltinEndpointsConfig" optionLabel="name" optionValue="baseUrl" :fuse="fuseOption" />
+        <AutoCompleteInput class="content" v-model="conf.baseUrl" :items="BuiltinEndpointsConfig" optionLabel="baseUrl" :fuse="fuseOption" />
       </div>
       <div class="editable-row">
         <label>API Key</label>
