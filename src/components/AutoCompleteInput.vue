@@ -1,17 +1,17 @@
 <script lang='ts' generic="T extends any" setup>
 import AutoComplete, {
-  type AutoCompleteProps,
   type AutoCompleteCompleteEvent,
   AutoCompleteSlots,
 } from 'primevue/autocomplete'
 import { shallowRef } from 'vue'
-import Fuse, { type FuseResult, type IFuseOptions } from 'fuse.js'
+import Fuse, { type IFuseOptions } from 'fuse.js'
 import { get } from 'lodash-es'
 import { isString } from '@0x-jerry/utils'
 import { watchImmediate } from '@vueuse/core'
 
-export interface AutoCompleteInputProps<T> extends AutoCompleteProps {
+export interface AutoCompleteInputProps<T> {
   items?: T[]
+  optionLabel?: keyof T | ({} & string)
   optionValue?: keyof T | ({} & string)
   fuse?: IFuseOptions<NoInfer<T>>
 }
@@ -26,24 +26,24 @@ const {
 
 const vValue = defineModel<string>()
 
-const suggestions = shallowRef<FuseResult<T>[]>([])
+const suggestions = shallowRef<T[]>([])
 
 const fuse = new Fuse<T>(items || [], option)
 
 watchImmediate(
   () => items,
   () => {
-    fuse.remove(() => true)
-    ;(items || []).forEach((newItem) => {
-      fuse.add(newItem)
-    })
+    console.log(items)
+    fuse.setCollection(items || [])
   },
 )
 
 function onSearchEndpoint(event: AutoCompleteCompleteEvent) {
   const q = event.query
 
-  suggestions.value = fuse.search(q)
+  suggestions.value = fuse.search(q).map((r) => r.item)
+
+  console.log(q, suggestions.value)
 }
 
 function updateValue(value: Record<string, string> | string) {

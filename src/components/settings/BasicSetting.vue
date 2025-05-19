@@ -4,6 +4,7 @@ import { useBasicConfig } from '../../composables'
 import { InputText, Checkbox, Button } from 'primevue'
 import { useId, watch } from 'vue'
 import { commands } from '../../logic/commands'
+import { sleep } from '@0x-jerry/utils'
 
 const basicConfig = useBasicConfig()
 
@@ -12,7 +13,7 @@ const listenClipboardFieldId = useId()
 watch(
   () => basicConfig.value.listenClipboard,
   async () => {
-    await basicConfig.save()
+    await sleep(500)
     await commands.toggleClipboardListener()
   },
 )

@@ -25,7 +25,7 @@ const modelList = computed(() => {
     (c) => c.id === conf.value?.endpointId,
   )?.baseUrl
 
-  return BuiltinEndpointsConfig.find((n) => n.value === baseUrl)?.models || []
+  return BuiltinEndpointsConfig.find((n) => n.baseUrl === baseUrl)?.models || []
 })
 </script>
 
@@ -71,10 +71,6 @@ const modelList = computed(() => {
     width: 100px;
     text-align: right;
     margin-right: 0.5rem;
-  }
-
-  &:deep(.p-inputtext) {
-    width: calc(100% - 150px);
   }
 }
 </style>

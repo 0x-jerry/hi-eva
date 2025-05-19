@@ -88,9 +88,7 @@ export function useConfig<T extends VersionedData>(
 
   initStore()
 
-  return config as Ref<T> & {
-    save: () => Promise<void>
-  }
+  return config
 
   async function initStore() {
     await loadConfig()
