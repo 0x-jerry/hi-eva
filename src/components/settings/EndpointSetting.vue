@@ -1,12 +1,13 @@
 <script lang='ts' setup>
-import Chip from 'primevue/chip'
 import Inplace from 'primevue/inplace'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
-import { computed, reactive } from 'vue'
+import { computed } from 'vue'
 import { getEndpointConf } from '../../logic/config'
-import { uniq } from 'lodash-es'
 import Icon from '../Icon.vue'
+import type { IFuseOptions } from 'fuse.js'
+import AutoCompleteInput from '../AutoCompleteInput.vue'
+import { type SimpleOption } from '@0x-jerry/utils'
 
 export interface EndpointSettingProps {
   confId: string
@@ -18,32 +19,16 @@ const props = defineProps<EndpointSettingProps>()
 
 const conf = computed(() => getEndpointConf(props.confId))
 
-const state = reactive({
-  model: '',
-})
+const builtinEndpoints: SimpleOption[] = [
+  {
+    label: '百炼',
+    value: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+  },
+]
 
-function removeModel(model: string) {
-  if (!conf.value) return
-  conf.value.models = conf.value.models.filter((m: string) => m !== model)
-}
-
-function handleAddModel(event: KeyboardEvent) {
-  if (!conf.value) return
-
-  if (event.code !== 'Enter') {
-    return
-  }
-
-  const modelName = state.model.trim()
-
-  if (!modelName) {
-    return
-  }
-
-  const models = [...conf.value.models, modelName]
-
-  conf.value.models = uniq(models)
-  state.model = ''
+const fuseOption: IFuseOptions<SimpleOption> = {
+  includeScore: true,
+  keys: ['label', 'value'],
 }
 </script>
 
@@ -69,18 +54,11 @@ function handleAddModel(event: KeyboardEvent) {
       </div>
       <div class="editable-row">
         <label>Base URL</label>
-        <InputText class="content" v-model="conf.baseUrl" />
+        <AutoCompleteInput class="content" v-model="conf.baseUrl" :items="builtinEndpoints" :fuse="fuseOption" />
       </div>
       <div class="editable-row">
         <label>API Key</label>
         <Password class="content" v-model="conf.apiKey" toggleMask :feedback="false"/>
-      </div>
-      <div class="editable-row">
-        <label>Model List</label>
-        <div class="flex flex-wrap gap-2 flex-1">
-          <Chip v-for="model in conf.models" :label="model" removable @remove="removeModel(model)" />
-          <InputText v-model="state.model" @keydown="handleAddModel($event)" />
-        </div>
       </div>
     </div>
   </div>
