@@ -7,7 +7,6 @@ use mouce::{
     common::{MouseButton, MouseEvent},
     MouseActions,
 };
-use serde::{Deserialize, Serialize};
 use text_selection::SelectionRect;
 
 use super::VerticalMoveDir;
@@ -124,12 +123,6 @@ pub fn listen<T: 'static + MouseExtTrait + Send>(app: T) {
     if let Err(err) = result {
         log::error!("error is {:?}", err);
     }
-}
-
-#[derive(Debug, Serialize, Deserialize, Default)]
-struct CliResult {
-    selected_text: Option<String>,
-    err: Option<String>,
 }
 
 fn distance(p1: (f64, f64), p2: (f64, f64)) -> f64 {

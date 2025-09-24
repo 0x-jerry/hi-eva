@@ -14,7 +14,7 @@ watch(
   () => basicConfig.value.listenClipboard,
   async () => {
     await sleep(500)
-    await commands.toggleClipboardListener()
+    await commands.applyClipboardListener()
   },
 )
 

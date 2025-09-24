@@ -7,22 +7,44 @@ export interface BasicConfigV1 extends VersionedData {
   listenClipboard: boolean
 }
 
-export type BasicConfigLatest = BasicConfigV1
+export interface BasicConfigV2 extends VersionedData {
+  version: 2
+  proxy: string
+  listenClipboard: boolean
+  enabled: boolean
+}
+
+export type BasicConfigLatest = BasicConfigV2
 
 export function useBasicConfig(option?: UseConfigOption<BasicConfigLatest>) {
   const defaultConfig: BasicConfigLatest = {
-    version: 1,
+    version: 2,
     proxy: '',
     listenClipboard: true,
+    enabled: true,
   }
 
-  return useConfig<BasicConfigV1>('config.json', 'data', defaultConfig, {
+  return useConfig<BasicConfigLatest>('config.json', 'data', defaultConfig, {
     ...option,
     migrations: [
       {
         version: 1,
         upgrade(): BasicConfigV1 {
-          return defaultConfig
+          return {
+            version: 1,
+            proxy: '',
+            listenClipboard: true,
+          }
+        },
+      },
+      {
+        version: 2,
+        upgrade(data: BasicConfigV1): BasicConfigV2 {
+          return {
+            ...data,
+            version: 2,
+            enabled: true,
+          }
         },
       },
     ],

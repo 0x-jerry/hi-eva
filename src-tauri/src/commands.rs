@@ -1,9 +1,7 @@
 use tauri::{AppHandle, Manager, Result, State, WebviewWindow};
 use tauri_plugin_opener::OpenerExt;
 
-use crate::core::{
-    AppMessageExt, AppState, AppStoreExt, ClipboardListenerExt, MyApp, MyAppWindowExt,
-};
+use crate::core::{AppMessageExt, AppState, MyApp, MyAppWindowExt};
 
 #[tauri::command]
 pub async fn get_selected_text(state: State<'_, AppState>) -> Result<String> {
@@ -50,14 +48,15 @@ pub async fn hide_toolbar_window(app: State<'_, MyApp>) -> Result<()> {
 }
 
 #[tauri::command]
-pub async fn toggle_clipboard_listener(app: State<'_, MyApp>) -> Result<()> {
-    let conf = app.get_basic_config();
+pub async fn apply_clipboard_listener(app: State<'_, MyApp>) -> Result<()> {
+    app.apply_clipboard_listener();
 
-    if conf.listen_clipboard {
-        app.start_clipboard_listener();
-    } else {
-        app.stop_clipboard_listener();
-    }
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn apply_enabled(app: State<'_, MyApp>) -> Result<()> {
+    app.apply_enabled();
 
     Ok(())
 }

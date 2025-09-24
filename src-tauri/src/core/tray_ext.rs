@@ -1,8 +1,10 @@
 use tauri::{
-    menu::{Menu, MenuItem, PredefinedMenuItem},
+    menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem},
     tray::{MouseButton, TrayIcon, TrayIconBuilder, TrayIconEvent},
-    Manager, Result,
+    AppHandle, Manager, Result, Runtime,
 };
+
+use crate::core::AppBasicConfig;
 
 use super::{MyApp, MyAppWindowExt, MyUpdaterExt, MAIN_WINDOW_LABEL};
 
@@ -13,28 +15,18 @@ pub trait AppTrayExt {
 const MENU_QUIT: &str = "quit";
 const MENU_CHECK_UPDATE: &str = "check-update";
 const MENU_OPEN_STATISTIC: &str = "open-statistic";
+const MENU_ENABLED: &str = "enabled";
+const MENU_LISTEN_CLIPBOARD_ENABLED: &str = "m_clipboard_enabled";
+
+const TRAY_NAME: &str = "main";
 
 impl AppTrayExt for MyApp {
     fn create_tray(&self) -> Result<TrayIcon> {
         let app = self.app();
 
-        let m_quit = MenuItem::with_id(app, MENU_QUIT, "Quit", true, None::<&str>)?;
-        let m_check_update =
-            MenuItem::with_id(app, MENU_CHECK_UPDATE, "Check Update", true, None::<&str>)?;
-        let m_open_static =
-            MenuItem::with_id(app, MENU_OPEN_STATISTIC, "Static Page", true, None::<&str>)?;
+        let menu = build_tray_menu(app)?;
 
-        let menu = Menu::with_items(
-            app,
-            &[
-                &m_open_static,
-                &PredefinedMenuItem::separator(app)?,
-                &m_check_update,
-                &m_quit,
-            ],
-        )?;
-
-        let tray = TrayIconBuilder::new()
+        let tray = TrayIconBuilder::with_id(TRAY_NAME)
             .menu(&menu)
             .show_menu_on_left_click(false)
             .icon(self.default_window_icon().unwrap().clone())
@@ -64,9 +56,79 @@ impl AppTrayExt for MyApp {
             MENU_OPEN_STATISTIC => {
                 app.state::<MyApp>().get_statistic_window();
             }
+            MENU_ENABLED => {
+                let mut conf = AppBasicConfig::load(app);
+                conf.enabled = !conf.enabled;
+                conf.save(app);
+
+                let my_app = app.state::<MyApp>();
+                my_app.apply_enabled();
+
+                update_tray_menu(app);
+            }
+            MENU_LISTEN_CLIPBOARD_ENABLED => {
+                let mut conf = AppBasicConfig::load(app);
+                conf.listen_clipboard = !conf.listen_clipboard;
+                conf.save(app);
+
+                let my_app = app.state::<MyApp>();
+                my_app.apply_clipboard_listener();
+
+                update_tray_menu(app);
+            }
             _ => {}
         });
 
         Ok(tray)
     }
+}
+
+pub fn update_tray_menu(app: &AppHandle) {
+    app.tray_by_id(TRAY_NAME).map(|tray| {
+        let menu = build_tray_menu(app).ok();
+        let _ = tray.set_menu(menu);
+    });
+}
+
+pub fn build_tray_menu<R: Runtime>(app: &AppHandle<R>) -> Result<Menu<R>> {
+    let conf = AppBasicConfig::load(app);
+
+    let m_quit = MenuItem::with_id(app, MENU_QUIT, "Quit", true, None::<&str>)?;
+    let m_check_update =
+        MenuItem::with_id(app, MENU_CHECK_UPDATE, "Check Update", true, None::<&str>)?;
+    let m_open_static =
+        MenuItem::with_id(app, MENU_OPEN_STATISTIC, "Static Page", true, None::<&str>)?;
+
+    let m_enabled = CheckMenuItem::with_id(
+        app,
+        MENU_ENABLED,
+        "Enabled",
+        true,
+        conf.enabled,
+        None::<&str>,
+    )?;
+
+    let m_listen_clipboard = CheckMenuItem::with_id(
+        app,
+        MENU_LISTEN_CLIPBOARD_ENABLED,
+        "Listen Clipboard",
+        true,
+        conf.listen_clipboard,
+        None::<&str>,
+    )?;
+
+    let menu = Menu::with_items(
+        app,
+        &[
+            &m_enabled,
+            &m_listen_clipboard,
+            &PredefinedMenuItem::separator(app)?,
+            &m_open_static,
+            &PredefinedMenuItem::separator(app)?,
+            &m_check_update,
+            &m_quit,
+        ],
+    )?;
+
+    Ok(menu)
 }

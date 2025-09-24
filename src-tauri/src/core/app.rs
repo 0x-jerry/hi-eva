@@ -3,11 +3,14 @@ use std::{ops::Deref, sync::Mutex};
 use clipboard_rs::{Clipboard, ClipboardHandler};
 use tauri::{AppHandle, Manager};
 
-use crate::{core::AppState, plugins::MyWebviewWindowExt};
+use crate::{
+    core::{AppBasicConfig, AppState},
+    plugins::MyWebviewWindowExt,
+};
 
 use super::{
-    mouse_listener, AppMessageExt, AppStateExt, AppStateInner, AppStoreExt, AppTrayExt,
-    ClipboardListenerExt, MouseExtTrait, MyAppWindowExt, SelectionResult, MAIN_WINDOW_LABEL,
+    mouse_listener, AppMessageExt, AppStateExt, AppStateInner, AppTrayExt, ClipboardListenerExt,
+    MouseExtTrait, MyAppWindowExt, SelectionResult, MAIN_WINDOW_LABEL,
 };
 
 #[derive(Clone)]
@@ -39,9 +42,7 @@ impl MyApp {
 
         let _ = self.create_tray();
 
-        if self.get_basic_config().listen_clipboard {
-            self.start_clipboard_listener();
-        }
+        self.apply_enabled();
 
         let app_cloned = self.clone();
 
@@ -50,6 +51,20 @@ impl MyApp {
         let _ = mouse_listener::listen(app_cloned);
 
         let _ = text_selection::init();
+    }
+
+    pub fn apply_enabled(&self) {
+        self.apply_clipboard_listener();
+    }
+
+    pub fn apply_clipboard_listener(&self) {
+        let conf = AppBasicConfig::load(self);
+
+        if conf.enabled && conf.listen_clipboard {
+            self.start_clipboard_listener();
+        } else {
+            self.stop_clipboard_listener();
+        }
     }
 }
 
@@ -78,6 +93,10 @@ impl ClipboardHandler for MyApp {
 
 impl MouseExtTrait for MyApp {
     fn on_selection_change(&self, result: Option<SelectionResult>) {
+        if !AppBasicConfig::load(self).enabled {
+            return;
+        }
+
         if let Some(result) = result {
             log::info!("result is {:?}", result);
 

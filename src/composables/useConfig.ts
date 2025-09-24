@@ -9,7 +9,7 @@ import { emit, listen, type UnlistenFn } from '@tauri-apps/api/event'
 import { LazyStore } from '@tauri-apps/plugin-store'
 import { tryOnUnmounted, watchPausable } from '@vueuse/core'
 import { debounce, isEqual } from 'lodash-es'
-import { nextTick, type Ref, ref } from 'vue'
+import { nextTick, ref } from 'vue'
 
 export interface UseConfigInnerOption<T> {
   init?(data: T): Awaitable<void>

@@ -31,9 +31,9 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 tauri = { version = "2", features = [
-    "macos-private-api",
-    "image-ico",
-    "tray-icon",
+  "macos-private-api",
+  "image-ico",
+  "tray-icon",
 ] }
 serde = { workspace = true }
 serde_json = { workspace = true }
@@ -42,6 +42,7 @@ env_logger = { workspace = true }
 clipboard-rs = { workspace = true }
 text-selection = { path = "./text-selection" }
 dotenv = "0.15"
+nanoid = "0.4"
 mouce = { workspace = true }
 tauri-plugin-opener = "2"
 tauri-plugin-single-instance = "2"
