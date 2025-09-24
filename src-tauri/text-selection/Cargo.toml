@@ -10,15 +10,15 @@ log = { workspace = true }
 enigo = { workspace = true }
 
 [target.'cfg(windows)'.dependencies]
-windows = { version = "0.61.0", features = ["UI_UIAutomation"] }
+windows = { version = "0.62.0", features = ["UI_UIAutomation"] }
 
 [target.'cfg(unix)'.dependencies]
 osascript = "0.3.0"
 objc2 = "0.6"
 objc2-app-kit = "0.3"
 core-foundation-sys = "0.8"
-core-foundation = "0.10.0"
-core-graphics = "0.24.0"
+core-foundation = "0.10"
+core-graphics = "0.24"
 accessibility-sys = { path = "../accessibility-sys" }
 accessibility = { path = "../accessibility" }
 serde = { workspace = true, features = ["derive"] }
