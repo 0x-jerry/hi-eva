@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useEventListener } from '@vueuse/core'
 import { remove } from 'lodash-es'
 import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs'
 import Button from 'primevue/button'
@@ -6,11 +7,10 @@ import ContextMenu from 'primevue/contextmenu'
 import type { MenuItem } from 'primevue/menuitem'
 import Textarea from 'primevue/textarea'
 import { nextTick, reactive, ref } from 'vue'
+import CopyBtn from '../CopyBtn.vue'
 import Markdown from '../Markdown.vue'
 import { chatWithPrompt } from './chat'
 import type { ChatHistory } from './types'
-import { useEventListener } from '@vueuse/core'
-import CopyBtn from '../CopyBtn.vue'
 
 export interface ChatMessagesProps {
   promptId: string
