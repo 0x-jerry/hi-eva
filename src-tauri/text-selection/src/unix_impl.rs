@@ -1,14 +1,11 @@
-use std::any::type_name;
+use std::{any::type_name, ptr::NonNull};
 
-use accessibility::{AXAttribute, AXTextMarkerRange, AXUIElement};
-use accessibility_sys::{
-    kAXFocusedUIElementAttribute, kAXSelectedTextAttribute, kAXTrustedCheckOptionPrompt,
-    AXIsProcessTrustedWithOptions,
-};
-use core_foundation::{
-    base::TCFType, boolean::CFBoolean, dictionary::CFDictionary, string::CFString, ConcreteCFType,
-};
 use objc2_app_kit::NSWorkspace;
+use objc2_application_services::{
+    kAXTrustedCheckOptionPrompt, AXError, AXIsProcessTrustedWithOptions, AXTextMarkerRange,
+    AXUIElement,
+};
+use objc2_core_foundation::{CFBoolean, CFDictionary, CFRetained, CFString, CFType, ConcreteType};
 use serde::Serialize;
 
 use crate::{
@@ -22,18 +19,23 @@ pub const kAXSelectedTextMarkerRangeAttribute: &str = "AXSelectedTextMarkerRange
 #[derive(Default)]
 pub struct HostImpl;
 
+#[allow(non_upper_case_globals)]
+const kAXFocusedUIElementAttribute: &str = "AXFocusedUIElement";
+#[allow(non_upper_case_globals)]
+const kAXSelectedTextAttribute: &str = "AXSelectedText";
+
 impl HostHelperTrait for HostImpl {
     fn detect_selection_rect(&self) -> Result<Option<SelectionRect>> {
         let pid = get_frontmost_app().unwrap();
-        let focused_app = AXUIElement::application(pid);
+        let focused_app = unsafe { AXUIElement::new_application(pid) };
 
         enable_screen_reader_accessibility(&focused_app)?;
 
-        let focused_element: AXUIElement =
-            get_element_attr(&focused_app, kAXFocusedUIElementAttribute)?;
+        let focused_element =
+            get_element_attr::<AXUIElement>(&focused_app, kAXFocusedUIElementAttribute)?;
 
         let selected_text =
-            get_element_attr::<CFString>(&focused_element, kAXSelectedTextAttribute)?.to_string();
+            get_element_attr::<CFString>(&focused_element, &"AXSelectedText")?.to_string();
 
         if !selected_text.is_empty() {
             let mut rect = SelectionRect::default();
@@ -52,12 +54,12 @@ impl HostHelperTrait for HostImpl {
 
     fn get_selected_text(&self) -> Result<String> {
         let pid = get_frontmost_app().unwrap();
-        let focused_app = AXUIElement::application(pid);
+        let focused_app = unsafe { AXUIElement::new_application(pid) };
 
         enable_screen_reader_accessibility(&focused_app)?;
 
-        let focused_element: AXUIElement =
-            get_element_attr(&focused_app, kAXFocusedUIElementAttribute)?;
+        let focused_element =
+            get_element_attr::<AXUIElement>(&focused_app, kAXFocusedUIElementAttribute)?;
 
         let selected_text =
             get_element_attr::<CFString>(&focused_element, kAXSelectedTextAttribute)?;
@@ -67,41 +69,48 @@ impl HostHelperTrait for HostImpl {
 }
 
 fn has_selected_text_mark_range(selected_element: &AXUIElement) -> Result<bool> {
-    let marker_range: AXTextMarkerRange =
-        get_element_attr(&selected_element, &kAXSelectedTextMarkerRangeAttribute)?;
+    let marker_range = get_element_attr::<AXTextMarkerRange>(
+        &selected_element,
+        &kAXSelectedTextMarkerRangeAttribute,
+    )?;
 
-    let is_the_same_marker =
-        marker_range.start_marker().bytes() == marker_range.end_marker().bytes();
+    let is_the_same_marker = unsafe {
+        marker_range
+            .start_marker()
+            .byte_ptr()
+            .eq(&marker_range.end_marker().byte_ptr())
+    };
 
     let has_selected_text = !is_the_same_marker;
 
     Ok(has_selected_text)
 }
 
-fn get_element_attr<T: ConcreteCFType>(element: &AXUIElement, attr: &str) -> Result<T> {
-    let attr_value = element.attribute(&AXAttribute::new(&CFString::new(&attr)));
+fn get_element_attr<T: ConcreteType>(element: &AXUIElement, attr: &str) -> Result<CFRetained<T>> {
+    unsafe {
+        // Prepare output slot
+        let mut raw: *const CFType = std::ptr::null();
+        let slot = NonNull::new(&mut raw as *mut *const CFType).unwrap();
+        let cf_attr = CFString::from_str(attr);
 
-    match attr_value {
-        Ok(attr_value) => {
-            let raw_value = attr_value.clone();
+        let err = element.copy_attribute_value(&cf_attr, slot);
 
-            if let Some(value) = attr_value.downcast::<T>() {
-                return Ok(value);
-            };
+        if err == AXError::Success {
+            if let Some(nonnull) = NonNull::new(raw as *mut CFType) {
+                let t = CFRetained::from_raw(nonnull);
+                let v = t.downcast::<T>().unwrap();
 
+                return Ok(v);
+            } else {
+                return Err(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::Other,
+                    format!("Convert {:?} to type {:?} failed", attr, type_name::<T>()),
+                )));
+            }
+        } else {
             return Err(Box::new(std::io::Error::new(
                 std::io::ErrorKind::Other,
-                format!(
-                    "Convert {:?} to type {:?} failed",
-                    raw_value,
-                    type_name::<T>()
-                ),
-            )));
-        }
-        Err(err) => {
-            return Err(Box::new(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                format!("get attr {} failed: {:?}", attr, err),
+                format!("Convert {:?} to type {:?} failed", attr, type_name::<T>()),
             )));
         }
     }
@@ -150,11 +159,10 @@ fn trigger_copy_menu_for_app(app_name: &str) -> bool {
 
 pub fn request_accessibility_access() -> bool {
     unsafe {
-        // request accessibility permission
-        let prompt_conf_key = CFString::wrap_under_create_rule(kAXTrustedCheckOptionPrompt);
-        let conf_dict =
-            CFDictionary::from_CFType_pairs(&[(prompt_conf_key, CFBoolean::from(true))]);
-        let result = AXIsProcessTrustedWithOptions(conf_dict.as_concrete_TypeRef());
+        let options =
+            CFDictionary::from_slices(&[kAXTrustedCheckOptionPrompt], &[CFBoolean::new(true)]);
+
+        let result = AXIsProcessTrustedWithOptions(Some(options.as_opaque()));
 
         log::info!("prompt: {:?}", result);
 
@@ -174,24 +182,20 @@ fn get_frontmost_app() -> Option<i32> {
 
 fn enable_screen_reader_accessibility(application: &AXUIElement) -> Result<()> {
     #[allow(non_snake_case)]
-    let kAXInspectorEnabled = CFString::new("AXInspectorEnabled");
+    let kAXInspectorEnabled = CFString::from_str("AXInspectorEnabled");
     #[allow(non_snake_case)]
-    let kAXEnhancedUserInterface = CFString::new("AXEnhancedUserInterface");
+    let kAXEnhancedUserInterface = CFString::from_str("AXEnhancedUserInterface");
     #[allow(non_snake_case)]
-    let kAXManualAccessibility = CFString::new("AXManualAccessibility");
+    let kAXManualAccessibility = CFString::from_str("AXManualAccessibility");
 
-    let bool_true = CFBoolean::true_value().as_CFType();
+    let bool_true = CFBoolean::new(true);
 
-    application.set_messaging_timeout(5.0)?;
-    let _ = application.set_attribute(&AXAttribute::new(&kAXInspectorEnabled), bool_true.clone());
-    let _ = application.set_attribute(
-        &AXAttribute::new(&kAXEnhancedUserInterface),
-        bool_true.clone(),
-    );
-    let _ = application.set_attribute(
-        &AXAttribute::new(&kAXManualAccessibility),
-        bool_true.clone(),
-    );
+    unsafe {
+        application.set_messaging_timeout(5.0);
+        let _ = application.set_attribute_value(&kAXInspectorEnabled, bool_true);
+        let _ = application.set_attribute_value(&kAXEnhancedUserInterface, bool_true);
+        let _ = application.set_attribute_value(&kAXManualAccessibility, bool_true);
+    }
 
     Ok(())
 }

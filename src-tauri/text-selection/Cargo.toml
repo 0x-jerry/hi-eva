@@ -21,10 +21,8 @@ windows = { version = "0.62.0", features = [
 [target.'cfg(unix)'.dependencies]
 osascript = "0.3.0"
 objc2 = "0.6"
-objc2-app-kit = "0.3"
-core-foundation-sys = "0.8"
-core-foundation = "0.10"
-core-graphics = "0.24"
-accessibility-sys = { path = "../accessibility-sys" }
-accessibility = { path = "../accessibility" }
+objc2-app-kit = { workspace = true }
+objc2-application-services = "0.3"
+objc2-core-foundation = "0.3"
+
 serde = { workspace = true, features = ["derive"] }
