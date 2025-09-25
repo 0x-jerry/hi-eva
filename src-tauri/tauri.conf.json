@@ -35,7 +35,7 @@
         "installMode": "passive"
       },
       "endpoints": [
-        "https://github.com/0x-jerry/hi-eva-docs/releases/latest/download/latest.json"
+        "https://github.com/0x-jerry/hi-eva/releases/latest/download/latest.json"
       ]
     },
     "sql": {

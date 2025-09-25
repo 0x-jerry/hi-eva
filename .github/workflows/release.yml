@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   create-release:
@@ -38,7 +38,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           body_path: RELEASE-NOTE.md
-          repository: 0x-jerry/hi-eva-docs
           token: ${{ secrets.RELEASE_GITHUB_TOKEN }}
           prerelease: ${{steps.is-prerelease.outputs.result}}
 
@@ -50,12 +49,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: 'macos-latest' # for Arm based macs (M1 and above).
-            args: '--target aarch64-apple-darwin'
-          - platform: 'macos-latest' # for Intel based macs.
-            args: '--target x86_64-apple-darwin'
-          - platform: 'windows-latest'
-            args: ''
+          - platform: "macos-latest" # for Arm based macs (M1 and above).
+            args: "--target aarch64-apple-darwin"
+          - platform: "macos-latest" # for Intel based macs.
+            args: "--target x86_64-apple-darwin"
+          - platform: "windows-latest"
+            args: ""
           # - platform: 'ubuntu-22.04' # for Tauri v1 you could replace this with ubuntu-20.04.
           #   args: ''
 
@@ -66,13 +65,13 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: latest
 
       - name: setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'pnpm'
+          node-version: latest
+          cache: "pnpm"
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -107,5 +106,4 @@ jobs:
         with:
           includeUpdaterJson: true
           args: ${{ matrix.args }}
-          repo: hi-eva-docs
           releaseId: ${{ needs.create-release.outputs.release_id }}
