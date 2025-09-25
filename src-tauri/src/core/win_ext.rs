@@ -1,4 +1,4 @@
-use tauri::{Manager, PhysicalPosition, WebviewWindow, WebviewWindowBuilder};
+use tauri::{Manager, PhysicalPosition, PhysicalSize, WebviewWindow, WebviewWindowBuilder};
 
 use super::{utils::calc_window_position, AppStateExt, MyApp, VerticalMoveDir};
 
@@ -66,7 +66,7 @@ impl MyAppWindowExt for MyApp {
             TOOLBAR_WINDOW_LABEL,
             tauri::WebviewUrl::App("#/toolbar".into()),
         )
-        .inner_size(10.0, 10.0)
+        .inner_size(0.0, 0.0)
         .visible_on_all_workspaces(true)
         .accept_first_mouse(true)
         .decorations(false)
@@ -171,6 +171,11 @@ impl MyAppWindowExt for MyApp {
 
         let pos = PhysicalPosition::new(old_pos.x, TOOLBAR_HIDDEN_LOWEST_Y_POS - 100);
 
+        let size = win.inner_size().unwrap();
+
+        self.save_toolbar_size(size);
+        win.set_size(PhysicalSize::new(0.0, 0.0)).unwrap();
+
         win.set_position(pos).unwrap();
 
         #[cfg(unix)]
@@ -184,6 +189,11 @@ impl MyAppWindowExt for MyApp {
 
     fn show_toolbar_win(&self, dir: Option<VerticalMoveDir>) {
         let win = self.get_toolbar_window();
+        let previous_size = self.get_saved_toolbar_size();
+
+        if previous_size.width != 0 || previous_size.height != 0 {
+            win.set_size(previous_size).unwrap();
+        }
 
         let pos = calc_window_position(&win, dir);
 

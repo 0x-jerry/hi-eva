@@ -1,6 +1,7 @@
 use std::sync::Mutex;
 
 use clipboard_rs::WatcherShutdown;
+use tauri::PhysicalSize;
 
 #[derive(Default)]
 pub struct AppStateInner {
@@ -12,6 +13,7 @@ pub struct AppStateInner {
 
 #[derive(Default)]
 pub struct ToolbarStateInner {
+    pub size: PhysicalSize<u32>,
     pub focused: bool,
 }
 
