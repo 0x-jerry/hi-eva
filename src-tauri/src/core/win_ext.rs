@@ -1,4 +1,4 @@
-use tauri::{Manager, PhysicalPosition, PhysicalSize, WebviewWindow, WebviewWindowBuilder};
+use tauri::{Manager, PhysicalPosition, WebviewWindow, WebviewWindowBuilder};
 
 use super::{utils::calc_window_position, AppStateExt, MyApp, VerticalMoveDir};
 
@@ -174,7 +174,6 @@ impl MyAppWindowExt for MyApp {
         let size = win.inner_size().unwrap();
 
         self.save_toolbar_size(size);
-        win.set_size(PhysicalSize::new(0.0, 0.0)).unwrap();
 
         win.set_position(pos).unwrap();
 
@@ -189,11 +188,6 @@ impl MyAppWindowExt for MyApp {
 
     fn show_toolbar_win(&self, dir: Option<VerticalMoveDir>) {
         let win = self.get_toolbar_window();
-        let previous_size = self.get_saved_toolbar_size();
-
-        if previous_size.width != 0 || previous_size.height != 0 {
-            win.set_size(previous_size).unwrap();
-        }
 
         let pos = calc_window_position(&win, dir);
 
