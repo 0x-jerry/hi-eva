@@ -1,9 +1,9 @@
--- create selection_text table
-
-create table if not exists selection (
-  id integer primary key autoincrement not null,
-  selected text,
-  promptName varchar(255),
-  createdDate datetime not null,
-  updatedDate datetime not null
-);
+CREATE TABLE IF NOT EXISTS
+  `selection` (
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    `createdDate` DATETIME NOT NULL,
+    `updatedDate` DATETIME NOT NULL,
+    -- 
+    `selected` text,
+    `promptName` VARCHAR(255)
+  );
