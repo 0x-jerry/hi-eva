@@ -63,6 +63,7 @@ async function scrollToBottom() {
 
 function handleKeydown(evt: KeyboardEvent) {
   if (evt.key === 'Enter') {
+    evt.preventDefault()
     onSend()
   }
 }
