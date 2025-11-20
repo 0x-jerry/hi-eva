@@ -1,12 +1,12 @@
 <script lang='ts' generic="T extends any" setup>
+import { isString } from '@0x-jerry/utils'
+import { watchImmediate } from '@vueuse/core'
+import Fuse, { type IFuseOptions } from 'fuse.js'
 import AutoComplete, {
   type AutoCompleteCompleteEvent,
   AutoCompleteSlots,
 } from 'primevue/autocomplete'
 import { shallowRef } from 'vue'
-import Fuse, { type IFuseOptions } from 'fuse.js'
-import { watchImmediate } from '@vueuse/core'
-import { isString } from '@0x-jerry/utils'
 
 export interface AutoCompleteInputProps<T> {
   items?: T[]

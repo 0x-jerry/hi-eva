@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import Popover from 'primevue/popover'
-import InputText from 'primevue/inputtext'
 import { icons } from '@iconify-json/carbon'
+import { InputGroup, InputGroupAddon } from 'primevue'
+import InputText from 'primevue/inputtext'
+import Popover from 'primevue/popover'
 import { computed, reactive, ref } from 'vue'
 import CarbonIcon from './CarbonIcon.vue'
-import { InputGroup, InputGroupAddon } from 'primevue'
 import Icon from './Icon.vue'
 
 export interface IconPickerProps {

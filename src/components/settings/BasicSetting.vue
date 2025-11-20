@@ -1,10 +1,10 @@
 <script lang='ts' setup>
-import SettingTitle from './SettingTitle.vue'
-import { useBasicConfig } from '../../composables'
-import { InputText, Checkbox, Button } from 'primevue'
-import { useId, watch } from 'vue'
-import { commands } from '../../logic/commands'
 import { sleep } from '@0x-jerry/utils'
+import { Button, Checkbox, InputText } from 'primevue'
+import { useId, watch } from 'vue'
+import { useBasicConfig } from '../../composables'
+import { commands } from '../../logic/commands'
+import SettingTitle from './SettingTitle.vue'
 
 const basicConfig = useBasicConfig()
 

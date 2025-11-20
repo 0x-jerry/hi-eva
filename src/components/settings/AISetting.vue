@@ -2,8 +2,8 @@
 import { nanoid } from '@0x-jerry/utils'
 import { endPointConfigs } from '../../logic/config'
 import Icon from '../Icon.vue'
-import SettingTitle from './SettingTitle.vue'
 import EndpointSetting from './EndpointSetting.vue'
+import SettingTitle from './SettingTitle.vue'
 
 const configs = endPointConfigs
 

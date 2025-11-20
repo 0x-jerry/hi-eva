@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { getCurrentWindow } from '@tauri-apps/api/window'
-import Icon from './Icon.vue'
 import type { Awaitable } from '@vueuse/core'
+import Icon from './Icon.vue'
 
 export interface CloseWindowProps {
   close?: () => Awaitable<void>

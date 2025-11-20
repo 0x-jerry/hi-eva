@@ -1,5 +1,5 @@
 <script lang='ts' setup>
-import { LogicalSize, getCurrentWindow } from '@tauri-apps/api/window'
+import { getCurrentWindow, LogicalSize } from '@tauri-apps/api/window'
 import { useResizeObserver } from '@vueuse/core'
 import { debounce } from 'lodash-es'
 import { computed, ref } from 'vue'

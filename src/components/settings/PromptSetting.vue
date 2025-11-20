@@ -2,8 +2,8 @@
 import { nanoid } from '@0x-jerry/utils'
 import { promptConfigs } from '../../logic/config'
 import Icon from '../Icon.vue'
-import SettingTitle from './SettingTitle.vue'
 import PromptItemSetting from './PromptItemSetting.vue'
+import SettingTitle from './SettingTitle.vue'
 
 const configs = promptConfigs
 

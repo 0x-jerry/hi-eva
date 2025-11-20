@@ -3,12 +3,12 @@ import Inplace from 'primevue/inplace'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
+import { computed } from 'vue'
+import { BuiltinEndpointsConfig } from '../../logic/builtinConfig'
 import { endPointConfigs, getPromptConf } from '../../logic/config'
+import AutoCompleteInput from '../AutoCompleteInput.vue'
 import Icon from '../Icon.vue'
 import IconPicker from '../IconPicker.vue'
-import { computed } from 'vue'
-import AutoCompleteInput from '../AutoCompleteInput.vue'
-import { BuiltinEndpointsConfig } from '../../logic/builtinConfig'
 
 export interface PromptItemSettingProps {
   confId: string

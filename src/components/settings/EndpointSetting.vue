@@ -1,16 +1,16 @@
 <script lang='ts' setup>
+import type { IFuseOptions } from 'fuse.js'
 import Inplace from 'primevue/inplace'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
 import { computed } from 'vue'
-import { getEndpointConf } from '../../logic/config'
-import Icon from '../Icon.vue'
-import type { IFuseOptions } from 'fuse.js'
-import AutoCompleteInput from '../AutoCompleteInput.vue'
 import {
   BuiltinConfigItem,
   BuiltinEndpointsConfig,
 } from '../../logic/builtinConfig'
+import { getEndpointConf } from '../../logic/config'
+import AutoCompleteInput from '../AutoCompleteInput.vue'
+import Icon from '../Icon.vue'
 
 export interface EndpointSettingProps {
   confId: string
