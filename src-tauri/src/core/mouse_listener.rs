@@ -27,6 +27,7 @@ pub struct SelectionResult {
 #[derive(Debug)]
 struct SelectionState {
     mouse_down_pos: (f64, f64),
+    current_mouse_pos: (f64, f64),
     mouse_down_ts: Instant,
     last_click_ts: Option<Instant>,
     last_click_pos: (f64, f64),
@@ -36,6 +37,7 @@ struct SelectionState {
 pub fn listen<T: 'static + MouseExtTrait + Send>(app: T) {
     let state = Mutex::new(SelectionState {
         mouse_down_pos: (0.0, 0.0),
+        current_mouse_pos: app.get_cursor_position(),
         mouse_down_ts: Instant::now(),
         last_click_ts: None,
         last_click_pos: (0.0, 0.0),
@@ -48,18 +50,19 @@ pub fn listen<T: 'static + MouseExtTrait + Send>(app: T) {
         let mut state = state.lock().unwrap();
 
         match event {
-            MouseEvent::AbsoluteMove(..) => {
+            MouseEvent::AbsoluteMove(x, y) => {
+                state.current_mouse_pos = ((*x).into(), (*y).into());
                 app.on_mouse_move();
             }
             MouseEvent::Press(MouseButton::Left) => {
-                state.mouse_down_pos = app.get_cursor_position();
+                state.mouse_down_pos = state.current_mouse_pos;
                 state.mouse_down_ts = Instant::now();
                 app.on_mouse_down();
             }
             MouseEvent::Release(MouseButton::Left) => {
                 let mut should_check_selection = false;
 
-                let current_mouse_pos = app.get_cursor_position();
+                let current_mouse_pos = state.current_mouse_pos;
 
                 let now = Instant::now();
                 let maybe_click = distance(state.mouse_down_pos, current_mouse_pos) < 5.0;
@@ -78,7 +81,7 @@ pub fn listen<T: 'static + MouseExtTrait + Send>(app: T) {
                     }
 
                     state.last_click_ts = Some(now);
-                    state.last_click_pos = current_mouse_pos.clone();
+                    state.last_click_pos = current_mouse_pos;
                 } else {
                     should_check_selection = true;
                     state.last_click_ts = None;
