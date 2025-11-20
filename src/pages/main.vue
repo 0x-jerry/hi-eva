@@ -14,7 +14,7 @@ const navButtons = [
 
 <template>
   <div class="flex h-screen">
-    <div class="nav-col w-60px bg-gray-1 flex flex-col gap-4">
+    <div class="nav-col w-60px bg-gray-1 flex flex-col gap-4 border-(0 r solid gray-2)">
       <div class="flex items-center justify-center pt-1">
         <img src="/logo.svg" alt="logo" class="w-3/4 p-2 rounded-md bg-gray-2 aspect-ratio-square">
       </div>

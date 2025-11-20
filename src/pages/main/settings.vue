@@ -2,16 +2,16 @@
 import { useEventListener } from '@vueuse/core'
 import { onMounted, reactive, ref, useId } from 'vue'
 import AboutSetting from '../../components/settings/AboutSetting.vue'
-import AISetting from '../../components/settings/AISetting.vue'
 import BasicSetting from '../../components/settings/BasicSetting.vue'
+import EndpointSetting from '../../components/settings/EndpointSetting.vue'
 import PromptSetting from '../../components/settings/PromptSetting.vue'
 
 const scrollElRef = ref<HTMLElement>()
 
 const settings = [
   {
-    label: 'AI 设置',
-    Component: AISetting,
+    label: 'Endpoint 设置',
+    Component: EndpointSetting,
     id: useId(),
   },
   {
@@ -65,10 +65,7 @@ function clickMenu(conf: { id: string }) {
 </script>
 <template>
   <div class="page flex h-screen">
-    <div class="sidebar">
-      <div class="flex-center mb-4 font-mono bg-light-8 h-8">
-        <span>Hi Eva</span>
-      </div>
+    <div class="sidebar pt-2">
       <div class="menu-item" v-for="conf in settings" :key="conf.id" @click="clickMenu(conf)"
         :class="{ active: state.activeMenu === conf.id }">
         {{ conf.label }}
@@ -87,7 +84,7 @@ function clickMenu(conf: { id: string }) {
 .sidebar {
   --uno: bg-light gap-2 border-(0 r solid light-8);
 
-  width: 180px;
+  width: 160px;
   display: flex;
   flex-direction: column;
 }
