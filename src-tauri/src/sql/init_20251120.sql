@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS
     `createdDate` DATETIME NOT NULL,
     `updatedDate` DATETIME NOT NULL,
     -- 
-    `isBuiltin` INTEGER DEFAULT 0
+    `isBuiltin` INTEGER DEFAULT 0,
     `name` VARCHAR(64),
     `url` VARCHAR(255),
     `apiKey` VARCHAR(255),
