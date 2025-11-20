@@ -71,7 +71,7 @@ function clickMenu(conf: { id: string }) {
         {{ conf.label }}
       </div>
     </div>
-    <div ref="scrollElRef" class="content flex-1 px-4 overflow-auto flex flex-col gap-4">
+    <div ref="scrollElRef" class="content bg-gray-1 flex-1 p-4 pt-2 overflow-auto flex flex-col gap-4">
       <div class="section-content" v-for="conf in settings" :key="conf.id">
         <span :id="conf.id"></span>
         <component :is="conf.Component" />
@@ -82,7 +82,7 @@ function clickMenu(conf: { id: string }) {
 
 <style lang="scss" scoped>
 .sidebar {
-  --uno: bg-light gap-2 border-(0 r solid light-8);
+  --uno: bg-light border-(0 r solid light-8);
 
   width: 160px;
   display: flex;
