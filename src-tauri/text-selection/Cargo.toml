@@ -10,7 +10,7 @@ log = { workspace = true }
 enigo = { workspace = true }
 
 [target.'cfg(windows)'.dependencies]
-windows = { version = "0.62.0", features = [
+windows = { version = "0.62", features = [
   "Win32",
   "Win32_System",
   "Win32_System_Com",
