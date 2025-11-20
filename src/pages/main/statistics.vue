@@ -4,7 +4,7 @@ import dayjs from 'dayjs'
 import Chart from 'primevue/chart'
 import DatePicker from 'primevue/datepicker'
 import { computed, reactive, watch } from 'vue'
-import { selectionTable } from '../database'
+import { selectionTable } from '../../database'
 
 const query = reactive({
   dates: [

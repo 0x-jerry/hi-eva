@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useEventListener } from '@vueuse/core'
 import { onMounted, reactive, ref, useId } from 'vue'
-import AboutSetting from '../components/settings/AboutSetting.vue'
-import AISetting from '../components/settings/AISetting.vue'
-import BasicSetting from '../components/settings/BasicSetting.vue'
-import PromptSetting from '../components/settings/PromptSetting.vue'
+import AboutSetting from '../../components/settings/AboutSetting.vue'
+import AISetting from '../../components/settings/AISetting.vue'
+import BasicSetting from '../../components/settings/BasicSetting.vue'
+import PromptSetting from '../../components/settings/PromptSetting.vue'
 
 const scrollElRef = ref<HTMLElement>()
 

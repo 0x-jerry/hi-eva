@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
 import { computed, onMounted, reactive, ref } from 'vue'
-import ChatMessages from '../components/Chat/ChatMessages.vue'
-import type { ChatMessageWithDb } from '../components/Chat/types'
-import type { IChatHistoryModel } from '../database/chatHistory'
-import { chatHistoryTable } from '../database/chatHistory'
+import ChatMessages from '../../components/Chat/ChatMessages.vue'
+import type { ChatMessageWithDb } from '../../components/Chat/types'
+import type { IChatHistoryModel } from '../../database/chatHistory'
+import { chatHistoryTable } from '../../database/chatHistory'
 
 // --- Repository (data access) - single responsibility
 async function fetchHistories(page = 0, size = 100) {

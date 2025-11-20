@@ -30,7 +30,7 @@ impl MyAppWindowExt for MyApp {
         let win_builder = WebviewWindowBuilder::new(
             self.app(),
             MAIN_WINDOW_LABEL,
-            tauri::WebviewUrl::App("#/".into()),
+            tauri::WebviewUrl::App("#/main".into()),
         )
         .inner_size(800.0, 600.0)
         .center()
