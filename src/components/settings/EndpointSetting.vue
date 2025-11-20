@@ -1,5 +1,6 @@
 <script lang='ts' setup>
 import { useAsyncData } from '@0x-jerry/vue-kit'
+import { Button } from 'primevue'
 import { ref } from 'vue'
 import { endpointConfigTable, IEndpointConfigItem } from '../../database/endpointConfig'
 import Icon from '../Icon.vue'
@@ -68,7 +69,16 @@ async function handleAddOrUpdate(conf: IEndpointConfigItem) {
     <div class="flex flex-col gap-2">
       <EndpointItemSetting v-if="newData" :item="newData" @update="handleAddOrUpdate" @remove="resetNewData" />
 
-      <EndpointItemSetting v-for="conf in configsApi.data.value" :key="conf.id" :item="conf" @remove="removeConf(conf)" @update="handleAddOrUpdate" />
+      <template v-if="!newData && !configsApi.data.value.length">
+          <div class="flex text-center justify-center py-8 bg-light-2">
+            <Button variant="text" @click="addConfig" >
+              + 新增配置
+            </Button>
+          </div>
+      </template>
+      <template v-else>
+        <EndpointItemSetting v-for="conf in configsApi.data.value" :key="conf.id" :item="conf" @remove="removeConf(conf)" @update="handleAddOrUpdate" />
+      </template>
     </div>
   </div>
 </template>

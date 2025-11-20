@@ -1,15 +1,15 @@
 import {
-	defineConfig,
-	presetIcons,
-	presetWind3,
-	transformerDirectives,
-	transformerVariantGroup,
+  defineConfig,
+  presetIcons,
+  presetWind3,
+  transformerDirectives,
+  transformerVariantGroup,
 } from 'unocss'
 
 export default defineConfig({
-	presets: [presetWind3(), presetIcons()],
-	transformers: [transformerVariantGroup(), transformerDirectives()],
+  presets: [presetWind3(), presetIcons()],
+  transformers: [transformerVariantGroup(), transformerDirectives()],
   shortcuts: {
-    'flex-center': 'flex items-center justify-center'
-  }
+    'flex-center': 'flex items-center justify-center',
+  },
 })

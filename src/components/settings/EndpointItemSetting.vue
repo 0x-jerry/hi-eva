@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import InputText from "primevue/inputtext";
 import Password from "primevue/password";
 import { ref, toRaw, watch } from "vue";
 import { IEndpointConfigItem } from "../../database/endpointConfig";
+import EditableInputText from "../EditableInputText.vue";
 import Icon from "../Icon.vue";
 
 export interface EndpointItemSettingProps {
@@ -35,7 +35,7 @@ function toggleEditMode() {
 
 async function applyUpdate() {
   emit("update", currentValue.value);
-  toggleEditMode();
+  editMode.value = !editMode.value;
 }
 </script>
 
@@ -44,53 +44,54 @@ async function applyUpdate() {
     <div class="flex flex-col gap-2 bg-light-3 p-4 rounded">
       <div class="flex items-center">
         <div>
-          <InputText :disabled="!editMode" v-model="currentValue.name" />
+          <EditableInputText :editable="editMode" v-model="currentValue.name" />
         </div>
 
-        <div class="flex flex-1 justify-end items-center gap-2">
-          <Icon
-            v-if="item.id"
-            class="i-carbon:trash-can cursor-pointer"
-            @click="emit('remove')"
-          />
+        <div class="tool-icons flex flex-1 justify-end items-center gap-2">
+          <Icon v-if="item.id" class="i-carbon:trash-can cursor-pointer" @click="emit('remove')" />
 
           <template v-if="editMode">
-            <Icon
-              class="i-carbon:close cursor-pointer"
-              @click="toggleEditMode"
-            />
-            <Icon
-              class="i-carbon:checkmark cursor-pointer"
-              @click="applyUpdate"
-            />
+            <Icon class="i-carbon:close cursor-pointer" @click="toggleEditMode" />
+            <Icon class="i-carbon:checkmark cursor-pointer" @click="applyUpdate" />
           </template>
           <template v-else>
-            <Icon
-              class="i-carbon:edit cursor-pointer"
-              @click="toggleEditMode"
-            />
+            <Icon class="i-carbon:edit cursor-pointer" @click="toggleEditMode" />
           </template>
         </div>
       </div>
       <div class="editable-row">
         <label>Base URL</label>
-        <InputText v-model="currentValue.baseUrl" :disabled="!editMode" />
+        <EditableInputText :editable="editMode" v-model="currentValue.baseUrl" />
       </div>
       <div class="editable-row">
         <label>API Key</label>
-        <Password
-          class="content"
-          v-model="currentValue.apiKey"
-          :disabled="!editMode"
-          toggleMask
-          :feedback="false"
-        />
+        <template v-if="editMode">
+          <Password class="content" v-model="currentValue.apiKey" :disabled="!editMode" toggleMask :feedback="false" />
+        </template>
+        <template v-else>
+          *************
+        </template>
       </div>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
+.tool-icons {
+  --uno: transition;
+  opacity: 0;
+}
+
+.endpoint-setting {
+  &:hover {
+    .tool-icons {
+      opacity: 1;
+    }
+
+  }
+}
+
+
 .editable-row {
   --uno: flex items-center;
 

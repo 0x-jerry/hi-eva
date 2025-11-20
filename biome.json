@@ -8,11 +8,9 @@
   "files": {
     "ignoreUnknown": true,
     "includes": [
-      "**/src/**",
-      "**/scripts/**",
-      "**/*.ts",
-      "!**/node_modules",
-      "!**/src/typed-router.d.ts"
+      "src/**",
+      "scripts/**",
+      "!src/typed-router.d.ts"
     ]
   },
   "formatter": {
