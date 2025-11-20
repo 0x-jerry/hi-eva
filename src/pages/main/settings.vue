@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useEventListener } from '@vueuse/core'
 import { onMounted, reactive, ref, useId } from 'vue'
-import AboutSetting from '../../components/settings/AboutSetting.vue'
 import BasicSetting from '../../components/settings/BasicSetting.vue'
 import EndpointSetting from '../../components/settings/EndpointSetting.vue'
 import PromptSetting from '../../components/settings/PromptSetting.vue'
@@ -9,6 +8,11 @@ import PromptSetting from '../../components/settings/PromptSetting.vue'
 const scrollElRef = ref<HTMLElement>()
 
 const settings = [
+  {
+    label: '基础设置',
+    Component: BasicSetting,
+    id: useId(),
+  },
   {
     label: 'Endpoint 设置',
     Component: EndpointSetting,
@@ -19,18 +23,7 @@ const settings = [
     Component: PromptSetting,
     id: useId(),
   },
-  {
-    label: '基础设置',
-    Component: BasicSetting,
-    id: useId(),
-  },
-  {
-    label: '关于',
-    Component: AboutSetting,
-    visible: false,
-    id: useId(),
-  },
-].filter((n) => n.visible !== false)
+]
 
 const state = reactive({
   activeMenu: '',
