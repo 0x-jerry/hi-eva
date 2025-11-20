@@ -1,10 +1,6 @@
-export interface BuiltinConfigItem {
-  name: string
-  baseUrl: string
-  models: string[]
-}
+import type { EndpointItem } from '../types/endpoint'
 
-export const BuiltinEndpointsConfig: BuiltinConfigItem[] = [
+export const BuiltinEndpointsConfig: Omit<EndpointItem, 'apiKey'>[] = [
   {
     name: '百炼',
     baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',

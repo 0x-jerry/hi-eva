@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS
     -- 
     `isBuiltin` INTEGER DEFAULT 0,
     `name` VARCHAR(64),
-    `url` VARCHAR(255),
+    `baseUrl` VARCHAR(255),
     `apiKey` VARCHAR(255),
     `models` text -- json value for string array
   );
