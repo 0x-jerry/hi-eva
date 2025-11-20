@@ -15,6 +15,12 @@ pub fn init_sql<T: Runtime>() -> TauriPlugin<T, Option<PluginConfig>> {
             sql: include_str!("sql/init_20251014.sql"),
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 3,
+            description: "create endpoint config tables",
+            sql: include_str!("sql/init_20251120.sql"),
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri_plugin_sql::Builder::default()

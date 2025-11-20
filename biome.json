@@ -48,6 +48,14 @@
 			"bracketSpacing": true
 		}
 	},
+  "html": {
+    "experimentalFullSupportEnabled": true
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
 	"overrides": [
 		{
 			"includes": ["**/*.vue"],

@@ -1,5 +1,5 @@
-import dayjs from 'dayjs'
 import Database from '@tauri-apps/plugin-sql'
+import dayjs from 'dayjs'
 
 export const db = Database.get('sqlite:data.db')
 

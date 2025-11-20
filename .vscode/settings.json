@@ -9,4 +9,7 @@
     "editor.defaultFormatter": "biomejs.biome"
   },
   "rust-analyzer.cargo.targetDir": "./target-analyzer",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.biome": "always"
+  }
 }

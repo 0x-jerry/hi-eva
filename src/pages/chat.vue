@@ -3,29 +3,31 @@ import { nanoid } from '@0x-jerry/utils'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import AutoResizeContainer from '../components/AutoResizeContainer.vue'
+import CarbonIcon from '../components/CarbonIcon.vue'
 import ChatMessages from '../components/Chat/ChatMessages.vue'
 import type { ChatHistory } from '../components/Chat/types'
 import CloseWindow from '../components/CloseWindow.vue'
 import DraggableArea from '../components/DraggableArea.vue'
 import Icon from '../components/Icon.vue'
+import { selectionTable } from '../database'
+import { commands } from '../logic/commands'
 import { getPromptConf } from '../logic/config'
 import { mustache } from '../utils'
-import { commands } from '../logic/commands'
-import CarbonIcon from '../components/CarbonIcon.vue'
-import { selectionTable } from '../database'
 
 const chatRef = ref<InstanceType<typeof ChatMessages>>()
+
+const initialChat: ChatHistory = {
+  id: nanoid(),
+  name: 'temp',
+  messages: [],
+}
 
 const state = reactive({
   promptId: '',
   selectedText: '',
   pinned: false,
   ready: false,
-  chatHistory: {
-    id: nanoid(),
-    name: 'temp',
-    messages: [],
-  } as ChatHistory,
+  chatHistory: initialChat,
 })
 
 const promptConf = computed(() =>

@@ -1,10 +1,10 @@
 <script lang='ts' setup>
-import Chart from 'primevue/chart'
-import { computed, reactive, watch } from 'vue'
 import { useAsyncData } from '@0x-jerry/vue-kit'
-import { selectionTable } from '../database'
-import DatePicker from 'primevue/datepicker'
 import dayjs from 'dayjs'
+import Chart from 'primevue/chart'
+import DatePicker from 'primevue/datepicker'
+import { computed, reactive, watch } from 'vue'
+import { selectionTable } from '../database'
 
 const query = reactive({
   dates: [

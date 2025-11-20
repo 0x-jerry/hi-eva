@@ -1,6 +1,9 @@
-import { chatHistoryMsgTable, IChatHistoryMsgModel } from './chatHistoryMsg'
+import {
+  chatHistoryMsgTable,
+  type IChatHistoryMsgModel,
+} from './chatHistoryMsg'
 import { type BaseModel, BaseModelManager } from './database'
-import { IPromptConfigModel } from './promptConfig'
+import type { IPromptConfigModel } from './promptConfig'
 
 export interface IChatHistoryModel extends BaseModel {
   title: string
@@ -21,7 +24,7 @@ class ChatHistoryTable extends BaseModelManager<IChatHistoryModel> {
 
     if (result) {
       const msgs = await chatHistoryMsgTable.getMsgs(result.id)
-      
+
       result.messages = msgs
     }
 

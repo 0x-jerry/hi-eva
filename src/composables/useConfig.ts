@@ -1,7 +1,7 @@
 import {
+  type Awaitable,
   execMigration,
   nanoid,
-  type Awaitable,
   type UpgradeConfig,
   type VersionedData,
 } from '@0x-jerry/utils'

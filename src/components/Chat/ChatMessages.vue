@@ -7,10 +7,12 @@ import ContextMenu from 'primevue/contextmenu'
 import type { MenuItem } from 'primevue/menuitem'
 import Textarea from 'primevue/textarea'
 import { nextTick, reactive, ref } from 'vue'
+import { chatHistoryTable } from '../../database/chatHistory'
+import { chatHistoryMsgTable } from '../../database/chatHistoryMsg'
 import CopyBtn from '../CopyBtn.vue'
 import Markdown from '../Markdown.vue'
 import { chatWithPrompt } from './chat'
-import type { ChatHistory } from './types'
+import type { ChatHistory, ChatMessageWithDb } from './types'
 
 export interface ChatMessagesProps {
   promptId: string
@@ -25,7 +27,7 @@ const emit = defineEmits(['click-title'])
 const menuRef = ref<InstanceType<typeof ContextMenu>>()
 
 const contextMenuState = reactive({
-  selectMsg: null as ChatCompletionMessageParam | null,
+  selectMsg: null as ChatMessageWithDb | null,
 })
 
 const scrollEl = ref<HTMLDivElement>()
@@ -61,6 +63,24 @@ async function scrollToBottom() {
   })
 }
 
+async function ensureChatPersisted() {
+  if (!chat.value) return
+  // already persisted when id is a number-like string
+  if (chat.value.id) return
+
+  const title = chat.value.name || String(chat.value.messages?.[0]?.content ?? '') || 'New Chat'
+
+  const created = await chatHistoryTable.createOne({
+    title,
+    model: '',
+    promptConfigId: Number(props.promptId) || 0,
+  })
+
+  if (created) {
+    chat.value.id = String(created.id)
+  }
+}
+
 function handleKeydown(evt: KeyboardEvent) {
   if (evt.key === 'Enter') {
     evt.preventDefault()
@@ -76,10 +96,23 @@ async function onSend() {
   if (!reply) return
   state.reply = ''
 
-  chat.value.messages.push({
-    role: 'user',
-    content: reply,
-  })
+  const userMsg: ChatMessageWithDb = { role: 'user', content: reply }
+  chat.value.messages.push(userMsg)
+  // persist user message (ensure chat record exists)
+  try {
+    await ensureChatPersisted()
+    const created = await chatHistoryMsgTable.createOne({
+      role: 'user',
+      content: reply,
+      chatHistoryId: Number(chat.value.id),
+    })
+    if (created?.id) {
+      const last = chat.value.messages.at(-1)
+      if (last) last.__dbId = created.id
+    }
+  } catch (e) {
+    // ignore persistence errors for now
+  }
   scrollToBottom()
 
   await continueChat()
@@ -107,6 +140,20 @@ async function chatWith(messages: ChatCompletionMessageParam[]) {
     content: '',
   })
 
+  // persist assistant placeholder
+  try {
+    await ensureChatPersisted()
+    const created = await chatHistoryMsgTable.createOne({
+      role: 'assistant',
+      content: '',
+      chatHistoryId: Number(chat.value.id),
+    })
+    const msg = chat.value.messages.at(-1)
+    if (created?.id && msg) msg.__dbId = created.id
+  } catch (e) {
+    // ignore persistence errors
+  }
+
   try {
     const respStream = await chatWithPrompt(messages, {
       promptId: props.promptId,
@@ -115,7 +162,7 @@ async function chatWith(messages: ChatCompletionMessageParam[]) {
     state.isThinking = false
     state.isReplying = true
 
-    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    // biome-ignore lint/style/noNonNullAssertion: false positive
     const msg = chat.value.messages.at(-1)!
 
     requestAbort = respStream.controller
@@ -124,6 +171,21 @@ async function chatWith(messages: ChatCompletionMessageParam[]) {
       const chunkContent = chunkItem.choices.at(0)?.delta.content || ''
       msg.content += chunkContent
 
+      // update DB record if exists
+      try {
+        const dbId = msg.__dbId
+        if (dbId) {
+          await chatHistoryMsgTable.updateOne({
+            id: dbId,
+            role: 'assistant',
+            content: String(msg.content),
+            chatHistoryId: Number(chat.value.id),
+          })
+        }
+      } catch (e) {
+        // ignore update errors
+      }
+
       scrollToBottom()
     }
   } catch (error) {
@@ -131,6 +193,20 @@ async function chatWith(messages: ChatCompletionMessageParam[]) {
 
     if (lastMsg) {
       lastMsg.content += String(error)
+      // persist error to DB if possible
+      try {
+        const dbId = lastMsg.__dbId
+        if (dbId) {
+          await chatHistoryMsgTable.updateOne({
+            id: dbId,
+            role: 'assistant',
+            content: String(lastMsg.content),
+            chatHistoryId: Number(chat.value.id),
+          })
+        }
+      } catch (e) {
+        // ignore
+      }
     }
   }
 
@@ -158,6 +234,19 @@ const menuItems: MenuItem[] = [
       const idx = chat.value.messages.indexOf(contextMenuState.selectMsg)
       if (idx == null) return
 
+      // delete DB rows for removed messages
+      const removed = chat.value.messages.slice(idx)
+      for (const m of removed) {
+        const dbId = m.__dbId
+        if (dbId) {
+          try {
+            chatHistoryMsgTable.deleteById(dbId)
+          } catch (e) {
+            // ignore
+          }
+        }
+      }
+
       chat.value.messages = chat.value.messages.slice(0, idx)
 
       continueChat()
@@ -172,6 +261,18 @@ const menuItems: MenuItem[] = [
       state.isReplying = false
       state.isThinking = false
 
+      const target = contextMenuState.selectMsg
+      if (target) {
+        const dbId = target.__dbId
+        if (dbId) {
+          try {
+            chatHistoryMsgTable.deleteById(dbId)
+          } catch (e) {
+            // ignore
+          }
+        }
+      }
+
       remove(
         chat.value?.messages || [],
         (msg) => msg === contextMenuState.selectMsg,
@@ -180,7 +281,7 @@ const menuItems: MenuItem[] = [
   },
 ]
 
-function showContextmenu(event: Event, msg: ChatCompletionMessageParam) {
+function showContextmenu(event: Event, msg: ChatMessageWithDb) {
   contextMenuState.selectMsg = msg
   menuRef.value?.show(event)
 }
@@ -200,13 +301,13 @@ defineExpose({
             <span v-else class="i-carbon-machine-learning text-rose-4"></span>
           </div>
           <div class="role-tools flex gap-1">
-            <CopyBtn class="text-sm" :content="msg.content as string" />
+            <CopyBtn class="text-sm" :content="String(msg.content)" />
           </div>
         </div>
         <div class="chat-msg-content ml-3 mt-2 p-2 bg-light-5 rounded border-(1 solid gray-2)"
           @contextmenu.prevent="showContextmenu($event, msg)">
           <template v-if="msg.content">
-            <Markdown :content="msg.content as string" />
+            <Markdown :content="String(msg.content)" />
           </template>
           <template v-else>
             <i class="pi pi-spin pi-spinner"></i>

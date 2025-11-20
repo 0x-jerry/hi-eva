@@ -1,1 +1,1 @@
-export { selectionTable, type ISelectionModel } from './selection'
+export { type ISelectionModel, selectionTable } from './selection'

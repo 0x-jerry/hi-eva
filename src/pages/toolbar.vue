@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import AutoResizeContainer from '../components/AutoResizeContainer.vue'
-import { promptConfigs } from '../logic/config'
-import CarbonIcon from '../components/CarbonIcon.vue'
-import { commands } from '../logic/commands'
 import { onMounted } from 'vue'
+import AutoResizeContainer from '../components/AutoResizeContainer.vue'
+import CarbonIcon from '../components/CarbonIcon.vue'
 import type { PromptConfig } from '../composables'
+import { commands } from '../logic/commands'
+import { promptConfigs } from '../logic/config'
 
 onMounted(async () => {
   await commands.applyAppearance()
