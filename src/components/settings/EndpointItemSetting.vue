@@ -64,6 +64,10 @@ async function applyUpdate() {
         <EditableInputText :editable="editMode" v-model="currentValue.baseUrl" />
       </div>
       <div class="editable-row">
+        <label>Model</label>
+        <EditableInputText :editable="editMode" v-model="currentValue.model" />
+      </div>
+      <div class="editable-row">
         <label>API Key</label>
         <template v-if="editMode">
           <Password class="content" v-model="currentValue.apiKey" :disabled="!editMode" toggleMask :feedback="false" />
