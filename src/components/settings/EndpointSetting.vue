@@ -1,33 +1,56 @@
 <script lang='ts' setup>
-import { parseJson } from '@0x-jerry/utils'
 import { useAsyncData } from '@0x-jerry/vue-kit'
 import { ref } from 'vue'
-import { endpointConfigTable } from '../../database/endpointConfig'
-import { EndpointItem } from '../../types/endpoint'
+import { endpointConfigTable, IEndpointConfigItem } from '../../database/endpointConfig'
 import Icon from '../Icon.vue'
 import EndpointItemSetting from './EndpointItemSetting.vue'
 import SettingTitle from './SettingTitle.vue'
 
 
-const configs = useAsyncData(async () => {
+const configsApi = useAsyncData(async () => {
   const resp = await endpointConfigTable.findAll()
 
-  return resp.map(item => ({ ...item, models: parseJson<string[]>(item.models) }))
+  return resp
 }, [])
 
-const newData = ref<EndpointItem>()
+configsApi.load()
 
-async function addConfig() {
+const newData = ref<IEndpointConfigItem>()
+
+function addConfig() {
   newData.value = {
     apiKey: '',
-    models: [],
-    name: '',
-    baseUrl: ''
+    name: '未命名',
+    baseUrl: '',
+    model: '',
   }
 }
 
-async function removeConf(idx: number) {
-  // configs.value.splice(idx, 1)
+function resetNewData() {
+  newData.value = undefined
+}
+
+async function removeConf(conf: IEndpointConfigItem) {
+  if (conf.id) {
+    await endpointConfigTable.deleteById(conf.id)
+  }
+
+  await configsApi.load()
+}
+
+async function handleAddOrUpdate(conf: IEndpointConfigItem) {
+
+  if (conf.id) {
+    await endpointConfigTable.updateOne({
+      ...conf,
+      id: conf.id,
+    })
+  } else {
+    await endpointConfigTable.createOne(conf)
+    newData.value = undefined
+  }
+
+  await configsApi.load()
 }
 </script>
 
@@ -43,10 +66,9 @@ async function removeConf(idx: number) {
     </SettingTitle>
 
     <div class="flex flex-col gap-2">
-      <EndpointItemSetting v-if="newData" v-model="newData" />
+      <EndpointItemSetting v-if="newData" :item="newData" @update="handleAddOrUpdate" @remove="resetNewData" />
 
-      <!-- todo -->
-      <!-- <EndpointSetting v-for="(conf, idx) in configs" :confId="conf.id" :key="conf.id" @remove="removeConf(idx)" /> -->
+      <EndpointItemSetting v-for="conf in configsApi.data.value" :key="conf.id" :item="conf" @remove="removeConf(conf)" @update="handleAddOrUpdate" />
     </div>
   </div>
 </template>

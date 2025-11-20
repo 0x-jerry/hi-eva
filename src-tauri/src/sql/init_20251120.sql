@@ -8,5 +8,5 @@ CREATE TABLE IF NOT EXISTS
     `name` VARCHAR(64),
     `baseUrl` VARCHAR(255),
     `apiKey` VARCHAR(255),
-    `models` text -- json value for string array
+    `model` VARCHAR(64)
   );

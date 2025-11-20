@@ -92,23 +92,29 @@ export abstract class BaseModelManager<T extends BaseModel> {
     return await this.getById(resp.lastInsertId!)
   }
 
-  async updateOne(data: UpdatedModel<T>) {
-    const columns = [COMMON_COLUMN.updatedDate, ...this.COLUMN_NAMES]
+  async updateOne(data: UpdatedModel<T>, opt: IUpdateOneOption = {}) {
+    const { columns = this.COLUMN_NAMES } = opt
 
-    const placeholders = columns
+    const allColumns = [COMMON_COLUMN.updatedDate, ...columns]
+
+    const placeholders = allColumns
       .map((name, idx) => `${name} = $${idx + 1}`)
       .join(', ')
 
     const values = [
       dayjs().unix(),
-      ...this.COLUMN_NAMES.map((key) => Reflect.get(data, key)),
+      ...columns.map((key) => Reflect.get(data, key)),
       data.id,
     ]
 
-    const sql = `update ${this.TABLE_NAME} set ${placeholders} where id = ${columns.length + 1}`
+    const sql = `update ${this.TABLE_NAME} set ${placeholders} where id = $${allColumns.length + 1}`
 
     const resp = await db.execute(sql, values)
 
     return resp
   }
+}
+
+interface IUpdateOneOption {
+  columns?: string[]
 }

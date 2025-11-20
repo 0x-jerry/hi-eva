@@ -6,17 +6,14 @@ export interface IEndpointConfigModel extends BaseModel {
   name: string
   baseUrl: string
   apiKey: string
-  /**
-   * json value for string array
-   */
-  models: string
+  model?: string
 }
 
 export type IEndpointConfigItem = GetPureModelType<IEndpointConfigModel>
 
 class EndpointConfigTable extends BaseModelManager<IEndpointConfigModel> {
   TABLE_NAME = 'endpoint_config'
-  COLUMN_NAMES = ['name', 'baseUrl', 'apiKey', 'models', 'isBuiltin']
+  COLUMN_NAMES = ['name', 'baseUrl', 'apiKey', 'model', 'isBuiltin']
 }
 
 export const endpointConfigTable = new EndpointConfigTable()

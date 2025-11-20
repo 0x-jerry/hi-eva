@@ -1,61 +1,98 @@
-<script lang='ts' setup>
-import type { IFuseOptions } from 'fuse.js'
-import Inplace from 'primevue/inplace'
-import InputText from 'primevue/inputtext'
-import Password from 'primevue/password'
-import {
-  BuiltinEndpointsConfig,
-} from '../../logic/builtinConfig'
-import { EndpointItem } from '../../types/endpoint'
-import AutoCompleteInput from '../AutoCompleteInput.vue'
-import Icon from '../Icon.vue'
+<script lang="ts" setup>
+import InputText from "primevue/inputtext";
+import Password from "primevue/password";
+import { ref, toRaw, watch } from "vue";
+import { IEndpointConfigItem } from "../../database/endpointConfig";
+import Icon from "../Icon.vue";
 
-const emit = defineEmits(['remove'])
+export interface EndpointItemSettingProps {
+  item: IEndpointConfigItem;
+}
 
-const modelValue = defineModel<EndpointItem>({ required: true })
+const props = defineProps<EndpointItemSettingProps>();
 
-const fuseOption: IFuseOptions<unknown> = {
-  includeScore: true,
-  keys: ['baseUrl', 'name'],
+const emit = defineEmits(["remove", "update", "update:editMode"]);
+
+const editMode = ref(!props.item.id)
+
+const currentValue = ref(structuredClone(toRaw(props.item)));
+
+watch(props.item, () => resetCurrentValue());
+
+function resetCurrentValue() {
+  currentValue.value = structuredClone(toRaw(props.item));
+}
+
+function toggleEditMode() {
+  editMode.value = !editMode.value;
+
+  resetCurrentValue();
+
+  if (!props.item.id) {
+    emit('remove')
+  }
+}
+
+async function applyUpdate() {
+  emit("update", currentValue.value);
+  toggleEditMode();
 }
 </script>
 
 <template>
-
   <div class="endpoint-setting">
     <div class="flex flex-col gap-2 bg-light-3 p-4 rounded">
       <div class="flex items-center">
-        <Inplace :disabled="!!modelValue.isBuiltin">
-          <template #display>
-            {{ modelValue.name || '无配置名称' }}
+        <div>
+          <InputText :disabled="!editMode" v-model="currentValue.name" />
+        </div>
+
+        <div class="flex flex-1 justify-end items-center gap-2">
+          <Icon
+            v-if="item.id"
+            class="i-carbon:trash-can cursor-pointer"
+            @click="emit('remove')"
+          />
+
+          <template v-if="editMode">
+            <Icon
+              class="i-carbon:close cursor-pointer"
+              @click="toggleEditMode"
+            />
+            <Icon
+              class="i-carbon:checkmark cursor-pointer"
+              @click="applyUpdate"
+            />
           </template>
-          <template #content="{ closeCallback }">
-            <span class="inline-flex items-center gap-2">
-              <InputText v-model="modelValue.name" autofocus />
-              <Icon class="i-carbon:checkmark cursor-pointer" @click="closeCallback" />
-            </span>
+          <template v-else>
+            <Icon
+              class="i-carbon:edit cursor-pointer"
+              @click="toggleEditMode"
+            />
           </template>
-        </Inplace>
-        <div class="flex flex-1 justify-end">
-          <Icon v-if="!modelValue.isBuiltin" class="i-carbon:close cursor-pointer" @click="emit('remove')" />
         </div>
       </div>
       <div class="editable-row">
         <label>Base URL</label>
-        <AutoCompleteInput class="content" v-model="modelValue.baseUrl" :items="BuiltinEndpointsConfig"
-          optionLabel="baseUrl" :fuse="fuseOption" />
+        <InputText v-model="currentValue.baseUrl" :disabled="!editMode" />
       </div>
       <div class="editable-row">
         <label>API Key</label>
-        <Password class="content" v-model="modelValue.apiKey" toggleMask :feedback="false" />
+        <Password
+          class="content"
+          v-model="currentValue.apiKey"
+          :disabled="!editMode"
+          toggleMask
+          :feedback="false"
+        />
       </div>
     </div>
   </div>
 </template>
 
-<style lang='scss' scoped>
+<style lang="scss" scoped>
 .editable-row {
-  @apply flex items-center;
+  --uno: flex items-center;
 
   label {
     width: 100px;
@@ -70,6 +107,5 @@ const fuseOption: IFuseOptions<unknown> = {
       width: 100%;
     }
   }
-
 }
 </style>
