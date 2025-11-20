@@ -121,7 +121,7 @@ fn get_selection_range() -> Result<Option<SelectionRect>> {
         }
     }
 
-    log::info!("get seletion range by automation end");
+    log::info!("get selection range by automation end");
 
     Ok(rect)
 }
@@ -177,7 +177,7 @@ fn get_selected_text() -> Result<Option<String>> {
         result = Some(s);
     }
 
-    log::info!("get seletion range by automation end");
+    log::info!("get selection range by automation end");
 
     Ok(result)
 }
