@@ -26,7 +26,7 @@ async function removeConf(idx: number) {
   <div>
     <SettingTitle class="mb-2 gap-2">
       <span>
-        AI 配置
+        Endpoint 配置
       </span>
       <div class="flex items-center gap-2">
         <Icon class="i-carbon:add cursor-pointer" @click="addConfig" />
