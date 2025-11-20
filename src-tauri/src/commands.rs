@@ -65,7 +65,9 @@ pub async fn apply_enabled(app: State<'_, MyApp>) -> Result<()> {
 pub async fn open_setting_folder(app: AppHandle) -> Result<()> {
     let conf_dir = app.path().app_config_dir()?;
 
-    app.opener().reveal_item_in_dir(conf_dir).unwrap();
+    app.opener()
+        .open_path(conf_dir.to_str().unwrap(), None::<&str>)
+        .unwrap();
 
     Ok(())
 }
