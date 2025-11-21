@@ -1,14 +1,10 @@
 <script lang="ts" setup>
-import { createPromise, isArray, Optional } from '@0x-jerry/utils'
-import { useAsyncData, useLoading } from '@0x-jerry/vue-kit'
+import { Optional } from '@0x-jerry/utils'
+import { useAsyncData } from '@0x-jerry/vue-kit'
 import { getCurrentWindow } from '@tauri-apps/api/window'
-import { debounce } from 'lodash-es'
-import OpenAI from 'openai'
-import { ChatCompletionStream } from 'openai/lib/ChatCompletionStream.mjs'
-import { ChatCompletionMessageParam } from 'openai/resources/index.mjs'
-import { onMounted, reactive, ref } from 'vue'
+import { nextTick, reactive, ref, useTemplateRef } from 'vue'
 import AutoResizeContainer from '../components/AutoResizeContainer.vue'
-import ChatRoom from '../components/Chat/ChatRoom.vue'
+import ChatWithHistory from '../components/ChatWithHistory.vue'
 import { chatHistoryTable, IChatHistoryModel } from '../database/chatHistory'
 import {
   chatHistoryMsgTable,
@@ -16,8 +12,6 @@ import {
   IChatHistoryMsgModel,
 } from '../database/chatHistoryMsg'
 import { promptConfigTable } from '../database/promptConfig'
-import { ChatRole } from '../logic/chat'
-import { commands } from '../logic/commands'
 import { WindowEventName } from '../logic/events'
 import { mustache } from '../utils'
 import ChatPageHead from './components/ChatPageHead.vue'
@@ -29,7 +23,7 @@ const state = reactive({
   responseMsg: null as Optional<IChatHistoryMsgModel>,
 })
 
-let streamRef: Optional<ChatCompletionStream>
+const chatRef = useTemplateRef('chatRef')
 
 const chatHistory = ref<IChatHistoryModel>()
 
@@ -53,11 +47,7 @@ win.listen(WindowEventName.ChatHide, async () => {
 
   await win.hide()
 
-  streamRef?.abort()
-})
-
-onMounted(async () => {
-  await commands.applyAppearance()
+  chatRef.value?.abortStream()
 })
 
 async function createChatHistory() {
@@ -90,141 +80,9 @@ async function createChatHistory() {
       name,
     })
 
-    await handleSendMsg(msg)
+    await nextTick()
+    await chatRef.value?.sendMsg(msg)
   }
-}
-
-async function updateChatTitle(newTitle: string) {
-  const history = chatHistory.value
-  if (!history) {
-    throw new Error(`Chat history is not initialized`)
-  }
-
-  await chatHistoryTable.updateOne({
-    ...history,
-    name: newTitle,
-  })
-
-  chatHistory.value = await chatHistoryTable.getById(history.id)
-}
-
-const handleSendMsg = useLoading(_handleSendMsg)
-
-async function _handleSendMsg(msgContent: string) {
-  const historyId = chatHistory.value?.id
-
-  if (!historyId) {
-    throw new Error(`Chat history is not initialized!`)
-  }
-
-  const newMsgItem = await chatHistoryMsgTable.createOne({
-    chatHistoryId: historyId,
-    role: ChatRole.User,
-    content: msgContent,
-  })
-
-  state.messages.push(newMsgItem)
-
-  state.responseMsg = await chatHistoryMsgTable.createOne({
-    chatHistoryId: historyId,
-    role: ChatRole.Assistant,
-    content: '',
-  })
-
-  state.messages.push(state.responseMsg)
-
-  await startChatStream(state.messages.slice(0, -1))
-}
-
-const saveResponseMsgItem = debounce(_saveResponseMsgItem, 100)
-
-async function _saveResponseMsgItem() {
-  if (!state.responseMsg?.id) return
-
-  await chatHistoryMsgTable.updateOne({
-    ...state.responseMsg,
-  })
-}
-
-async function startChatStream(msgs: IChatHistoryMsgItem[]) {
-  const { apiKey, model, baseUrl } =
-    promptConfigApi.data.value?.endpointConfig || {}
-
-  if (!baseUrl || !apiKey || !model) {
-    throw new Error(`Endpoint config is missing`)
-  }
-
-  const ins = new OpenAI({
-    baseURL: baseUrl,
-    apiKey,
-  })
-
-  const resultPromise = createPromise<void>()
-
-  const stream = ins.chat.completions.stream({
-    model,
-    messages: msgs.map((msg) => {
-      const item: ChatCompletionMessageParam = {
-        role: msg.role === ChatRole.User ? 'user' : 'assistant',
-        content: msg.content,
-      }
-
-      return item
-    }),
-  })
-
-  streamRef = stream
-
-  stream.on('message', (msg) => {
-    let content = ''
-
-    if (isArray(msg.content)) {
-      msg.content.forEach((item) => {
-        switch (item.type) {
-          case 'text':
-            content += item.text
-            break
-          case 'refusal':
-            content += item.refusal
-            break
-
-          case 'image_url':
-            content += `![](${item.image_url.url})`
-            break
-
-          default:
-            throw new Error(`Message type not support`)
-        }
-      })
-    } else {
-      content += msg.content || ''
-    }
-
-    if (!state.responseMsg) {
-      throw new Error(`Response message instance is null`)
-    }
-
-    state.responseMsg.content += content
-
-    saveResponseMsgItem()
-  })
-
-  stream.on('end', () => {
-    state.responseMsg = null
-    streamRef = null
-
-    resultPromise.resolve()
-  })
-
-  stream.on('error', (err) => {
-    resultPromise.reject(err.message)
-  })
-
-  return resultPromise.promise
-}
-
-function handleAbort() {
-  streamRef?.abort()
 }
 </script>
 
@@ -234,8 +92,7 @@ function handleAbort() {
       <ChatPageHead :icon="promptConfigApi.data.value?.icon" :title="promptConfigApi.data.value?.name" v-model:pinned="state.pinned" />
 
       <template v-if="chatHistory">
-        <ChatRoom :title="chatHistory.name" :messages="state.messages" :is-processing="handleSendMsg.isLoading"
-          @rename-title="updateChatTitle" @send="handleSendMsg" @abort="handleAbort" />
+        <ChatWithHistory ref="chatRef" :history-id="chatHistory.id" :prompt-config-id="promptConfigApi.data.value?.id" />
       </template>
     </div>
   </AutoResizeContainer>

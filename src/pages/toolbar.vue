@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { useAsyncData } from '@0x-jerry/vue-kit'
 import { getCurrentWindow } from '@tauri-apps/api/window'
-import { onMounted } from 'vue'
 import AutoResizeContainer from '../components/AutoResizeContainer.vue'
 import CarbonIcon from '../components/CarbonIcon.vue'
 import { IPromptConfigModel, promptConfigTable } from '../database/promptConfig'
@@ -11,10 +10,6 @@ import { WindowEventName } from '../logic/events'
 const promptConfigsApi = useAsyncData(promptConfigTable.findAll, [])
 
 promptConfigsApi.load()
-
-onMounted(async () => {
-  await commands.applyAppearance()
-})
 
 const win = getCurrentWindow()
 

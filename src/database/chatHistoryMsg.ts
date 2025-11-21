@@ -16,7 +16,7 @@ class ChatHistoryMsgTable extends BaseModelManager<IChatHistoryMsgModel> {
   COLUMN_NAMES = ['role', 'content', 'chatHistoryId']
 
   async getMsgs(chatHistoryId: number) {
-    const sql = `select * from ${this.TABLE_NAME} where chatHistoryId = $1 order by ${COMMON_COLUMN.createdDate} desc`
+    const sql = `select * from ${this.TABLE_NAME} where chatHistoryId = $1 order by ${COMMON_COLUMN.id}`
 
     const result = await this.db.select<IChatHistoryMsgModel[]>(sql, [
       chatHistoryId,

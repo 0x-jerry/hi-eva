@@ -42,7 +42,7 @@ export abstract class BaseModelManager<T extends BaseModel> {
   async page(opt: PaginationParam) {
     const { size = 10, current } = opt
 
-    const sql = `select * from ${this.TABLE_NAME} order by ${COMMON_COLUMN.createdDate} limit ${size} offset ${size * current}`
+    const sql = `select * from ${this.TABLE_NAME} order by ${COMMON_COLUMN.id} limit ${size} offset ${size * current}`
 
     const resp = await db.select<T[]>(sql)
 
@@ -58,7 +58,7 @@ export abstract class BaseModelManager<T extends BaseModel> {
   }
 
   async findAll() {
-    const sql = `select * from ${this.TABLE_NAME} order by ${COMMON_COLUMN.createdDate} desc`
+    const sql = `select * from ${this.TABLE_NAME} order by ${COMMON_COLUMN.id} desc`
 
     const resp = await db.select<T[]>(sql)
 

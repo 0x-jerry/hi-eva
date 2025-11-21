@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { IChatHistoryMsgItem } from '../../database/chatHistoryMsg'
-import ChatHeader from './ChatHeader.vue'
 import ChatInput, { type ChatInputEmits } from './ChatInput.vue'
 import ChatMessageList from './ChatMessageList.vue'
 
@@ -10,9 +9,7 @@ export interface ChatRoomProps {
   isProcessing?: boolean
 }
 
-export type ChatRoomEmits = ChatInputEmits & {
-  renameTitle: [newTitle: string]
-}
+export type ChatRoomEmits = ChatInputEmits
 
 defineProps<ChatRoomProps>()
 
@@ -21,17 +18,13 @@ const emit = defineEmits<ChatRoomEmits>()
 function handleSend(content: string) {
   emit('send', content)
 }
-
-function renameChat(newName: string) {
-  emit('renameTitle', newName)
-}
 </script>
 
 <template>
-  <div class="chat-root">
-    <ChatHeader :name="title" @rename="renameChat" />
-
-    <ChatMessageList :messages="messages" />
+  <div class="chat-root flex">
+    <div class="flex-1 h-0">
+      <ChatMessageList :messages="messages" />
+    </div>
 
     <ChatInput :is-processing="isProcessing" @send="handleSend" @abort="emit('abort')" />
   </div>
