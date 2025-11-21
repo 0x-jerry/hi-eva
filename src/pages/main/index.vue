@@ -76,12 +76,12 @@ async function updateHistoryName(name: string) {
 <template>
   <div class="flex h-full">
     <aside class="w-50 flex flex-col bg-light-3 overflow-auto border-(0 r solid gray-2) ">
-      <div class="flex-1">
+      <div class="flex-1 overflow-auto">
         <div v-for="h in historiesApi.data.value" :key="h.id" class="p-2 rounded cursor-pointer hover:bg-light-5"
           :class="{ 'bg-light-5': state.selectedId === h.id }" @click="selectHistory(h.id)">
           <div class="truncate">{{ h.name || "Untitled" }}</div>
           <div class="text-sm text-gray-4 mt-1">
-            {{ dayjs.unix(h.createdDate).format("YYYY-MM-DD HH:mm") }}
+            {{ dayjs.unix(h.createdDate).format("YYYY-MM-DD HH:mm:ss") }}
           </div>
         </div>
       </div>
