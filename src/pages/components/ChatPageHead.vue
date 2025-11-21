@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import { getCurrentWindow } from '@tauri-apps/api/window'
+import CarbonIcon from '../../components/CarbonIcon.vue'
 import CloseWindow from '../../components/CloseWindow.vue'
 import DraggableArea from '../../components/DraggableArea.vue'
+import Icon from '../../components/Icon.vue'
 import { commands } from '../../logic/commands'
 
 export interface ChatPageHead {
@@ -16,10 +18,12 @@ const vPinned = defineModel('pinned', { default: false })
 const win = getCurrentWindow()
 
 async function togglePinWindow() {
-  vPinned.value = !vPinned.value
+  const pinned = !vPinned.value
 
-  await win.setAlwaysOnTop(vPinned.value)
-  await commands.setChatPinned({ pinned: vPinned.value })
+  vPinned.value = pinned
+
+  await win.setAlwaysOnTop(pinned)
+  await commands.setChatPinned({ pinned })
 }
 </script>
 

@@ -12,7 +12,6 @@ CREATE TABLE IF NOT EXISTS
   );
 
 CREATE UNIQUE INDEX `endpoint_config_index_id` ON `endpoint_config` (`id`);
-CREATE UNIQUE INDEX `endpoint_config_index_updatedDate` ON `endpoint_config` (`updatedDate`);
 
 CREATE TABLE IF NOT EXISTS
   `prompt_config` (
@@ -28,7 +27,6 @@ CREATE TABLE IF NOT EXISTS
   );
 
 CREATE UNIQUE INDEX `prompt_config_index_id` ON `prompt_config` (`id`);
-CREATE UNIQUE INDEX `prompt_config_index_updatedDate` ON `prompt_config` (`updatedDate`);
 
 CREATE TABLE IF NOT EXISTS
   `chat_history` (
@@ -40,7 +38,6 @@ CREATE TABLE IF NOT EXISTS
   );
 
 CREATE UNIQUE INDEX `chat_history_index_id` ON `chat_history` (`id`);
-CREATE UNIQUE INDEX `chat_history_index_updatedDate` ON `chat_history` (`updatedDate`);
 
 CREATE TABLE IF NOT EXISTS
   `chat_history_msg` (
@@ -54,4 +51,3 @@ CREATE TABLE IF NOT EXISTS
   );
 
 CREATE UNIQUE INDEX `chat_history_msg_index_id` ON `chat_history_msg` (`id`);
-CREATE UNIQUE INDEX `chat_history_msg_index_updatedDate` ON `chat_history_msg` (`updatedDate`);
