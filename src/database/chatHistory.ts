@@ -3,21 +3,16 @@ import {
   type IChatHistoryMsgModel,
 } from './chatHistoryMsg'
 import { type BaseModel, BaseModelManager } from './database'
-import type { IPromptConfigModel } from './promptConfig'
 
 export interface IChatHistoryModel extends BaseModel {
-  title: string
-  model: string
-
-  promptConfigId: number
-  promptConfig?: IPromptConfigModel
+  name: string
 
   messages?: IChatHistoryMsgModel[]
 }
 
 class ChatHistoryTable extends BaseModelManager<IChatHistoryModel> {
   TABLE_NAME = 'chat_history'
-  COLUMN_NAMES = ['title', 'model', 'promptConfigId']
+  COLUMN_NAMES = ['name']
 
   async getAllById(id: number) {
     const result = await this.getById(id)

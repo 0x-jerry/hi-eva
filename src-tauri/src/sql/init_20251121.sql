@@ -1,12 +1,26 @@
 CREATE TABLE IF NOT EXISTS
+  `endpoint_config` (
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    `createdDate` DATETIME NOT NULL,
+    `updatedDate` DATETIME NOT NULL,
+    -- 
+    `isBuiltin` INTEGER DEFAULT 0,
+    `name` VARCHAR(64),
+    `baseUrl` VARCHAR(255),
+    `apiKey` VARCHAR(255),
+    `model` VARCHAR(64)
+  );
+
+CREATE TABLE IF NOT EXISTS
   `prompt_config` (
     `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     `createdDate` DATETIME NOT NULL,
     `updatedDate` DATETIME NOT NULL,
     -- 
-    `name` VARCHAR(64) NOT NULL,
-    `icon` VARCHAR(255) NOT NULL,
-    `prompt` text NOT NULL,
+    `name` VARCHAR(64),
+    `icon` VARCHAR(255),
+    `prompt` text,
+    `endpointId` INTEGER,
     `isBuiltin` INTEGER DEFAULT 0
   );
 
@@ -16,9 +30,7 @@ CREATE TABLE IF NOT EXISTS
     `createdDate` DATETIME NOT NULL,
     `updatedDate` DATETIME NOT NULL,
     -- 
-    `title` VARCHAR(255) NOT NULL,
-    `model` VARCHAR(64) NOT NULL, -- model name
-    `promptConfigId` VARCHAR(64) NOT NULL
+    `name` VARCHAR(255) NOT NULL
   );
 
 CREATE TABLE IF NOT EXISTS

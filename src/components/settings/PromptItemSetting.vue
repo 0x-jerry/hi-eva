@@ -1,71 +1,83 @@
 <script lang='ts' setup>
-import Inplace from 'primevue/inplace'
-import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
-import { computed } from 'vue'
-import { BuiltinEndpointsConfig } from '../../logic/builtinConfig'
-import { endPointConfigs, getPromptConf } from '../../logic/config'
-import AutoCompleteInput from '../AutoCompleteInput.vue'
+import { computed, ref, toRaw, watch } from 'vue'
+import type { IEndpointConfigItem } from '../../database/endpointConfig'
+import type { IPromptConfigItem } from '../../database/promptConfig'
+import EditableInputText from '../EditableInputText.vue'
 import Icon from '../Icon.vue'
 import IconPicker from '../IconPicker.vue'
 
 export interface PromptItemSettingProps {
-  confId: string
+  item: IPromptConfigItem
+  endpoints?: IEndpointConfigItem[]
 }
 
-const emit = defineEmits(['remove'])
-
 const props = defineProps<PromptItemSettingProps>()
+const emit = defineEmits(['remove', 'update'])
 
-const conf = computed(() => getPromptConf(props.confId))
+const editMode = ref(!props.item.id)
 
-const modelList = computed(() => {
-  const baseUrl = endPointConfigs.value.find(
-    (c) => c.id === conf.value?.endpointId,
-  )?.baseUrl
+const currentValue = ref(structuredClone(toRaw(props.item)))
 
-  return BuiltinEndpointsConfig.find((n) => n.baseUrl === baseUrl)?.models || []
-})
+watch(
+  () => props.item,
+  () => {
+    currentValue.value = structuredClone(toRaw(props.item))
+  },
+)
+
+const endpoints = computed(() => props.endpoints ?? [])
+
+function toggleEditMode() {
+  editMode.value = !editMode.value
+  currentValue.value = structuredClone(toRaw(props.item))
+
+  if (!props.item.id) {
+    emit('remove')
+  }
+}
+
+function applyUpdate() {
+  emit('update', currentValue.value)
+  editMode.value = !editMode.value
+}
 </script>
 
 <template>
-  <div class="flex flex-col gap-2 bg-light-3 p-4 rounded" v-if="conf">
+  <div class="flex flex-col gap-2 bg-light-3 p-4 rounded">
     <div class="flex items-center gap-1">
-      <IconPicker v-model="conf.icon" />
-      <Inplace :disabled="conf.builtin">
-        <template #display>
-          {{ conf.name || '未命名' }}
-        </template>
-        <template #content="{ closeCallback }">
-          <span class="inline-flex items-center gap-2">
-            <InputText v-model="conf.name" autofocus />
-            <Icon class="i-carbon:checkmark cursor-pointer" @click="closeCallback" />
-          </span>
-        </template>
-      </Inplace>
+      <IconPicker v-model="currentValue.icon" />
+      <EditableInputText :editable="editMode" v-model="currentValue.name" />
       <div class="flex flex-1 justify-end">
-        <Icon v-if="!conf.builtin" class="i-carbon:close cursor-pointer" @click="emit('remove')" />
+        <Icon v-if="!currentValue.isBuiltin" class="i-carbon:close cursor-pointer" @click="emit('remove')" />
       </div>
     </div>
     <div class="flex flex-col gap-2">
-      <Textarea v-model="conf.prompt" :rows="5" />
+      <Textarea v-model="currentValue.prompt" :rows="5" />
     </div>
     <div class="editable-row">
-      <label>Model</label>
+      <label>Endpoint</label>
       <div class="flex gap-2">
-        <Select v-model="conf.endpointId" :options="endPointConfigs" optionLabel="label" optionValue="id"
+        <Select v-model="currentValue.endpointId" :options="endpoints" optionLabel="name" optionValue="id"
           placeholder="Select a endpoint" />
-
-        <AutoCompleteInput v-model="conf.model" :items="modelList" />
       </div>
+    </div>
+    <div class="flex items-center gap-2 justify-end mt-2">
+      <template v-if="editMode">
+        <Icon class="i-carbon:close cursor-pointer" @click="toggleEditMode" />
+        <Icon class="i-carbon:checkmark cursor-pointer" @click="applyUpdate" />
+      </template>
+      <template v-else>
+        <Icon class="i-carbon:edit cursor-pointer" @click="toggleEditMode" />
+      </template>
     </div>
   </div>
 </template>
 
 <style lang='scss' scoped>
 .editable-row {
-  @apply flex items-center;
+  --uno: flex items-center;
 
   label {
     width: 50px;

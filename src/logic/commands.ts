@@ -19,7 +19,7 @@ function buildCommands<T>(): T {
     {},
     {
       get(_target, p, _receiver) {
-        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        // biome-ignore lint/suspicious/noExplicitAny: on purpose
         return (arg: any) => invoke(snakeCase(p as string), arg)
       },
     },

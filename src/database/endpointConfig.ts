@@ -3,9 +3,9 @@ import type { GetPureModelType } from './types'
 
 export interface IEndpointConfigModel extends BaseModel {
   isBuiltin?: number
-  name: string
-  baseUrl: string
-  apiKey: string
+  name?: string
+  baseUrl?: string
+  apiKey?: string
   model?: string
 }
 

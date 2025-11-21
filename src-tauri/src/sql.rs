@@ -12,13 +12,7 @@ pub fn init_sql<T: Runtime>() -> TauriPlugin<T, Option<PluginConfig>> {
         Migration {
             version: 2,
             description: "create history relative tables",
-            sql: include_str!("sql/init_20251014.sql"),
-            kind: MigrationKind::Up,
-        },
-        Migration {
-            version: 3,
-            description: "create endpoint config tables",
-            sql: include_str!("sql/init_20251120.sql"),
+            sql: include_str!("sql/init_20251121.sql"),
             kind: MigrationKind::Up,
         },
     ];

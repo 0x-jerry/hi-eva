@@ -54,5 +54,8 @@ This file gives focused, actionable guidance for AI coding agents working in thi
 1. Do not add useless comment, make code more readable and efficient.
 2. Do not use literal object types, always define an interface or type alias for complex objects.
 3. Follow SOLID principles and best practices of software design.
+4. In Vue SFC file, always put variables declarations at the top, then hooks, then methods.
+5. In Vue SFC file, always put script section at the first, then template section then style section.
+6. In Vue SFC file, props and events should always be a interface named `${ComponentName}Props` and `${ComponentName}Emits`.
 
 If anything here is unclear or you'd like more detail about a particular area (e.g., Rust commands, database schema, or deployment), tell me which part to expand and I will iterate.

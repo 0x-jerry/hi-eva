@@ -1,7 +1,6 @@
 <script lang='ts' setup>
-import { sleep } from '@0x-jerry/utils'
 import { Button, Checkbox, InputText } from 'primevue'
-import { useId, watch } from 'vue'
+import { useId } from 'vue'
 import { useBasicConfig } from '../../composables'
 import { commands } from '../../logic/commands'
 import SettingTitle from './SettingTitle.vue'
@@ -10,13 +9,9 @@ const basicConfig = useBasicConfig()
 
 const listenClipboardFieldId = useId()
 
-watch(
-  () => basicConfig.value.listenClipboard,
-  async () => {
-    await sleep(500)
-    await commands.applyClipboardListener()
-  },
-)
+async function applyClipboardChange() {
+  await commands.applyClipboardListener()
+}
 
 function openSettingFolder() {
   commands.openSettingFolder()
@@ -41,7 +36,7 @@ function openSettingFolder() {
       </div>
       <div class="field-row ">
         <label :for="listenClipboardFieldId"> 监听剪贴板 </label>
-        <Checkbox :input-id="listenClipboardFieldId" v-model="basicConfig.listenClipboard" binary>  </Checkbox>
+        <Checkbox :input-id="listenClipboardFieldId" v-model="basicConfig.listenClipboard" binary @change="applyClipboardChange">  </Checkbox>
       </div>
     </div>
   </div>

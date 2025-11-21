@@ -1,23 +1,53 @@
 <script lang='ts' setup>
-import { nanoid } from '@0x-jerry/utils'
-import { promptConfigs } from '../../logic/config'
+import { useAsyncData } from '@0x-jerry/vue-kit'
+import { ref } from 'vue'
+import { endpointConfigTable } from '../../database/endpointConfig'
+import type { IPromptConfigItem } from '../../database/promptConfig'
+import { promptConfigTable } from '../../database/promptConfig'
 import Icon from '../Icon.vue'
 import PromptItemSetting from './PromptItemSetting.vue'
 import SettingTitle from './SettingTitle.vue'
 
-const configs = promptConfigs
+const configsApi = useAsyncData(() => promptConfigTable.findAll(), [])
 
-async function addConfig() {
-  configs.value.push({
-    id: nanoid(),
-    name: '',
+configsApi.load()
+
+const newData = ref<Partial<IPromptConfigItem>>()
+
+const endpointsApi = useAsyncData(() => endpointConfigTable.findAll(), [])
+
+endpointsApi.load()
+
+function addConfig() {
+  newData.value = {
+    name: '未命名',
     icon: '',
     prompt: '',
-  })
+  }
 }
 
-async function removeConf(idx: number) {
-  configs.value.splice(idx, 1)
+function resetNewData() {
+  newData.value = undefined
+}
+
+async function removeConf(conf: IPromptConfigItem) {
+  if (conf.id) {
+    await promptConfigTable.deleteById(conf.id)
+  }
+
+  await configsApi.load()
+}
+
+async function handleAddOrUpdate(conf: IPromptConfigItem) {
+
+  if (conf.id) {
+    await promptConfigTable.updateOne({ ...conf, id: conf.id })
+  } else {
+    await promptConfigTable.createOne(conf)
+    newData.value = undefined
+  }
+
+  await configsApi.load()
 }
 </script>
 
@@ -27,16 +57,26 @@ async function removeConf(idx: number) {
       <span>
         Prompt 配置
       </span>
-      <div class="flex items-center gap-2 cursor-pointer">
-        <Icon class="i-carbon:add" @click="addConfig" />
+      <div class="flex items-center gap-2">
+        <Icon class="i-carbon:add cursor-pointer" @click="addConfig" />
       </div>
     </SettingTitle>
 
     <div class="flex flex-col gap-2">
-      <PromptItemSetting v-for="(conf, idx) in configs" :confId="conf.id" :key="conf.id" @remove="removeConf(idx)" />
+      <PromptItemSetting v-if="newData" :item="newData" :endpoints="endpointsApi.data.value" @update="handleAddOrUpdate"
+        @remove="resetNewData" />
+
+      <template v-if="!newData && !configsApi.data.value.length">
+        <div class="flex text-center justify-center py-8 bg-light-2">
+          <button class="btn-text" @click="addConfig">+ 新增配置</button>
+        </div>
+      </template>
+      <template v-else>
+        <PromptItemSetting v-for="conf in configsApi.data.value" :key="conf.id" :item="conf"
+          :endpoints="endpointsApi.data.value" @remove="removeConf(conf)" @update="handleAddOrUpdate" />
+      </template>
     </div>
   </div>
 </template>
 
-<style lang='scss' scoped>
-</style>
+<style lang='scss' scoped></style>
