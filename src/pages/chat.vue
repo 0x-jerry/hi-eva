@@ -231,7 +231,7 @@ function handleAbort() {
 <template>
   <AutoResizeContainer :width="400">
     <div class="page bg-white">
-      <ChatPageHead :icon="promptConfigApi.data.value?.icon" :title="promptConfigApi.data.value?.name" />
+      <ChatPageHead :icon="promptConfigApi.data.value?.icon" :title="promptConfigApi.data.value?.name" v-model:pinned="state.pinned" />
 
       <template v-if="chatHistory">
         <ChatRoom :title="chatHistory.name" :messages="state.messages" :is-processing="handleSendMsg.isLoading"

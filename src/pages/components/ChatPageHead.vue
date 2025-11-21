@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { getCurrentWindow } from '@tauri-apps/api/window'
-import { reactive } from 'vue'
 import CloseWindow from '../../components/CloseWindow.vue'
 import DraggableArea from '../../components/DraggableArea.vue'
 import { commands } from '../../logic/commands'
@@ -10,29 +9,24 @@ export interface ChatPageHead {
   title?: string
 }
 
-const props = defineProps<ChatPageHead>()
+defineProps<ChatPageHead>()
 
-const state = reactive({
-  promptId: '',
-  selectedText: '',
-  pinned: false,
-  ready: false,
-})
+const vPinned = defineModel('pinned', { default: false })
 
 const win = getCurrentWindow()
 
 async function togglePinWindow() {
-  state.pinned = !state.pinned
+  vPinned.value = !vPinned.value
 
-  await win.setAlwaysOnTop(state.pinned)
-  await commands.setChatPinned({ pinned: state.pinned })
+  await win.setAlwaysOnTop(vPinned.value)
+  await commands.setChatPinned({ pinned: vPinned.value })
 }
 </script>
 
 <template>
   <div class="title flex border-(0 b solid gray) h-8 select-none">
     <div class="flex items-center pl-1 cursor-pointer" @click="togglePinWindow">
-      <Icon v-if="state.pinned" class="i-carbon:pin-filled" />
+      <Icon v-if="vPinned" class="i-carbon:pin-filled" />
       <Icon v-else class="i-carbon:pin" />
     </div>
     <div class="border-(0 r solid gray) ml-1 mr-2">&nbsp;</div>
