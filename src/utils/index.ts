@@ -8,10 +8,24 @@ export function mustache(tpl: string, data: Record<string, string>) {
   return compiled(data)
 }
 
-export function bindAllMethodsToSelf(obj: Record<string, any>) {
-  for (const key in obj) {
-    if (typeof obj[key] === 'function') {
-      obj[key] = obj[key].bind(obj)
+// biome-ignore lint/suspicious/noExplicitAny: on purpose
+export function bindAllMethodsToSelf(obj: Record<string, any>, target = obj) {
+  const keys = Object.getOwnPropertyNames(obj)
+
+  const excludeKeys = ['constructor']
+
+  for (const key of keys) {
+    if (excludeKeys.includes(key)) {
+      continue
     }
+
+    if (typeof target[key] === 'function') {
+      target[key] = target[key].bind(target)
+    }
+  }
+
+  const superProto = Object.getPrototypeOf(obj)
+  if (superProto !== Object.prototype) {
+    bindAllMethodsToSelf(superProto, target)
   }
 }
