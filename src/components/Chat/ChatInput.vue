@@ -8,6 +8,7 @@ export interface ChatInputProps {
 
 export type ChatInputEmits = {
   send: [content: string]
+  abort: []
 }
 
 const props = defineProps<ChatInputProps>()
@@ -15,14 +16,11 @@ const emit = defineEmits<ChatInputEmits>()
 
 const text = ref('')
 
-const canSend = computed(() => {
-  const isNonEmpty = text.value.trim().length > 0
-
-  return isNonEmpty && !props.isProcessing
-})
+const canSend = computed(() => text.value.trim().length > 0)
 
 function send() {
   if (!canSend.value) return
+  if (props.isProcessing) return
 
   emit('send', text.value.trim())
 
@@ -35,6 +33,14 @@ function onCtrlEnter(evt: KeyboardEvent) {
 
   send()
 }
+
+function handleAbort() {
+  if (!props.isProcessing) {
+    return
+  }
+
+  emit('abort')
+}
 </script>
 
 <template>
@@ -42,7 +48,8 @@ function onCtrlEnter(evt: KeyboardEvent) {
     <Textarea v-model="text" @keydown="onCtrlEnter" placeholder="Type a message" />
 
     <div class="actions">
-      <Button @click="send" :disabled="!canSend">Send</Button>
+      <Button v-if="isProcessing" @click="handleAbort">Abort</Button>
+      <Button v-else @click="send" :disabled="!canSend">Send</Button>
     </div>
   </div>
 </template>

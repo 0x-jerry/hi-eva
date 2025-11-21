@@ -4,6 +4,7 @@ import { useAsyncData, useLoading } from '@0x-jerry/vue-kit'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { debounce } from 'lodash-es'
 import OpenAI from 'openai'
+import { ChatCompletionStream } from 'openai/lib/ChatCompletionStream.mjs'
 import { ChatCompletionMessageParam } from 'openai/resources/index.mjs'
 import { onMounted, reactive, ref } from 'vue'
 import AutoResizeContainer from '../components/AutoResizeContainer.vue'
@@ -30,6 +31,8 @@ const state = reactive({
   messages: [] as IChatHistoryMsgItem[],
   responseMsg: null as Optional<IChatHistoryMsgModel>,
 })
+
+let streamRef: Optional<ChatCompletionStream>
 
 const chatHistory = ref<IChatHistoryModel>()
 
@@ -174,6 +177,8 @@ async function startChatStream(msgs: IChatHistoryMsgItem[]) {
     }),
   })
 
+  streamRef = stream
+
   stream.on('message', (msg) => {
     let content = ''
 
@@ -210,6 +215,7 @@ async function startChatStream(msgs: IChatHistoryMsgItem[]) {
 
   stream.on('end', () => {
     state.responseMsg = null
+    streamRef = null
 
     resultPromise.resolve()
   })
@@ -220,15 +226,20 @@ async function startChatStream(msgs: IChatHistoryMsgItem[]) {
 
   return resultPromise.promise
 }
+
+function handleAbort() {
+  streamRef?.abort()
+}
 </script>
 
 <template>
   <AutoResizeContainer :width="400">
     <div class="page bg-white">
-      <ChatPageHead :icon="promptConfigApi.data.value?.icon"  :title="promptConfigApi.data.value?.name" />
-      
+      <ChatPageHead :icon="promptConfigApi.data.value?.icon" :title="promptConfigApi.data.value?.name" />
+
       <template v-if="chatHistory">
-        <ChatRoom :title="chatHistory.name" :messages="state.messages" :is-processing="handleSendMsg.isLoading" @rename-title="updateChatTitle" @send="handleSendMsg" />
+        <ChatRoom :title="chatHistory.name" :messages="state.messages" :is-processing="handleSendMsg.isLoading"
+          @rename-title="updateChatTitle" @send="handleSendMsg" @abort="handleAbort" />
       </template>
     </div>
   </AutoResizeContainer>

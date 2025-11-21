@@ -14,15 +14,15 @@ export type ChatRoomEmits = ChatInputEmits & {
   renameTitle: [newTitle: string]
 }
 
-const props = defineProps<ChatRoomProps>()
+defineProps<ChatRoomProps>()
 
 const emit = defineEmits<ChatRoomEmits>()
 
-async function handleSend(content: string) {
+function handleSend(content: string) {
   emit('send', content)
 }
 
-async function renameChat(newName: string) {
+function renameChat(newName: string) {
   emit('renameTitle', newName)
 }
 </script>
@@ -33,7 +33,7 @@ async function renameChat(newName: string) {
 
     <ChatMessageList :messages="messages" />
 
-    <ChatInput :is-processing="isProcessing" @send="handleSend" />
+    <ChatInput :is-processing="isProcessing" @send="handleSend" @abort="emit('abort')" />
   </div>
 </template>
 
