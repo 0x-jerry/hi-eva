@@ -12,6 +12,7 @@ import {
 import { promptConfigTable } from '../database/promptConfig'
 import { WindowEventName } from '../logic/events'
 import { mustache } from '../utils'
+import { checkWindowPosition } from '../utils/win'
 import ChatPageHead from './components/ChatPageHead.vue'
 
 const state = reactive({
@@ -40,6 +41,8 @@ win.listen(WindowEventName.ChatShow, async (evt) => {
   }
 
   await fetchInitializedData()
+
+  await checkWindowPosition()
 })
 
 win.listen(WindowEventName.ChatHide, async () => {
@@ -104,11 +107,13 @@ async function createChatHistory() {
 
 <template>
   <div class="page flex flex-col w-400px h-600px bg-white">
-    <ChatPageHead :icon="promptConfigApi.data.value?.icon" :title="promptConfigApi.data.value?.name" v-model:pinned="pinned" />
+    <ChatPageHead :icon="promptConfigApi.data.value?.icon" :title="promptConfigApi.data.value?.name"
+      v-model:pinned="pinned" />
 
     <template v-if="chatHistory">
       <div class="flex-1 h-0">
-        <ChatWithHistory  ref="chatRef" :history-id="chatHistory.id" :endpoint-config="promptConfigApi.data.value?.endpointConfig" />
+        <ChatWithHistory ref="chatRef" :history-id="chatHistory.id"
+          :endpoint-config="promptConfigApi.data.value?.endpointConfig" />
       </div>
     </template>
   </div>

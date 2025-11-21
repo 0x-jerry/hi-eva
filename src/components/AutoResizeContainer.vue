@@ -3,6 +3,7 @@ import { getCurrentWindow, LogicalSize } from '@tauri-apps/api/window'
 import { useResizeObserver } from '@vueuse/core'
 import { debounce } from 'lodash-es'
 import { computed, ref } from 'vue'
+import { checkWindowPosition } from '../utils/win'
 
 export interface AutoResizeContainerProps {
   width?: number
@@ -16,7 +17,7 @@ const props = defineProps<AutoResizeContainerProps>()
 const el = ref<HTMLElement>()
 const win = getCurrentWindow()
 
-const resizeWindow = debounce(_resizeWindow, 100)
+const resizeWindow = debounce(_resizeWindow, 100, { trailing: true })
 
 useResizeObserver(el, resizeWindow)
 
@@ -35,34 +36,7 @@ async function _resizeWindow() {
 
   const size = new LogicalSize(Math.max(w, minSise.w), Math.max(h, minSise.h))
   await win.setSize(size)
-  await checkWindowPosition(size)
-}
-
-async function checkWindowPosition(size: LogicalSize) {
-  const winPos = (await win.outerPosition()).toLogical(devicePixelRatio)
-  let shouldUpdate = false
-
-  const gap = 10
-
-  const bottom = screen.availHeight - (winPos.y + size.height)
-
-  const right = screen.availWidth - (winPos.x + size.width)
-
-  if (bottom < gap) {
-    const nextY = screen.availHeight - (size.height + gap)
-    winPos.y = nextY
-    shouldUpdate = true
-  }
-
-  if (right < gap) {
-    const nextX = screen.availWidth - (size.width + gap)
-    winPos.x = nextX
-    shouldUpdate = true
-  }
-
-  if (shouldUpdate) {
-    await win.setPosition(winPos)
-  }
+  await checkWindowPosition()
 }
 
 const style = computed(() => {
