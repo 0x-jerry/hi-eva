@@ -9,7 +9,6 @@ import { ChatCompletionMessageParam } from 'openai/resources/index.mjs'
 import { onMounted, reactive, ref } from 'vue'
 import AutoResizeContainer from '../components/AutoResizeContainer.vue'
 import ChatRoom from '../components/Chat/ChatRoom.vue'
-import { selectionTable } from '../database'
 import { chatHistoryTable, IChatHistoryModel } from '../database/chatHistory'
 import {
   chatHistoryMsgTable,
@@ -24,10 +23,8 @@ import { mustache } from '../utils'
 import ChatPageHead from './components/ChatPageHead.vue'
 
 const state = reactive({
-  promptId: '',
   selectedText: '',
   pinned: false,
-  ready: false,
   messages: [] as IChatHistoryMsgItem[],
   responseMsg: null as Optional<IChatHistoryMsgModel>,
 })
@@ -40,27 +37,23 @@ const promptConfigApi = useAsyncData(promptConfigTable.getById)
 
 const win = getCurrentWindow()
 
-win.listen(WindowEventName.ShowChat, async (evt) => {
+win.listen(WindowEventName.ChatShow, async (evt) => {
   const payload = evt.payload
-  state.promptId = payload.prompt_id
   state.selectedText = payload.selected_text
 
   await promptConfigApi.load(Number(payload.prompt_id))
 
-  await selectionTable.createOne({
-    selected: payload.selected_text,
-    promptName: promptConfigApi.data.value?.name || 'unknown',
-  })
-
   await createChatHistory()
 })
 
-win.listen(WindowEventName.HideChat, async () => {
+win.listen(WindowEventName.ChatHide, async () => {
   if (state.pinned) {
     return
   }
 
   await win.hide()
+
+  streamRef?.abort()
 })
 
 onMounted(async () => {
@@ -68,21 +61,6 @@ onMounted(async () => {
 })
 
 async function createChatHistory() {
-  if (!state.promptId) return
-
-  state.ready = false
-
-  // todo, generate history name
-  const name = promptConfigApi.data.value?.name || 'unknown-prompt-config'
-
-  chatHistory.value = await chatHistoryTable.createOne({
-    name,
-  })
-
-  await initMessages()
-}
-
-async function initMessages() {
   const promptTpl = promptConfigApi.data.value?.prompt
 
   if (!promptTpl) {
@@ -95,7 +73,25 @@ async function initMessages() {
     selection: state.selectedText,
   })
 
-  await handleSendMsg(msg)
+  const msgItem = await chatHistoryMsgTable.getByContent(msg)
+
+  // Restore chat history
+  if (msgItem?.chatHistoryId) {
+    chatHistory.value = await chatHistoryTable.getById(msgItem.chatHistoryId)
+
+    const msgs = await chatHistoryMsgTable.getMsgs(msgItem.chatHistoryId)
+
+    state.messages = msgs
+  } else {
+    // todo, generate history name
+    const name = promptConfigApi.data.value?.name || 'unknown-prompt-config'
+
+    chatHistory.value = await chatHistoryTable.createOne({
+      name,
+    })
+
+    await handleSendMsg(msg)
+  }
 }
 
 async function updateChatTitle(newTitle: string) {

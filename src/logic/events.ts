@@ -6,19 +6,25 @@ export interface IShowChatPayload {
 }
 
 export enum WindowEventName {
-  ShowChat = 'show-chat',
-  HideChat = 'hide-chat',
+  ChatShow = 'chat:show',
+  ChatHide = 'chat:hide',
+  ToolbarShow = 'toolbar:show',
 }
 
 declare module '@tauri-apps/api/window' {
   interface Window {
     listen(
-      event: `${WindowEventName.ShowChat}`,
+      event: `${WindowEventName.ChatShow}`,
       handler: EventCallback<IShowChatPayload>,
     ): Promise<UnlistenFn>
 
     listen(
-      event: `${WindowEventName.HideChat}`,
+      event: `${WindowEventName.ChatHide}`,
+      handler: EventCallback<void>,
+    ): Promise<UnlistenFn>
+
+    listen(
+      event: `${WindowEventName.ToolbarShow}`,
       handler: EventCallback<void>,
     ): Promise<UnlistenFn>
   }

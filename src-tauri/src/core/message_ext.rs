@@ -29,7 +29,7 @@ impl AppMessageExt for MyApp {
 
         win.emit_to(
             EventTarget::labeled(CHAT_WINDOW_LABEL),
-            "show-chat",
+            "chat:show",
             OpenChatPayload {
                 prompt_id,
                 selected_text: state.selected_text.clone(),
@@ -44,7 +44,7 @@ impl AppMessageExt for MyApp {
     fn hide_chat(&self) {
         let win = self.get_chat_window();
 
-        win.emit_to(EventTarget::labeled(CHAT_WINDOW_LABEL), "hide-chat", ())
+        win.emit_to(EventTarget::labeled(CHAT_WINDOW_LABEL), "chat:hide", ())
             .unwrap();
     }
 }

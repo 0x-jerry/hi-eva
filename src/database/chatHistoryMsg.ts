@@ -23,6 +23,14 @@ class ChatHistoryMsgTable extends BaseModelManager<IChatHistoryMsgModel> {
 
     return result
   }
+
+  async getByContent(content: string) {
+    const sql = `select * from ${this.TABLE_NAME} where content = $1`
+
+    const resp = await this.db.select<IChatHistoryMsgModel[]>(sql, [content])
+
+    return resp.at(0)
+  }
 }
 
 export const chatHistoryMsgTable = new ChatHistoryMsgTable()

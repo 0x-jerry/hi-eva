@@ -1,4 +1,4 @@
-use tauri::{Manager, PhysicalPosition, WebviewWindow, WebviewWindowBuilder};
+use tauri::{Emitter, EventTarget, Manager, PhysicalPosition, WebviewWindow, WebviewWindowBuilder};
 
 use super::{utils::calc_window_position, AppStateExt, MyApp, VerticalMoveDir};
 
@@ -188,6 +188,13 @@ impl MyAppWindowExt for MyApp {
 
     fn show_toolbar_win(&self, dir: Option<VerticalMoveDir>) {
         let win = self.get_toolbar_window();
+
+        win.emit_to(
+            EventTarget::labeled(TOOLBAR_WINDOW_LABEL),
+            "toolbar:show",
+            (),
+        )
+        .unwrap();
 
         let pos = calc_window_position(&win, dir);
 
