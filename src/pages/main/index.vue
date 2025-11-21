@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useAsyncData } from '@0x-jerry/vue-kit'
 import dayjs from 'dayjs'
-import { Button, Inplace, InputText, Select } from 'primevue'
+import { Button, InputText, Select } from 'primevue'
 import { computed, reactive } from 'vue'
 import ChatWithHistory from '../../components/ChatWithHistory.vue'
+import ClickToEdit from '../../components/ClickToEdit.vue'
 import { chatHistoryTable } from '../../database/chatHistory'
 import { chatHistoryMsgTable } from '../../database/chatHistoryMsg'
 import { endpointConfigTable } from '../../database/endpointConfig'
@@ -59,12 +60,13 @@ async function createNewChat() {
   await selectHistory(chatHistory.id)
 }
 
-async function updateHistoryName() {
+async function updateHistoryName(name: string) {
   const selected = selectedHistory.value
   if (!selected) return
 
   await chatHistoryTable.updateOne({
     ...selected,
+    name,
   })
 
   await historiesApi.load()
@@ -92,15 +94,12 @@ async function updateHistoryName() {
       <template v-if="selectedHistory">
         <div class="flex gap-1 items-center p-2 border-(0 b solid gray-2)">
           <div class="truncate w-200px">
-            <Inplace @close="updateHistoryName">
-              <template #display>
-                {{ selectedHistory.name }}
+            <ClickToEdit :value="selectedHistory.name" @ok="updateHistoryName">
+              {{ selectedHistory.name }}
+              <template #edit="{value, update}">
+                <InputText class="w-full" :model-value="value" @update:model-value="update" autofocus />
               </template>
-              <template #content="{ closeCallback }">
-                <InputText class="w-full" v-model="selectedHistory.name" @keydown.enter.prevent.stop="closeCallback"
-                  autofocus />
-              </template>
-            </Inplace>
+            </ClickToEdit>
           </div>
           <Select class="flex-1" v-model="state.endpointConfigId" :options="endpointConfigsApi.data.value"
             optionLabel="name" optionValue="id" placeholder="Select a endpoint" />
