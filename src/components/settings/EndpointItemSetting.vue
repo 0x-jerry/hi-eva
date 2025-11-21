@@ -1,32 +1,32 @@
 <script lang="ts" setup>
-import Password from "primevue/password";
-import { ref, toRaw, watch } from "vue";
-import { IEndpointConfigItem } from "../../database/endpointConfig";
-import EditableInputText from "../EditableInputText.vue";
-import Icon from "../Icon.vue";
+import Password from 'primevue/password'
+import { ref, toRaw, watch } from 'vue'
+import { IEndpointConfigItem } from '../../database/endpointConfig'
+import EditableInputText from '../EditableInputText.vue'
+import Icon from '../Icon.vue'
 
 export interface EndpointItemSettingProps {
-  item: IEndpointConfigItem;
+  item: IEndpointConfigItem
 }
 
-const props = defineProps<EndpointItemSettingProps>();
+const props = defineProps<EndpointItemSettingProps>()
 
-const emit = defineEmits(["remove", "update", "update:editMode"]);
+const emit = defineEmits(['remove', 'update', 'update:editMode'])
 
 const editMode = ref(!props.item.id)
 
-const currentValue = ref(structuredClone(toRaw(props.item)));
+const currentValue = ref(structuredClone(toRaw(props.item)))
 
-watch(props.item, () => resetCurrentValue());
+watch(props.item, () => resetCurrentValue())
 
 function resetCurrentValue() {
-  currentValue.value = structuredClone(toRaw(props.item));
+  currentValue.value = structuredClone(toRaw(props.item))
 }
 
 function toggleEditMode() {
-  editMode.value = !editMode.value;
+  editMode.value = !editMode.value
 
-  resetCurrentValue();
+  resetCurrentValue()
 
   if (!props.item.id) {
     emit('remove')
@@ -34,13 +34,13 @@ function toggleEditMode() {
 }
 
 async function applyUpdate() {
-  emit("update", currentValue.value);
-  editMode.value = !editMode.value;
+  emit('update', currentValue.value)
+  editMode.value = !editMode.value
 }
 </script>
 
 <template>
-  <div class="endpoint-setting">
+  <div class="endpoint-item-setting">
     <div class="flex flex-col gap-2 bg-light-3 p-4 rounded">
       <div class="flex items-center">
         <div>
@@ -86,7 +86,7 @@ async function applyUpdate() {
   opacity: 0;
 }
 
-.endpoint-setting {
+.endpoint-item-setting {
   &:hover {
     .tool-icons {
       opacity: 1;

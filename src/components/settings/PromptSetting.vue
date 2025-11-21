@@ -1,5 +1,6 @@
 <script lang='ts' setup>
 import { useAsyncData } from '@0x-jerry/vue-kit'
+import { Button } from 'primevue'
 import { ref } from 'vue'
 import { endpointConfigTable } from '../../database/endpointConfig'
 import type { IPromptConfigItem } from '../../database/promptConfig'
@@ -39,7 +40,6 @@ async function removeConf(conf: IPromptConfigItem) {
 }
 
 async function handleAddOrUpdate(conf: IPromptConfigItem) {
-
   if (conf.id) {
     await promptConfigTable.updateOne({ ...conf, id: conf.id })
   } else {
@@ -49,6 +49,14 @@ async function handleAddOrUpdate(conf: IPromptConfigItem) {
 
   await configsApi.load()
 }
+
+function updateEndpoints() {
+  endpointsApi.load()
+}
+
+defineExpose({
+  updateEndpoints,
+})
 </script>
 
 <template>
@@ -68,7 +76,7 @@ async function handleAddOrUpdate(conf: IPromptConfigItem) {
 
       <template v-if="!newData && !configsApi.data.value.length">
         <div class="flex text-center justify-center py-8 bg-light-2">
-          <button class="btn-text" @click="addConfig">+ 新增配置</button>
+          <Button variant="text" @click="addConfig">+ 新增配置</Button>
         </div>
       </template>
       <template v-else>

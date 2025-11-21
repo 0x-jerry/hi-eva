@@ -1,3 +1,4 @@
+import { bindAllMethodsToSelf } from '../utils'
 import { type BaseModel, BaseModelManager, COMMON_COLUMN } from './database'
 import type { GetPureModelType } from './types'
 
@@ -34,3 +35,4 @@ class ChatHistoryMsgTable extends BaseModelManager<IChatHistoryMsgModel> {
 }
 
 export const chatHistoryMsgTable = new ChatHistoryMsgTable()
+bindAllMethodsToSelf(chatHistoryMsgTable)

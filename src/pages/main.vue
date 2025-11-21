@@ -8,7 +8,11 @@ const route = useRoute()
 const navButtons = [
   { name: 'Home', path: '/main', icon: 'i-carbon:chat' },
   { name: 'Settings', path: '/main/settings', icon: 'i-carbon:settings' },
-  { name: 'Statistics', path: '/main/statistics', icon: 'i-carbon:chart-line-data' }
+  {
+    name: 'Statistics',
+    path: '/main/statistics',
+    icon: 'i-carbon:chart-line-data',
+  },
 ]
 </script>
 
@@ -32,7 +36,7 @@ const navButtons = [
       </div>
     </div>
 
-    <div class="content">
+    <div class="content flex-1">
       <RouterView />
     </div>
 

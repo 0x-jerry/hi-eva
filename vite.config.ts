@@ -3,7 +3,6 @@ import uno from 'unocss/vite'
 import router from 'unplugin-vue-router/vite'
 import { defineConfig } from 'vite'
 
-// @ts-expect-error process is a nodejs global
 const host = process.env.TAURI_DEV_HOST
 
 const port = 8990
@@ -12,6 +11,7 @@ const port = 8990
 export default defineConfig(async () => ({
   plugins: [
     router({
+      exclude: ['**/components/**'],
       dts: 'src/typed-router.d.ts',
     }),
     vue(),

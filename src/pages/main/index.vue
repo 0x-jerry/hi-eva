@@ -1,80 +1,30 @@
 <script setup lang="ts">
+import { useAsyncData } from '@0x-jerry/vue-kit'
 import dayjs from 'dayjs'
-import { computed, onMounted, reactive, ref } from 'vue'
-import ChatMessages from '../../components/Chat/ChatMessages.vue'
-import type { ChatMessageWithDb } from '../../components/Chat/types'
-import type { IChatHistoryModel } from '../../database/chatHistory'
+import { computed, reactive } from 'vue'
+import ChatRoom from '../../components/Chat/ChatRoom.vue'
 import { chatHistoryTable } from '../../database/chatHistory'
+import { chatHistoryMsgTable } from '../../database/chatHistoryMsg'
 
-// --- Repository (data access) - single responsibility
-async function fetchHistories(page = 0, size = 100) {
-  return await chatHistoryTable.page({ current: page, size })
-}
+const historyApi = useAsyncData(chatHistoryTable.findAll, [])
 
-async function fetchHistoryById(id: number) {
-  return await chatHistoryTable.getAllById(id)
-}
+const historyMessageApi = useAsyncData(chatHistoryMsgTable.getMsgs, [])
 
-// --- Presentation state
-const histories = ref<IChatHistoryModel[]>([])
-const selectedId = ref<number | null>(null)
-const selectedHistory = ref<IChatHistoryModel | null>(null)
+const state = reactive({
+  selectedId: null as number | null,
+})
 
-// Chat model expected by `ChatMessages`
-const chatModel = reactive<{ id: string; name: string; messages: ChatMessageWithDb[] }>({ id: '', name: '', messages: [] })
+const selectedHistory = computed(() => {
+  return historyApi.data.value.find((h) => h.id === state.selectedId)
+})
 
-const promptId = computed(() => (selectedHistory.value ? String(selectedHistory.value.promptConfigId) : ''))
-
-function normalizeRole(r: string): ChatMessageWithDb['role'] {
-  if (r === 'user' || r === 'assistant' || r === 'system') return r
-  return 'user'
-}
-
-function mapDbToChatModel(h: IChatHistoryModel) {
-  const messages: ChatMessageWithDb[] = (h.messages || []).map((m) => {
-    const role = normalizeRole(String(m.role))
-    if (role === 'assistant') {
-      return { role: 'assistant', content: m.content, __dbId: m.id }
-    }
-    if (role === 'system') {
-      return { role: 'system', content: m.content, __dbId: m.id }
-    }
-
-    return { role: 'user', content: m.content, __dbId: m.id }
-  })
-
-  return {
-    id: String(h.id),
-    name: h.title || 'Untitled',
-    messages,
-  }
-}
-
-async function loadHistories() {
-  const res = await fetchHistories()
-  histories.value = res || []
-}
+historyApi.load()
 
 async function selectHistory(id: number) {
-  selectedId.value = id
-  const h = await fetchHistoryById(id)
-  selectedHistory.value = h || null
+  state.selectedId = id
 
-  if (h) {
-    const mapped = mapDbToChatModel(h)
-    chatModel.id = mapped.id
-    chatModel.name = mapped.name
-    chatModel.messages = mapped.messages
-  } else {
-    chatModel.id = ''
-    chatModel.name = ''
-    chatModel.messages = []
-  }
+  await historyMessageApi.load(id)
 }
-
-onMounted(() => {
-  loadHistories()
-})
 </script>
 
 <template>
@@ -83,9 +33,9 @@ onMounted(() => {
     <aside class="w-72 border-(1 solid gray-2) rounded p-2 bg-light-3 overflow-auto">
       <h3 class="mb-2">History</h3>
       <ul>
-        <li v-for="h in histories" :key="h.id" class="p-2 rounded cursor-pointer hover:bg-light-5"
-            :class="{ 'bg-light-5': selectedId === h.id }" @click="selectHistory(h.id)">
-          <div class="font-medium truncate">{{ h.title || 'Untitled' }}</div>
+        <li v-for="h in historyApi.data.value" :key="h.id" class="p-2 rounded cursor-pointer hover:bg-light-5"
+            :class="{ 'bg-light-5': state.selectedId === h.id }" @click="selectHistory(h.id)">
+          <div class="font-medium truncate">{{ h.name || 'Untitled' }}</div>
           <div class="text-sm text-(muted)">{{ dayjs.unix(h.createdDate).format('YYYY-MM-DD HH:mm') }}</div>
         </li>
       </ul>
@@ -94,8 +44,8 @@ onMounted(() => {
     <!-- Right: chat content -->
     <section class="flex-1 border-(1 solid gray-2) rounded p-4 bg-white">
       <template v-if="selectedHistory">
-        <div class="mb-2 font-semibold">{{ selectedHistory.title }}</div>
-        <ChatMessages v-model="chatModel" :promptId="promptId" />
+        <div class="mb-2 font-semibold">{{ selectedHistory.name }}</div>
+        <ChatRoom :title="selectHistory.name" :messages="historyMessageApi.data.value" />
       </template>
       <template v-else>
         <div class="flex items-center justify-center h-full text-muted">Select a history on the left to view chat</div>
@@ -104,4 +54,3 @@ onMounted(() => {
   </div>
 </template>
 
-<!-- styles intentionally omitted; page relies on existing utility classes -->

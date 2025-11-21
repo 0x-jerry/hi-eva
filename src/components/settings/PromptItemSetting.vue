@@ -1,7 +1,7 @@
 <script lang='ts' setup>
 import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
-import { computed, ref, toRaw, watch } from 'vue'
+import { ref, toRaw, watch } from 'vue'
 import type { IEndpointConfigItem } from '../../database/endpointConfig'
 import type { IPromptConfigItem } from '../../database/promptConfig'
 import EditableInputText from '../EditableInputText.vue'
@@ -27,8 +27,6 @@ watch(
   },
 )
 
-const endpoints = computed(() => props.endpoints ?? [])
-
 function toggleEditMode() {
   editMode.value = !editMode.value
   currentValue.value = structuredClone(toRaw(props.item))
@@ -45,37 +43,51 @@ function applyUpdate() {
 </script>
 
 <template>
-  <div class="flex flex-col gap-2 bg-light-3 p-4 rounded">
+  <div class="prompt-item-setting flex flex-col gap-2 bg-light-3 p-4 rounded">
     <div class="flex items-center gap-1">
       <IconPicker v-model="currentValue.icon" />
       <EditableInputText :editable="editMode" v-model="currentValue.name" />
-      <div class="flex flex-1 justify-end">
-        <Icon v-if="!currentValue.isBuiltin" class="i-carbon:close cursor-pointer" @click="emit('remove')" />
-      </div>
+
+        <div class="tool-icons flex flex-1 justify-end items-center gap-2">
+          <Icon v-if="item.id" class="i-carbon:trash-can cursor-pointer" @click="emit('remove')" />
+
+          <template v-if="editMode">
+            <Icon class="i-carbon:close cursor-pointer" @click="toggleEditMode" />
+            <Icon class="i-carbon:checkmark cursor-pointer" @click="applyUpdate" />
+          </template>
+          <template v-else>
+            <Icon class="i-carbon:edit cursor-pointer" @click="toggleEditMode" />
+          </template>
+        </div>
     </div>
     <div class="flex flex-col gap-2">
-      <Textarea v-model="currentValue.prompt" :rows="5" />
+      <Textarea v-model="currentValue.prompt" :disabled="!editMode" :rows="5" />
     </div>
     <div class="editable-row">
       <label>Endpoint</label>
       <div class="flex gap-2">
-        <Select v-model="currentValue.endpointId" :options="endpoints" optionLabel="name" optionValue="id"
+        <Select v-model="currentValue.endpointId" :disabled="!editMode" :options="endpoints" optionLabel="name" optionValue="id"
           placeholder="Select a endpoint" />
       </div>
-    </div>
-    <div class="flex items-center gap-2 justify-end mt-2">
-      <template v-if="editMode">
-        <Icon class="i-carbon:close cursor-pointer" @click="toggleEditMode" />
-        <Icon class="i-carbon:checkmark cursor-pointer" @click="applyUpdate" />
-      </template>
-      <template v-else>
-        <Icon class="i-carbon:edit cursor-pointer" @click="toggleEditMode" />
-      </template>
     </div>
   </div>
 </template>
 
 <style lang='scss' scoped>
+.tool-icons {
+  --uno: transition;
+  opacity: 0;
+}
+
+.prompt-item-setting {
+  &:hover {
+    .tool-icons {
+      opacity: 1;
+    }
+
+  }
+}
+
 .editable-row {
   --uno: flex items-center;
 

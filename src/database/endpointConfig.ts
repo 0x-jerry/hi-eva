@@ -1,3 +1,4 @@
+import { bindAllMethodsToSelf } from '../utils'
 import { type BaseModel, BaseModelManager } from './database'
 import type { GetPureModelType } from './types'
 
@@ -17,3 +18,5 @@ class EndpointConfigTable extends BaseModelManager<IEndpointConfigModel> {
 }
 
 export const endpointConfigTable = new EndpointConfigTable()
+
+bindAllMethodsToSelf(endpointConfigTable)

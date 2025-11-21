@@ -7,3 +7,11 @@ export function mustache(tpl: string, data: Record<string, string>) {
 
   return compiled(data)
 }
+
+export function bindAllMethodsToSelf(obj: Record<string, any>) {
+  for (const key in obj) {
+    if (typeof obj[key] === 'function') {
+      obj[key] = obj[key].bind(obj)
+    }
+  }
+}

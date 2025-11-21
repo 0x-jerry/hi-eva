@@ -1,3 +1,4 @@
+import { bindAllMethodsToSelf } from '../utils'
 import { type BaseModel, BaseModelManager } from './database'
 import {
   endpointConfigTable,
@@ -33,3 +34,5 @@ class PromptConfigTable extends BaseModelManager<IPromptConfigModel> {
 }
 
 export const promptConfigTable = new PromptConfigTable()
+
+bindAllMethodsToSelf(promptConfigTable)

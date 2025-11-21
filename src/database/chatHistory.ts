@@ -1,3 +1,4 @@
+import { bindAllMethodsToSelf } from '../utils'
 import {
   chatHistoryMsgTable,
   type IChatHistoryMsgModel,
@@ -28,3 +29,5 @@ class ChatHistoryTable extends BaseModelManager<IChatHistoryModel> {
 }
 
 export const chatHistoryTable = new ChatHistoryTable()
+
+bindAllMethodsToSelf(chatHistoryTable)

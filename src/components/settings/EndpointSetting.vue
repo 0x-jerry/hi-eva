@@ -2,11 +2,19 @@
 import { useAsyncData } from '@0x-jerry/vue-kit'
 import { Button } from 'primevue'
 import { ref } from 'vue'
-import { endpointConfigTable, IEndpointConfigItem } from '../../database/endpointConfig'
+import {
+  endpointConfigTable,
+  IEndpointConfigItem,
+} from '../../database/endpointConfig'
 import Icon from '../Icon.vue'
 import EndpointItemSetting from './EndpointItemSetting.vue'
 import SettingTitle from './SettingTitle.vue'
 
+export type EndpointSettingEmit = {
+  updated: []
+}
+
+const emit = defineEmits<EndpointSettingEmit>()
 
 const configsApi = useAsyncData(async () => {
   const resp = await endpointConfigTable.findAll()
@@ -37,10 +45,10 @@ async function removeConf(conf: IEndpointConfigItem) {
   }
 
   await configsApi.load()
+  emit('updated')
 }
 
 async function handleAddOrUpdate(conf: IEndpointConfigItem) {
-
   if (conf.id) {
     await endpointConfigTable.updateOne({
       ...conf,
@@ -52,6 +60,7 @@ async function handleAddOrUpdate(conf: IEndpointConfigItem) {
   }
 
   await configsApi.load()
+  emit('updated')
 }
 </script>
 
