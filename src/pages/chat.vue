@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { Optional } from '@0x-jerry/utils'
 import { useAsyncData } from '@0x-jerry/vue-kit'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { useLocalStorage } from '@vueuse/core'
@@ -9,7 +8,6 @@ import { chatHistoryTable, IChatHistoryModel } from '../database/chatHistory'
 import {
   chatHistoryMsgTable,
   IChatHistoryMsgItem,
-  IChatHistoryMsgModel,
 } from '../database/chatHistoryMsg'
 import { promptConfigTable } from '../database/promptConfig'
 import { WindowEventName } from '../logic/events'
@@ -18,7 +16,6 @@ import ChatPageHead from './components/ChatPageHead.vue'
 
 const state = reactive({
   messages: [] as IChatHistoryMsgItem[],
-  responseMsg: null as Optional<IChatHistoryMsgModel>,
 })
 
 const pinned = useLocalStorage('chat-pinned', false)
@@ -111,7 +108,7 @@ async function createChatHistory() {
 
     <template v-if="chatHistory">
       <div class="flex-1 h-0">
-        <ChatWithHistory  ref="chatRef" :history-id="chatHistory.id" :prompt-config-id="promptConfigApi.data.value?.id" />
+        <ChatWithHistory  ref="chatRef" :history-id="chatHistory.id" :endpoint-config="promptConfigApi.data.value?.endpointConfig" />
       </div>
     </template>
   </div>

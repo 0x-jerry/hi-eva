@@ -44,8 +44,8 @@ function applyUpdate() {
 
 <template>
   <div class="prompt-item-setting flex flex-col gap-2 bg-light-3 p-4 rounded">
-    <div class="flex items-center gap-1">
-      <IconPicker v-model="currentValue.icon" />
+    <div class="flex items-center gap-2">
+      <IconPicker v-model="currentValue.icon" :disabled="!editMode" />
       <EditableInputText :editable="editMode" v-model="currentValue.name" />
 
         <div class="tool-icons flex flex-1 justify-end items-center gap-2">
@@ -61,7 +61,7 @@ function applyUpdate() {
         </div>
     </div>
     <div class="flex flex-col gap-2">
-      <Textarea v-model="currentValue.prompt" :disabled="!editMode" :rows="5" />
+      <Textarea v-model="currentValue.prompt" :disabled="!editMode" :rows="3" style="resize: vertical;" />
     </div>
     <div class="editable-row">
       <label>Endpoint</label>

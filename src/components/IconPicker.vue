@@ -48,8 +48,8 @@ function handleSelect(name: string) {
 
 <template>
   <div class="text-2xl inline-block">
-    <div class="border-(1 solid light-8) rounded size-8 flex-center cursor-pointer hover:bg-light-6"
-      @click="showPopover">
+    <div class="icon-picker border-(1 solid light-8) rounded size-8 flex-center cursor-pointer"
+      :class="{ 'disabled': disabled }" @click="showPopover">
       <CarbonIcon :name="vValue || 'data-categorical'" />
     </div>
 
@@ -78,6 +78,22 @@ function handleSelect(name: string) {
 </template>
 
 <style scoped>
+.icon-picker {
+  --uno: bg-white;
+
+  &:hover {
+    --uno: bg-light-6;
+  }
+
+  &.disabled {
+    cursor: auto;
+
+    &:hover {
+      --uno: bg-white;
+    }
+  }
+}
+
 .icons {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
