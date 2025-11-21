@@ -73,7 +73,7 @@ async function updateHistoryName() {
 
 <template>
   <div class="flex h-full">
-    <aside class="w-50 flex flex-col bg-light-3 overflow-auto">
+    <aside class="w-50 flex flex-col bg-light-3 overflow-auto border-(0 r solid gray-2) ">
       <div class="flex-1">
         <div v-for="h in historiesApi.data.value" :key="h.id" class="p-2 rounded cursor-pointer hover:bg-light-5"
           :class="{ 'bg-light-5': state.selectedId === h.id }" @click="selectHistory(h.id)">
@@ -88,7 +88,7 @@ async function updateHistoryName() {
       </div>
     </aside>
 
-    <section class="flex flex-col h-full flex-1 border-(0 l solid gray-2) bg-white">
+    <section class="flex flex-col h-full flex-1 bg-white">
       <template v-if="selectedHistory">
         <div class="flex gap-1 items-center p-2 border-(0 b solid gray-2)">
           <div class="truncate w-200px">
@@ -97,7 +97,8 @@ async function updateHistoryName() {
                 {{ selectedHistory.name }}
               </template>
               <template #content="{ closeCallback }">
-                <InputText class="w-full" v-model="selectedHistory.name" @keydown.enter.prevent.stop="closeCallback" autofocus />
+                <InputText class="w-full" v-model="selectedHistory.name" @keydown.enter.prevent.stop="closeCallback"
+                  autofocus />
               </template>
             </Inplace>
           </div>

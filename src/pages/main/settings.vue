@@ -70,13 +70,13 @@ function clickMenu(conf: { id: string }) {
 </script>
 <template>
   <div class="page flex h-screen">
-    <div class="sidebar pt-2">
+    <div class="sidebar">
       <div class="menu-item" v-for="conf in settings" :key="conf.id" @click="clickMenu(conf)"
         :class="{ active: state.activeMenu === conf.id }">
         {{ conf.label }}
       </div>
     </div>
-    <div ref="scrollElRef" class="content bg-gray-1 flex-1 p-4 pt-2 overflow-auto flex flex-col gap-4">
+    <div ref="scrollElRef" class="content bg-white flex-1 p-4 pt-2 overflow-auto flex flex-col gap-4">
       <div class="section-content" v-for="conf in settings" :key="conf.id">
         <span :id="conf.id"></span>
         <component :is="conf.Component" v-bind="conf.props" />
@@ -87,25 +87,24 @@ function clickMenu(conf: { id: string }) {
 
 <style lang="scss" scoped>
 .sidebar {
-  --uno: bg-light border-(0 r solid light-8);
+  --uno: bg-light-3 border-(0 r solid light-8) w-50;
 
-  width: 160px;
   display: flex;
   flex-direction: column;
 }
 
 .menu-item {
-  --uno: px-2 text-gray-9 flex items-center py-2;
+  --uno: p-2 text-gray-9 flex items-center py-2;
   cursor: pointer;
 
   text-decoration: none;
 
   &:hover {
-    --uno: bg-light-7;
+    --uno: bg-light-5;
   }
 
   &.active {
-    --uno: bg-light-8;
+    --uno: bg-light-5;
   }
 
 }
