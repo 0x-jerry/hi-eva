@@ -16,14 +16,14 @@ export interface MarkdownContentProps {
 
 const props = defineProps<MarkdownContentProps>()
 
-const html = computed(() => marked.parse(props.content || ''))
+const html = computed(() => marked.parse(props.content?.trim() || ''))
 </script>
 
 <template>
   <div class="markdown-body" v-html="html"></div>
 </template>
 
-<style scoped>
+<style lang="less" scoped>
 .markdown-body {
   --bgColor-default: transparent;
 }

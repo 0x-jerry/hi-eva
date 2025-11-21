@@ -30,7 +30,18 @@ const selectedEndpoint = computed(() => {
 })
 
 historyApi.load()
-endpointConfigsApi.load()
+fetchEndpointsData()
+
+async function fetchEndpointsData() {
+  await endpointConfigsApi.load()
+
+  const hit = endpointConfigsApi.data.value.find(
+    (c) => c.id === state.endpointConfigId,
+  )
+  if (!hit) {
+    state.endpointConfigId = endpointConfigsApi.data.value[0]?.id
+  }
+}
 
 async function selectHistory(id: number) {
   state.selectedId = id
@@ -40,23 +51,18 @@ async function selectHistory(id: number) {
 </script>
 
 <template>
-  <div class="flex gap-4 h-(full) p-4">
-    <!-- Left: history list -->
-    <aside class="w-72 border-(1 solid gray-2) rounded p-2 bg-light-3 overflow-auto">
-      <h3 class="mb-2">History</h3>
-      <ul>
-        <li v-for="h in historyApi.data.value" :key="h.id" class="p-2 rounded cursor-pointer hover:bg-light-5"
+  <div class="flex h-full">
+    <aside class="w-50 p-2 bg-light-3 overflow-auto">
+        <div v-for="h in historyApi.data.value" :key="h.id" class="p-2 rounded cursor-pointer hover:bg-light-5"
           :class="{ 'bg-light-5': state.selectedId === h.id }" @click="selectHistory(h.id)">
           <div class="font-medium truncate">{{ h.name || 'Untitled' }}</div>
           <div class="text-sm text-(muted)">{{ dayjs.unix(h.createdDate).format('YYYY-MM-DD HH:mm') }}</div>
-        </li>
-      </ul>
+        </div>
     </aside>
 
-    <!-- Right: chat content -->
-    <section class="flex flex-col h-full flex-1 border-(1 solid gray-2) rounded p-4 bg-white">
+    <section class="flex flex-col h-full flex-1 border-(0 l solid gray-2) bg-white">
       <template v-if="selectedHistory">
-        <div class="flex gap-1 items-center mb-2">
+        <div class="flex gap-1 items-center p-2 border-(0 b solid gray-2)">
           <div class="font-semibold">{{ selectedHistory.name }}</div>
           <Select class="flex-1" v-model="state.endpointConfigId" :options="endpointConfigsApi.data.value" optionLabel="name"
             optionValue="id" placeholder="Select a endpoint" />

@@ -28,7 +28,6 @@ class SelectionTable extends BaseModelManager<ISelectionModel> {
       dayjs(opt.end).unix(),
     ]
 
-    console.log('sql', sql, values)
     const datas = await this.db.select<IGroupedSelectionModel[]>(sql, values)
 
     return datas

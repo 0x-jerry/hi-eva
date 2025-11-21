@@ -46,7 +46,6 @@ watchImmediate(
 async function updateMessages() {
   const msgs = await chatHistoryMsgTable.getMsgs(props.historyId)
 
-  console.log(msgs)
   state.messages = msgs
 }
 
@@ -170,7 +169,7 @@ async function startChatStream(msgs: IChatHistoryMsgItem[]) {
   })
 
   stream.on('error', (err) => {
-    console.log(err)
+    console.error(err)
     resultPromise.reject(err.message)
   })
 

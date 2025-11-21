@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { IChatHistoryMsgItem } from '../../database/chatHistoryMsg'
-import Markdown from '../Markdown.vue';
+import Markdown from '../Markdown.vue'
 
 interface ChatMessageProps {
   message: IChatHistoryMsgItem
@@ -37,12 +37,10 @@ const roleClass = props.message.role === 'user' ? 'from-user' : 'from-assistant'
 }
 
 .meta {
-  font-size: 12px;
-  color: #666
-}
+  --uno: text-sm text-gray-5 mb-1;
 
-.content {
-  white-space: pre-wrap;
-  margin-top: 4px
+  &::first-letter {
+    text-transform: uppercase;
+  }
 }
 </style>

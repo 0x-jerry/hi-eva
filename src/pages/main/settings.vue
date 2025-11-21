@@ -21,7 +21,6 @@ const settings = [
     id: useId(),
     props: {
       onUpdated() {
-        console.log(promptSettingRef.value)
         promptSettingRef.value?.updateEndpoints()
       },
     },
