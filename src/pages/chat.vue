@@ -53,6 +53,7 @@ win.listen(WindowEventName.ChatHide, async () => {
   await win.hide()
 
   chatRef.value?.abortStream()
+  chatHistory.value = undefined
 })
 
 onMounted(async () => {
@@ -100,6 +101,7 @@ async function createChatHistory() {
     })
 
     await nextTick()
+
     await chatRef.value?.sendMsg(msg)
   }
 }

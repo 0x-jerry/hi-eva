@@ -34,14 +34,20 @@ let streamRef: Optional<ChatCompletionStream>
 
 const chatHistory = ref<IChatHistoryModel>()
 
+let updateDataPromise = null as null | Promise<void>
+
 watchImmediate(
   () => props.historyId,
-  async () => {
-    chatHistory.value = await chatHistoryTable.getById(props.historyId)
-
-    await updateMessages()
+  () => {
+    updateDataPromise = updateHistoryData()
   },
 )
+
+async function updateHistoryData() {
+  chatHistory.value = await chatHistoryTable.getById(props.historyId)
+
+  await updateMessages()
+}
 
 async function updateMessages() {
   const msgs = await chatHistoryMsgTable.getMsgs(props.historyId)
@@ -65,7 +71,9 @@ async function updateChatTitle(newTitle: string) {
 
 const handleSendMsg = useLoading(_handleSendMsg)
 async function _handleSendMsg(msgContent: string) {
-  const historyId = chatHistory.value?.id
+  await updateDataPromise
+
+  const historyId = props.historyId
 
   if (!historyId) {
     throw new Error(`Chat history is not initialized!`)
