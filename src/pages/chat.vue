@@ -1,55 +1,58 @@
 <script lang="ts" setup>
-import { nanoid } from '@0x-jerry/utils'
+import { createPromise, isArray, Optional } from '@0x-jerry/utils'
+import { useAsyncData, useLoading } from '@0x-jerry/vue-kit'
 import { getCurrentWindow } from '@tauri-apps/api/window'
-import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import { debounce } from 'lodash-es'
+import OpenAI from 'openai'
+import { ChatCompletionMessageParam } from 'openai/resources/index.mjs'
+import { onMounted, reactive, ref } from 'vue'
 import AutoResizeContainer from '../components/AutoResizeContainer.vue'
-import CarbonIcon from '../components/CarbonIcon.vue'
-import ChatMessages from '../components/Chat/ChatMessages.vue'
-import type { ChatHistory } from '../components/Chat/types'
-import CloseWindow from '../components/CloseWindow.vue'
-import DraggableArea from '../components/DraggableArea.vue'
-import Icon from '../components/Icon.vue'
+import ChatRoom from '../components/Chat/ChatRoom.vue'
 import { selectionTable } from '../database'
+import { chatHistoryTable, IChatHistoryModel } from '../database/chatHistory'
+import {
+  chatHistoryMsgTable,
+  IChatHistoryMsgItem,
+  IChatHistoryMsgModel,
+} from '../database/chatHistoryMsg'
+import { promptConfigTable } from '../database/promptConfig'
+import { ChatRole } from '../logic/chat'
 import { commands } from '../logic/commands'
-import { getPromptConf } from '../logic/config'
+import { WindowEventName } from '../logic/events'
 import { mustache } from '../utils'
-
-const chatRef = ref<InstanceType<typeof ChatMessages>>()
-
-const initialChat: ChatHistory = {
-  id: nanoid(),
-  name: 'temp',
-  messages: [],
-}
+import ChatPageHead from './components/ChatPageHead.vue'
 
 const state = reactive({
   promptId: '',
   selectedText: '',
   pinned: false,
   ready: false,
-  chatHistory: initialChat,
+  messages: [] as IChatHistoryMsgItem[],
+  responseMsg: null as Optional<IChatHistoryMsgModel>,
 })
 
-const promptConf = computed(() =>
-  state.promptId ? getPromptConf(state.promptId) : undefined,
-)
+const chatHistory = ref<IChatHistoryModel>()
+
+const promptConfigApi = useAsyncData(promptConfigTable.getById)
 
 const win = getCurrentWindow()
 
-win.listen('show-chat', async (evt) => {
-  const payload = evt.payload as { prompt_id: string; selected_text: string }
+win.listen(WindowEventName.ShowChat, async (evt) => {
+  const payload = evt.payload
   state.promptId = payload.prompt_id
   state.selectedText = payload.selected_text
 
+  await promptConfigApi.load(Number(payload.prompt_id))
+
   await selectionTable.createOne({
     selected: payload.selected_text,
-    promptName: promptConf.value?.name || '',
+    promptName: promptConfigApi.data.value?.name || 'unknown',
   })
 
-  await resetChatMessage()
+  await createChatHistory()
 })
 
-win.listen('hide-chat', async () => {
+win.listen(WindowEventName.HideChat, async () => {
   if (state.pinned) {
     return
   }
@@ -57,68 +60,176 @@ win.listen('hide-chat', async () => {
   await win.hide()
 })
 
-watch(
-  () => state.pinned,
-  () => commands.setChatPinned({ pinned: state.pinned }),
-)
-
 onMounted(async () => {
   await commands.applyAppearance()
 })
 
-async function resetChatMessage() {
+async function createChatHistory() {
   if (!state.promptId) return
 
   state.ready = false
-  state.chatHistory.messages = []
+
+  // todo, generate history name
+  const name = promptConfigApi.data.value?.name || 'unknown-prompt-config'
+
+  chatHistory.value = await chatHistoryTable.createOne({
+    name,
+  })
 
   await initMessages()
 }
 
 async function initMessages() {
-  state.chatHistory.messages.push({
-    role: 'user',
-    content: mustache(promptConf.value?.prompt || '', {
-      selection: state.selectedText,
+  const promptTpl = promptConfigApi.data.value?.prompt
+
+  if (!promptTpl) {
+    throw new Error(`Prompt config is null`)
+  }
+
+  state.messages = []
+
+  const msg = mustache(promptTpl, {
+    selection: state.selectedText,
+  })
+
+  await handleSendMsg(msg)
+}
+
+async function updateChatTitle(newTitle: string) {
+  const history = chatHistory.value
+  if (!history) {
+    throw new Error(`Chat history is not initialized`)
+  }
+
+  await chatHistoryTable.updateOne({
+    ...history,
+    name: newTitle,
+  })
+
+  chatHistory.value = await chatHistoryTable.getById(history.id)
+}
+
+const handleSendMsg = useLoading(_handleSendMsg)
+
+async function _handleSendMsg(msgContent: string) {
+  const historyId = chatHistory.value?.id
+
+  if (!historyId) {
+    throw new Error(`Chat history is not initialized!`)
+  }
+
+  const newMsgItem = await chatHistoryMsgTable.createOne({
+    chatHistoryId: historyId,
+    role: ChatRole.User,
+    content: msgContent,
+  })
+
+  state.messages.push(newMsgItem)
+
+  state.responseMsg = await chatHistoryMsgTable.createOne({
+    chatHistoryId: historyId,
+    role: ChatRole.Assistant,
+    content: '',
+  })
+
+  state.messages.push(state.responseMsg)
+
+  await startChatStream(state.messages.slice(0, -1))
+}
+
+const saveResponseMsgItem = debounce(_saveResponseMsgItem, 100)
+
+async function _saveResponseMsgItem() {
+  if (!state.responseMsg?.id) return
+
+  await chatHistoryMsgTable.updateOne({
+    ...state.responseMsg,
+  })
+}
+
+async function startChatStream(msgs: IChatHistoryMsgItem[]) {
+  const { apiKey, model, baseUrl } =
+    promptConfigApi.data.value?.endpointConfig || {}
+
+  if (!baseUrl || !apiKey || !model) {
+    throw new Error(`Endpoint config is missing`)
+  }
+
+  const ins = new OpenAI({
+    baseURL: baseUrl,
+    apiKey,
+  })
+
+  const resultPromise = createPromise<void>()
+
+  const stream = ins.chat.completions.stream({
+    model,
+    messages: msgs.map((msg) => {
+      const item: ChatCompletionMessageParam = {
+        role: msg.role === ChatRole.User ? 'user' : 'assistant',
+        content: msg.content,
+      }
+
+      return item
     }),
   })
 
-  state.ready = true
-  await nextTick()
+  stream.on('message', (msg) => {
+    let content = ''
 
-  chatRef.value?.continueChat()
-}
+    if (isArray(msg.content)) {
+      msg.content.forEach((item) => {
+        switch (item.type) {
+          case 'text':
+            content += item.text
+            break
+          case 'refusal':
+            content += item.refusal
+            break
 
-async function togglePinWindow() {
-  state.pinned = !state.pinned
-  await win.setAlwaysOnTop(state.pinned)
+          case 'image_url':
+            content += `![](${item.image_url.url})`
+            break
+
+          default:
+            throw new Error(`Message type not support`)
+        }
+      })
+    } else {
+      content += msg.content || ''
+    }
+
+    if (!state.responseMsg) {
+      throw new Error(`Response message instance is null`)
+    }
+
+    state.responseMsg.content += content
+
+    saveResponseMsgItem()
+  })
+
+  stream.on('end', () => {
+    state.responseMsg = null
+
+    resultPromise.resolve()
+  })
+
+  stream.on('error', (err) => {
+    resultPromise.reject(err.message)
+  })
+
+  return resultPromise.promise
 }
 </script>
 
 <template>
   <AutoResizeContainer :width="400">
     <div class="page bg-white">
-      <div class="title flex border-(0 b solid gray) h-8 select-none">
-        <div class="flex items-center pl-1 cursor-pointer" @click="togglePinWindow">
-          <Icon v-if="state.pinned" class="i-carbon:pin-filled" />
-          <Icon v-else class="i-carbon:pin" />
-        </div>
-        <div class="border-(0 r solid gray) ml-1 mr-2">&nbsp;</div>
-        <DraggableArea class="flex-1 flex items-center gap-1">
-          <template v-if="promptConf">
-            <CarbonIcon v-if="promptConf.icon" :name="promptConf.icon" class="text-xl" />
-            <span class="pl-2">
-              {{ promptConf?.name }}
-            </span>
-          </template>
-        </DraggableArea>
-        <div class="icons h-full">
-          <CloseWindow class="h-full" />
-        </div>
-      </div>
-
-      <ChatMessages ref="chatRef" v-if="state.ready && promptConf?.id" v-model="state.chatHistory"
-        :prompt-id="promptConf.id" />
+      <ChatPageHead :icon="promptConfigApi.data.value?.icon"  :title="promptConfigApi.data.value?.name" />
+      
+      <template v-if="chatHistory">
+        <ChatRoom :title="chatHistory.name" :messages="state.messages" :is-processing="handleSendMsg.isLoading" @rename-title="updateChatTitle" @send="handleSendMsg" />
+      </template>
     </div>
   </AutoResizeContainer>
 </template>

@@ -4,18 +4,19 @@ import ChatHeader from './ChatHeader.vue'
 import ChatInput, { type ChatInputEmits } from './ChatInput.vue'
 import ChatMessageList from './ChatMessageList.vue'
 
-export interface ChatProps {
+export interface ChatRoomProps {
   title: string
   messages: IChatHistoryMsgItem[]
+  isProcessing?: boolean
 }
 
-export type ChatEmits = ChatInputEmits & {
+export type ChatRoomEmits = ChatInputEmits & {
   renameTitle: [newTitle: string]
 }
 
-const props = defineProps<ChatProps>()
+const props = defineProps<ChatRoomProps>()
 
-const emit = defineEmits<ChatEmits>()
+const emit = defineEmits<ChatRoomEmits>()
 
 async function handleSend(content: string) {
   emit('send', content)
@@ -28,11 +29,11 @@ async function renameChat(newName: string) {
 
 <template>
   <div class="chat-root">
-    <ChatHeader :name="title ?? 'New Chat'" @rename="renameChat" />
+    <ChatHeader :name="title" @rename="renameChat" />
 
     <ChatMessageList :messages="messages" />
 
-    <ChatInput @send="handleSend" />
+    <ChatInput :is-processing="isProcessing" @send="handleSend" />
   </div>
 </template>
 

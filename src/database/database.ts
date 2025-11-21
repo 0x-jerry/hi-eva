@@ -89,7 +89,9 @@ export abstract class BaseModelManager<T extends BaseModel> {
     const resp = await db.execute(sql, values)
 
     // biome-ignore lint/style/noNonNullAssertion: lastInsertId always exists.
-    return await this.getById(resp.lastInsertId!)
+    const createdItem = (await this.getById(resp.lastInsertId!))!
+
+    return createdItem
   }
 
   async updateOne(data: UpdatedModel<T>, opt: IUpdateOneOption = {}) {
