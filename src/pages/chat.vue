@@ -2,8 +2,8 @@
 import { Optional } from '@0x-jerry/utils'
 import { useAsyncData } from '@0x-jerry/vue-kit'
 import { getCurrentWindow } from '@tauri-apps/api/window'
-import { nextTick, reactive, ref, useTemplateRef } from 'vue'
-import AutoResizeContainer from '../components/AutoResizeContainer.vue'
+import { useLocalStorage } from '@vueuse/core'
+import { nextTick, onMounted, reactive, ref, useTemplateRef } from 'vue'
 import ChatWithHistory from '../components/ChatWithHistory.vue'
 import { chatHistoryTable, IChatHistoryModel } from '../database/chatHistory'
 import {
@@ -17,10 +17,15 @@ import { mustache } from '../utils'
 import ChatPageHead from './components/ChatPageHead.vue'
 
 const state = reactive({
-  selectedText: '',
-  pinned: false,
   messages: [] as IChatHistoryMsgItem[],
   responseMsg: null as Optional<IChatHistoryMsgModel>,
+})
+
+const pinned = useLocalStorage('chat-pinned', false)
+
+const payload = useLocalStorage('chat-payload', {
+  promptId: null as number | null,
+  selectedText: '',
 })
 
 const chatRef = useTemplateRef('chatRef')
@@ -32,16 +37,16 @@ const promptConfigApi = useAsyncData(promptConfigTable.getById)
 const win = getCurrentWindow()
 
 win.listen(WindowEventName.ChatShow, async (evt) => {
-  const payload = evt.payload
-  state.selectedText = payload.selected_text
+  payload.value = {
+    promptId: Number(evt.payload.prompt_id),
+    selectedText: evt.payload.selected_text,
+  }
 
-  await promptConfigApi.load(Number(payload.prompt_id))
-
-  await createChatHistory()
+  await fetchInitializedData()
 })
 
 win.listen(WindowEventName.ChatHide, async () => {
-  if (state.pinned) {
+  if (pinned.value) {
     return
   }
 
@@ -49,6 +54,20 @@ win.listen(WindowEventName.ChatHide, async () => {
 
   chatRef.value?.abortStream()
 })
+
+onMounted(async () => {
+  await fetchInitializedData()
+})
+
+async function fetchInitializedData() {
+  if (!payload.value.promptId) {
+    return
+  }
+
+  await promptConfigApi.load(payload.value.promptId)
+
+  await createChatHistory()
+}
 
 async function createChatHistory() {
   const promptTpl = promptConfigApi.data.value?.prompt
@@ -60,7 +79,7 @@ async function createChatHistory() {
   state.messages = []
 
   const msg = mustache(promptTpl, {
-    selection: state.selectedText,
+    selection: payload.value.selectedText,
   })
 
   const msgItem = await chatHistoryMsgTable.getByContent(msg)
@@ -87,15 +106,15 @@ async function createChatHistory() {
 </script>
 
 <template>
-  <AutoResizeContainer :width="400">
-    <div class="page bg-white">
-      <ChatPageHead :icon="promptConfigApi.data.value?.icon" :title="promptConfigApi.data.value?.name" v-model:pinned="state.pinned" />
+  <div class="page flex flex-col w-400px h-600px bg-white">
+    <ChatPageHead :icon="promptConfigApi.data.value?.icon" :title="promptConfigApi.data.value?.name" v-model:pinned="pinned" />
 
-      <template v-if="chatHistory">
-        <ChatWithHistory ref="chatRef" :history-id="chatHistory.id" :prompt-config-id="promptConfigApi.data.value?.id" />
-      </template>
-    </div>
-  </AutoResizeContainer>
+    <template v-if="chatHistory">
+      <div class="flex-1 h-0">
+        <ChatWithHistory  ref="chatRef" :history-id="chatHistory.id" :prompt-config-id="promptConfigApi.data.value?.id" />
+      </div>
+    </template>
+  </div>
 </template>
 
 <style lang="scss" scoped></style>

@@ -45,11 +45,11 @@ function handleAbort() {
 
 <template>
   <div class="chat-input">
-    <Textarea v-model="text" @keydown="onCtrlEnter" placeholder="Type a message" />
+    <Textarea style="resize: none;" v-model="text" @keydown="onCtrlEnter" placeholder="Type a message" :rows="3" />
 
     <div class="actions">
-      <Button v-if="isProcessing" @click="handleAbort">Abort</Button>
-      <Button v-else @click="send" :disabled="!canSend">Send</Button>
+      <Button class="h-full" v-if="isProcessing" @click="handleAbort">Abort</Button>
+      <Button class="h-full" v-else @click="send" :disabled="!canSend">Send</Button>
     </div>
   </div>
 </template>
@@ -72,9 +72,5 @@ function handleAbort() {
 .actions {
   display: flex;
   align-items: flex-end
-}
-
-.actions button {
-  padding: 6px 12px
 }
 </style>

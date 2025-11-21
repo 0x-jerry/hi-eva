@@ -36,7 +36,7 @@ async function togglePinWindow() {
     <div class="border-(0 r solid gray) ml-1 mr-2">&nbsp;</div>
     <DraggableArea class="flex-1 flex items-center gap-1">
       <CarbonIcon v-if="icon" :name="icon" class="text-xl" />
-      <span class="pl-2">
+      <span>
         {{ title }}
       </span>
     </DraggableArea>
