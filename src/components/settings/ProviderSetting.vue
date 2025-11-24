@@ -1,6 +1,6 @@
 <script lang='ts' setup>
 import { useAsyncData } from '@0x-jerry/vue-kit'
-import { Button, List, ListItem } from 'tdesign-vue-next'
+import { Button, List, ListItem, Tag } from 'tdesign-vue-next'
 import { ref, toRaw } from 'vue'
 import { useDrawer } from '../../composables/useDrawer'
 import {
@@ -105,7 +105,10 @@ function handleNewFunction() {
       <template v-else>
         <List>
           <ListItem v-for="conf in configsApi.data.value">
-            <div>{{ conf.name }}</div>
+            <div class="flex items-center gap-1">
+              <span>{{ conf.name }}</span>
+              <Tag v-if="conf.model" size="small">{{ conf.model }}</Tag>
+            </div>
 
             <template #action>
               <Icon class="i-carbon:edit cursor-pointer" @click="openEditDrawer(conf)" />

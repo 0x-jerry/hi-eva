@@ -15,6 +15,12 @@ pub fn init_sql<T: Runtime>() -> TauriPlugin<T, Option<PluginConfig>> {
             sql: include_str!("sql/init_20251121.sql"),
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 3,
+            description: "create cache table",
+            sql: include_str!("sql/init_20251124.sql"),
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri_plugin_sql::Builder::default()
