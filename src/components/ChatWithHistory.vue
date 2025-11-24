@@ -135,40 +135,6 @@ async function startChatStream(msgs: IChatHistoryMsgItem[]) {
 
   streamRef = stream
 
-  stream.on('message', (msg) => {
-    let content = ''
-
-    if (isArray(msg.content)) {
-      msg.content.forEach((item) => {
-        switch (item.type) {
-          case 'text':
-            content += item.text
-            break
-          case 'refusal':
-            content += item.refusal
-            break
-
-          case 'image_url':
-            content += `![](${item.image_url.url})`
-            break
-
-          default:
-            throw new Error(`Message type not support`)
-        }
-      })
-    } else {
-      content += msg.content || ''
-    }
-
-    if (!state.responseMsg) {
-      throw new Error(`Response message instance is null`)
-    }
-
-    state.responseMsg.content += content
-
-    saveResponseMsgItem()
-  })
-
   stream.on('end', () => {
     state.responseMsg = null
     streamRef = null
@@ -180,6 +146,19 @@ async function startChatStream(msgs: IChatHistoryMsgItem[]) {
     console.error(err)
     resultPromise.reject(err.message)
   })
+
+  for await (const chunk of stream) {
+    const firstChoice = chunk.choices[0]
+
+    const content = firstChoice.delta.content
+
+    if (!state.responseMsg) {
+      throw new Error(`Response message instance is null`)
+    }
+
+    state.responseMsg.content += content
+    await saveResponseMsgItem()
+  }
 
   return resultPromise.promise
 }
