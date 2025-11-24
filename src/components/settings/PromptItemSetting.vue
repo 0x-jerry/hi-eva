@@ -1,99 +1,59 @@
 <script lang='ts' setup>
-import { Select, Textarea } from 'tdesign-vue-next'
-import { ref, toRaw, watch } from 'vue'
-import type { IEndpointConfigItem } from '../../database/endpointConfig'
+import { useAsyncData } from '@0x-jerry/vue-kit'
+import { watchImmediate } from '@vueuse/core'
+import {
+  Form,
+  FormInstanceFunctions,
+  FormItem,
+  Input,
+  Select,
+  Textarea,
+} from 'tdesign-vue-next'
+import { useTemplateRef } from 'vue'
+import { endpointConfigTable } from '../../database/endpointConfig'
 import type { IPromptConfigItem } from '../../database/promptConfig'
-import EditableInputText from '../EditableInputText.vue'
-import Icon from '../Icon.vue'
-import IconPicker from '../IconPicker.vue'
 
 export interface PromptItemSettingProps {
-  item: IPromptConfigItem
-  endpoints?: IEndpointConfigItem[]
+  _?: unknown
 }
 
 const props = defineProps<PromptItemSettingProps>()
-const emit = defineEmits(['remove', 'update'])
 
-const editMode = ref(!props.item.id)
+const value = defineModel<IPromptConfigItem>({ required: true })
 
-const currentValue = ref(structuredClone(toRaw(props.item)))
+const formRef = useTemplateRef<FormInstanceFunctions>('formRef')
 
-watch(
-  () => props.item,
-  () => {
-    currentValue.value = structuredClone(toRaw(props.item))
-  },
-)
+const endpointsApi = useAsyncData(endpointConfigTable.findAll, [])
 
-function toggleEditMode() {
-  editMode.value = !editMode.value
-  currentValue.value = structuredClone(toRaw(props.item))
+watchImmediate(value, () => {
+  endpointsApi.load()
+})
 
-  if (!props.item.id) {
-    emit('remove')
-  }
+function validate() {
+  formRef.value?.validate()
 }
 
-function applyUpdate() {
-  emit('update', currentValue.value)
-  editMode.value = !editMode.value
-}
+defineExpose({
+  validate,
+})
 </script>
 
 <template>
-  <div class="prompt-item-setting flex flex-col gap-2 bg-light-3 p-4 rounded">
-    <div class="flex items-center gap-2">
-      <IconPicker v-model="currentValue.icon" :disabled="!editMode" />
-      <EditableInputText :editable="editMode" v-model="currentValue.name" />
-
-        <div class="tool-icons flex flex-1 justify-end items-center gap-2">
-          <Icon v-if="item.id" class="i-carbon:trash-can cursor-pointer" @click="emit('remove')" />
-
-          <template v-if="editMode">
-            <Icon class="i-carbon:close cursor-pointer" @click="toggleEditMode" />
-            <Icon class="i-carbon:checkmark cursor-pointer" @click="applyUpdate" />
-          </template>
-          <template v-else>
-            <Icon class="i-carbon:edit cursor-pointer" @click="toggleEditMode" />
-          </template>
-        </div>
-    </div>
-    <div class="flex flex-col gap-2">
-      <Textarea v-model="currentValue.prompt" :disabled="!editMode" :rows="3" style="resize: vertical;" />
-    </div>
-    <div class="editable-row">
-      <label>Endpoint</label>
-      <div class="flex gap-2">
-        <Select v-model="currentValue.endpointId" :disabled="!editMode" :options="endpoints" optionLabel="name" optionValue="id"
-          placeholder="Select a endpoint" />
-      </div>
-    </div>
+  <div class="prompt-item-setting">
+    <Form ref="formRef" :data="value" label-align="top">
+      <FormItem label=" Name" name="name">
+        <Input v-model="value.name"></Input>
+      </FormItem>
+      <FormItem label="Prompt" name="prompt">
+        <Textarea v-model="value.prompt" placeholder="Write a prompt..." ></Textarea>
+      </FormItem>
+      <FormItem label="Provider" name="endpointId">
+        <Select v-model="value.endpointId" :options="endpointsApi.data.value"
+          :keys="{ label: 'name', value: 'id' }"></Select>
+      </FormItem>
+    </Form>
   </div>
 </template>
 
 <style lang='scss' scoped>
-.tool-icons {
-  --uno: transition;
-  opacity: 0;
-}
-
-.prompt-item-setting {
-  &:hover {
-    .tool-icons {
-      opacity: 1;
-    }
-
-  }
-}
-
-.editable-row {
-  --uno: flex items-center;
-
-  label {
-    width: 50px;
-    text-align: right;
-    margin-right: 1rem;
-  }
-}
 </style>

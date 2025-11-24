@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { useEventListener } from '@vueuse/core'
-import { onMounted, reactive, ref, shallowRef, useId } from 'vue'
+import { onMounted, reactive, ref, useId } from 'vue'
 import BasicSetting from '../../components/settings/BasicSetting.vue'
 import PromptSetting from '../../components/settings/PromptSetting.vue'
 import ProviderSetting from '../../components/settings/ProviderSetting.vue'
 
 const scrollElRef = ref<HTMLElement>()
-
-const promptSettingRef = shallowRef<InstanceType<typeof PromptSetting>>()
 
 const settings = [
   {
@@ -19,21 +17,11 @@ const settings = [
     label: 'Provider 设置',
     Component: ProviderSetting,
     id: useId(),
-    props: {
-      onUpdated() {
-        promptSettingRef.value?.updateEndpoints()
-      },
-    },
   },
   {
     label: 'Prompt 设置',
     Component: PromptSetting,
     id: useId(),
-    props: {
-      ref: (r: any) => {
-        promptSettingRef.value = r
-      },
-    },
   },
 ]
 
@@ -79,7 +67,7 @@ function clickMenu(conf: { id: string }) {
     <div ref="scrollElRef" class="content bg-white flex-1 p-4 pt-2 overflow-auto flex flex-col gap-4">
       <div class="section-content" v-for="conf in settings" :key="conf.id">
         <span :id="conf.id"></span>
-        <component :is="conf.Component" v-bind="conf.props" />
+        <component :is="conf.Component" />
       </div>
     </div>
   </div>

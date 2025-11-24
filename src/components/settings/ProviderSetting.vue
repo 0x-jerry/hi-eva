@@ -1,7 +1,8 @@
 <script lang='ts' setup>
 import { useAsyncData } from '@0x-jerry/vue-kit'
-import { Button } from 'tdesign-vue-next'
-import { ref } from 'vue'
+import { Button, List, ListItem } from 'tdesign-vue-next'
+import { ref, toRaw } from 'vue'
+import { useDrawer } from '../../composables/useDrawer'
 import {
   endpointConfigTable,
   IEndpointConfigItem,
@@ -16,6 +17,8 @@ export type EndpointSettingEmit = {
 
 const emit = defineEmits<EndpointSettingEmit>()
 
+const editDrawer = useDrawer()
+
 const configsApi = useAsyncData(async () => {
   const resp = await endpointConfigTable.findAll()
 
@@ -24,19 +27,20 @@ const configsApi = useAsyncData(async () => {
 
 configsApi.load()
 
-const newData = ref<IEndpointConfigItem>()
+const editData = ref<IEndpointConfigItem>({
+  apiKey: '',
+  name: '未命名',
+  baseUrl: '',
+  model: '',
+})
 
-function addConfig() {
-  newData.value = {
+function resetEditData() {
+  editData.value = {
     apiKey: '',
     name: '未命名',
     baseUrl: '',
     model: '',
   }
-}
-
-function resetNewData() {
-  newData.value = undefined
 }
 
 async function removeConf(conf: IEndpointConfigItem) {
@@ -48,7 +52,9 @@ async function removeConf(conf: IEndpointConfigItem) {
   emit('updated')
 }
 
-async function handleAddOrUpdate(conf: IEndpointConfigItem) {
+async function handleAddOrUpdate() {
+  const conf = editData.value
+
   if (conf.id) {
     await endpointConfigTable.updateOne({
       ...conf,
@@ -56,11 +62,24 @@ async function handleAddOrUpdate(conf: IEndpointConfigItem) {
     })
   } else {
     await endpointConfigTable.createOne(conf)
-    newData.value = undefined
+    resetEditData()
   }
 
   await configsApi.load()
+  editDrawer.close()
   emit('updated')
+}
+
+function openEditDrawer(conf: IEndpointConfigItem) {
+  editData.value = structuredClone(toRaw(conf))
+
+  editDrawer.open()
+}
+
+function handleNewFunction() {
+  resetEditData()
+
+  editDrawer.open()
 }
 </script>
 
@@ -71,24 +90,35 @@ async function handleAddOrUpdate(conf: IEndpointConfigItem) {
         Provider 配置
       </span>
       <div class="flex items-center gap-2">
-        <Icon class="i-carbon:add cursor-pointer" @click="addConfig" />
+        <Icon class="i-carbon:add cursor-pointer" @click="handleNewFunction" />
       </div>
     </SettingTitle>
 
     <div class="flex flex-col gap-2">
-      <ProviderItemSetting v-if="newData" :item="newData" @update="handleAddOrUpdate" @remove="resetNewData" />
-
-      <template v-if="!newData && !configsApi.data.value.length">
-          <div class="flex text-center justify-center py-8 bg-light-2">
-            <Button variant="text" @click="addConfig" >
-              + 新增配置
-            </Button>
-          </div>
+      <template v-if="!configsApi.data.value.length">
+        <div class="flex text-center justify-center py-8 bg-light-2">
+          <Button variant="text" @click="handleNewFunction">
+            + 新增配置
+          </Button>
+        </div>
       </template>
       <template v-else>
-        <ProviderItemSetting v-for="conf in configsApi.data.value" :key="conf.id" :item="conf" @remove="removeConf(conf)" @update="handleAddOrUpdate" />
+        <List>
+          <ListItem v-for="conf in configsApi.data.value">
+            <div>{{ conf.name }}</div>
+
+            <template #action>
+              <Icon class="i-carbon:edit cursor-pointer" @click="openEditDrawer(conf)" />
+              <Icon class="i-carbon:trash-can cursor-pointer" @click="removeConf(conf)" />
+            </template>
+          </ListItem>
+        </List>
       </template>
     </div>
+
+    <editDrawer.Component header="Edit Provider" @confirm="handleAddOrUpdate">
+      <ProviderItemSetting v-model="editData" />
+    </editDrawer.Component>
   </div>
 </template>
 
