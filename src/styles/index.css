@@ -17,3 +17,7 @@ body {
 *::-webkit-scrollbar-thumb {
   --uno: bg-gray-3 rounded-xl;
 }
+
+div {
+  box-sizing: border-box;
+}

@@ -12,6 +12,7 @@ import {
 import { useTemplateRef } from 'vue'
 import { endpointConfigTable } from '../../database/endpointConfig'
 import type { IPromptConfigItem } from '../../database/promptConfig'
+import IconPicker from '../IconPicker.vue'
 
 export interface PromptItemSettingProps {
   _?: unknown
@@ -42,18 +43,21 @@ defineExpose({
   <div class="prompt-item-setting">
     <Form ref="formRef" :data="value" label-align="top">
       <FormItem label=" Name" name="name">
-        <Input v-model="value.name"></Input>
-      </FormItem>
-      <FormItem label="Prompt" name="prompt">
-        <Textarea v-model="value.prompt" placeholder="Write a prompt..." ></Textarea>
+        <div class="flex gap-1 w-full">
+          <IconPicker v-model="value.icon" />
+          <Input class="flex-1" v-model="value.name"></Input>
+        </div>
       </FormItem>
       <FormItem label="Provider" name="endpointId">
         <Select v-model="value.endpointId" :options="endpointsApi.data.value"
           :keys="{ label: 'name', value: 'id' }"></Select>
       </FormItem>
+      <FormItem label="Prompt" name="prompt">
+        <Textarea v-model="value.prompt" placeholder="Write a prompt..."
+          :autosize="{ minRows: 3, maxRows: 5 }"></Textarea>
+      </FormItem>
     </Form>
   </div>
 </template>
 
-<style lang='scss' scoped>
-</style>
+<style lang='scss' scoped></style>

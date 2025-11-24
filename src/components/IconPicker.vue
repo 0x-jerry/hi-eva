@@ -45,9 +45,9 @@ function handleSelect(name: string) {
 
 <template>
   <div class="text-2xl inline-block">
-    <Popup v-model="state.visible">
+    <Popup v-model="state.visible" trigger="click">
       <div class="icon-picker border-(1 solid light-8) rounded size-8 flex-center cursor-pointer"
-        :class="{ 'disabled': disabled }" @click="showPopover">
+        :class="{ 'disabled': disabled }">
         <CarbonIcon :name="vValue || 'data-categorical'" />
       </div>
 

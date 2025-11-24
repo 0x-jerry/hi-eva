@@ -1,10 +1,11 @@
-<script lang='ts' setup>
+<script lang="ts" setup>
 import { useAsyncData } from '@0x-jerry/vue-kit'
 import { Button, List, ListItem } from 'tdesign-vue-next'
 import { ref, toRaw } from 'vue'
 import { useDrawer } from '../../composables/useDrawer'
 import type { IPromptConfigItem } from '../../database/promptConfig'
 import { promptConfigTable } from '../../database/promptConfig'
+import CarbonIcon from '../CarbonIcon.vue'
 import Icon from '../Icon.vue'
 import PromptItemSetting from './PromptItemSetting.vue'
 import SettingTitle from './SettingTitle.vue'
@@ -68,9 +69,7 @@ function handleNewFunction() {
 <template>
   <div>
     <SettingTitle class="mb-2 gap-2">
-      <span>
-        Prompt 配置
-      </span>
+      <span> Prompt 配置 </span>
       <div class="flex items-center gap-2">
         <Icon class="i-carbon:add cursor-pointer" @click="handleNewFunction" />
       </div>
@@ -85,7 +84,15 @@ function handleNewFunction() {
       <template v-else>
         <List>
           <ListItem v-for="conf in configsApi.data.value">
-            <div>{{ conf.name }}</div>
+            <div class="gap-1 flex items-center">
+              <div v-if="conf.icon"
+                class="text-xl border-(1 solid light-8) rounded size-6 flex items-center justify-center">
+                <CarbonIcon :name="conf.icon" />
+              </div>
+              <span>
+                {{ conf.name }}
+              </span>
+            </div>
 
             <template #action>
               <Icon class="i-carbon:edit cursor-pointer" @click="openEditDrawer(conf)" />
@@ -102,4 +109,4 @@ function handleNewFunction() {
   </div>
 </template>
 
-<style lang='scss' scoped></style>
+<style lang="scss" scoped></style>
