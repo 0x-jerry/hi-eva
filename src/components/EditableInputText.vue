@@ -1,10 +1,9 @@
 <script lang='ts' setup>
-import type { InputTextProps } from 'primevue/inputtext'
-import InputText from 'primevue/inputtext'
+import { Input, type InputProps } from 'tdesign-vue-next'
 
 export interface EditableInputTextProps {
   editable?: boolean
-  input?: InputTextProps
+  input?: InputProps
 }
 
 defineProps<EditableInputTextProps>()
@@ -15,7 +14,7 @@ const modelValue = defineModel<string>()
 
 <template>
   <template v-if="editable">
-    <InputText v-bind="input" v-model="modelValue" />
+    <Input v-bind="input" v-model="modelValue" />
   </template>
   <template v-else>
     {{ modelValue }}

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Button, Textarea } from 'primevue'
+import { Button, Textarea, TextareaValue } from 'tdesign-vue-next'
 import { computed, ref } from 'vue'
 
 export interface ChatInputProps {
@@ -27,7 +27,8 @@ function send() {
   text.value = ''
 }
 
-function onCtrlEnter(evt: KeyboardEvent) {
+function onCtrlEnter(_: TextareaValue, opt: { e: KeyboardEvent }) {
+  const evt = opt.e
   const shouldSend = evt.key === 'Enter' && (evt.ctrlKey || evt.metaKey)
   if (!shouldSend) return
 

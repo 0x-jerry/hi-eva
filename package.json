@@ -13,7 +13,6 @@
   "dependencies": {
     "@0x-jerry/utils": "^6.0.0",
     "@0x-jerry/vue-kit": "^2.3.1",
-    "@primeuix/themes": "^1.2.5",
     "@tauri-apps/api": "^2.9.0",
     "@tauri-apps/plugin-opener": "^2.5.2",
     "@tauri-apps/plugin-sql": "^2.3.1",
@@ -28,7 +27,7 @@
     "marked": "^17.0.0",
     "marked-katex-extension": "^5.1.6",
     "openai": "^6.9.1",
-    "primevue": "^4.4.1",
+    "tdesign-vue-next": "^1.17.3",
     "vue": "^3.5.24",
     "vue-router": "^4.6.3"
   },

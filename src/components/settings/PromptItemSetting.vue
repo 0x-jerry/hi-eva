@@ -1,6 +1,5 @@
 <script lang='ts' setup>
-import Select from 'primevue/select'
-import Textarea from 'primevue/textarea'
+import { Select, Textarea } from 'tdesign-vue-next'
 import { ref, toRaw, watch } from 'vue'
 import type { IEndpointConfigItem } from '../../database/endpointConfig'
 import type { IPromptConfigItem } from '../../database/promptConfig'

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useAsyncData } from '@0x-jerry/vue-kit'
 import dayjs from 'dayjs'
-import { Button, InputText, Select } from 'primevue'
+import { Button, Input, Select } from 'tdesign-vue-next'
 import { computed, reactive } from 'vue'
 import ChatWithHistory from '../../components/ChatWithHistory.vue'
 import ClickToEdit from '../../components/ClickToEdit.vue'
@@ -97,7 +97,7 @@ async function updateHistoryName(name: string) {
             <ClickToEdit :value="selectedHistory.name" @ok="updateHistoryName">
               {{ selectedHistory.name }}
               <template #edit="{value, update}">
-                <InputText class="w-full" :model-value="value" @update:model-value="update" autofocus />
+                <Input class="w-full" :model-value="value" @update:model-value="update" autofocus />
               </template>
             </ClickToEdit>
           </div>

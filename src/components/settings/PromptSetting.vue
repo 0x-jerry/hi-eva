@@ -1,6 +1,6 @@
 <script lang='ts' setup>
 import { useAsyncData } from '@0x-jerry/vue-kit'
-import { Button } from 'primevue'
+import { Button } from 'tdesign-vue-next'
 import { ref } from 'vue'
 import { endpointConfigTable } from '../../database/endpointConfig'
 import type { IPromptConfigItem } from '../../database/promptConfig'

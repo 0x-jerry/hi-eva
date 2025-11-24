@@ -1,13 +1,13 @@
 <script lang='ts' setup>
 import { useAsyncData } from '@0x-jerry/vue-kit'
-import { Button } from 'primevue'
+import { Button } from 'tdesign-vue-next'
 import { ref } from 'vue'
 import {
   endpointConfigTable,
   IEndpointConfigItem,
 } from '../../database/endpointConfig'
 import Icon from '../Icon.vue'
-import EndpointItemSetting from './EndpointItemSetting.vue'
+import ProviderItemSetting from './ProviderItemSetting.vue'
 import SettingTitle from './SettingTitle.vue'
 
 export type EndpointSettingEmit = {
@@ -68,7 +68,7 @@ async function handleAddOrUpdate(conf: IEndpointConfigItem) {
   <div>
     <SettingTitle class="mb-2 gap-2">
       <span>
-        Endpoint 配置
+        Provider 配置
       </span>
       <div class="flex items-center gap-2">
         <Icon class="i-carbon:add cursor-pointer" @click="addConfig" />
@@ -76,7 +76,7 @@ async function handleAddOrUpdate(conf: IEndpointConfigItem) {
     </SettingTitle>
 
     <div class="flex flex-col gap-2">
-      <EndpointItemSetting v-if="newData" :item="newData" @update="handleAddOrUpdate" @remove="resetNewData" />
+      <ProviderItemSetting v-if="newData" :item="newData" @update="handleAddOrUpdate" @remove="resetNewData" />
 
       <template v-if="!newData && !configsApi.data.value.length">
           <div class="flex text-center justify-center py-8 bg-light-2">
@@ -86,7 +86,7 @@ async function handleAddOrUpdate(conf: IEndpointConfigItem) {
           </div>
       </template>
       <template v-else>
-        <EndpointItemSetting v-for="conf in configsApi.data.value" :key="conf.id" :item="conf" @remove="removeConf(conf)" @update="handleAddOrUpdate" />
+        <ProviderItemSetting v-for="conf in configsApi.data.value" :key="conf.id" :item="conf" @remove="removeConf(conf)" @update="handleAddOrUpdate" />
       </template>
     </div>
   </div>

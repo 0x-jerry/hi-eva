@@ -1,8 +1,7 @@
 <script lang='ts' setup>
 import { useAsyncData } from '@0x-jerry/vue-kit'
 import dayjs from 'dayjs'
-import Chart from 'primevue/chart'
-import DatePicker from 'primevue/datepicker'
+import { DateRangePicker } from 'tdesign-vue-next'
 import { computed, reactive, watch } from 'vue'
 import { selectionTable } from '../../database'
 
@@ -64,10 +63,13 @@ const chartOptions = computed(() => {
   <div class="p-4">
     <div class="query mb-2">
       <span>选择时间：</span>
-      <DatePicker v-model="query.dates" selectionMode="range" :numberOfMonths="2" :manualInput="false" />
+      <DateRangePicker v-model="query.dates" />
     </div>
     <div class="flex justify-center">
-      <Chart v-if="chartData.labels.length" type="pie" :data="chartData" :options="chartOptions" class="w-400px" />
+      <div v-if="chartData.labels.length">
+        <!-- <Chart type="pie" :data="chartData" :options="chartOptions" class="w-400px" /> -->
+        <div>TODO, migrate Chart component</div>
+      </div>
       <div v-else class="text-center text-gray h-100px text-2xl flex items-center">
         <div>暂无数据</div>
       </div>

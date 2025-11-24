@@ -1,18 +1,16 @@
-import Aura from '@primeuix/themes/aura'
-import PrimeVue from 'primevue/config'
+import TDesign from 'tdesign-vue-next'
 import { createApp } from 'vue'
 import App from './App.vue'
 import { router } from './router'
 
 import 'normalize.css'
 import './styles/index.css'
+
+import 'tdesign-vue-next/es/style/index.css';
 import 'uno.css'
 
 createApp(App)
+  //
   .use(router)
-  .use(PrimeVue, {
-    theme: {
-      preset: Aura,
-    },
-  })
+  .use(TDesign)
   .mount('#app')

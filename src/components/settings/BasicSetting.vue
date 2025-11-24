@@ -1,5 +1,5 @@
 <script lang='ts' setup>
-import { Button, Checkbox, InputText } from 'primevue'
+import { Button, Checkbox, Input } from 'tdesign-vue-next'
 import { useId } from 'vue'
 import { useBasicConfig } from '../../composables'
 import { commands } from '../../logic/commands'
@@ -32,7 +32,7 @@ function openSettingFolder() {
     <div class="flex flex-col gap-2">
       <div class="field-row">
         <label> 代理地址</label>
-        <InputText class="flex-1" v-model="basicConfig.proxy" placeholder="代理地址" />
+        <Input class="flex-1" v-model="basicConfig.proxy" placeholder="代理地址" />
       </div>
       <div class="field-row ">
         <label :for="listenClipboardFieldId"> 监听剪贴板 </label>

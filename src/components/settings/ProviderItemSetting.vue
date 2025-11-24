@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import Password from 'primevue/password'
+import { Input } from 'tdesign-vue-next'
 import { ref, toRaw, watch } from 'vue'
 import { IEndpointConfigItem } from '../../database/endpointConfig'
 import EditableInputText from '../EditableInputText.vue'
@@ -70,7 +70,7 @@ async function applyUpdate() {
       <div class="editable-row">
         <label>API Key</label>
         <template v-if="editMode">
-          <Password class="content" v-model="currentValue.apiKey" :disabled="!editMode" toggleMask :feedback="false" />
+          <Input class="content" v-model="currentValue.apiKey" :disabled="!editMode" type="password" />
         </template>
         <template v-else>
           *************

@@ -2,8 +2,8 @@
 import { useEventListener } from '@vueuse/core'
 import { onMounted, reactive, ref, shallowRef, useId } from 'vue'
 import BasicSetting from '../../components/settings/BasicSetting.vue'
-import EndpointSetting from '../../components/settings/EndpointSetting.vue'
 import PromptSetting from '../../components/settings/PromptSetting.vue'
+import ProviderSetting from '../../components/settings/ProviderSetting.vue'
 
 const scrollElRef = ref<HTMLElement>()
 
@@ -16,8 +16,8 @@ const settings = [
     id: useId(),
   },
   {
-    label: 'Endpoint 设置',
-    Component: EndpointSetting,
+    label: 'Provider 设置',
+    Component: ProviderSetting,
     id: useId(),
     props: {
       onUpdated() {
