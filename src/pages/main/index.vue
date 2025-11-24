@@ -96,13 +96,13 @@ async function updateHistoryName(name: string) {
           <div class="truncate w-200px">
             <ClickToEdit :value="selectedHistory.name" @ok="updateHistoryName">
               {{ selectedHistory.name }}
-              <template #edit="{value, update}">
+              <template #edit="{ value, update }">
                 <Input class="w-full" :model-value="value" @update:model-value="update" autofocus />
               </template>
             </ClickToEdit>
           </div>
           <Select class="flex-1" v-model="state.endpointConfigId" :options="endpointConfigsApi.data.value"
-            optionLabel="name" optionValue="id" placeholder="Select a endpoint" />
+            :keys="{ label: 'name', value: 'id' }" placeholder="Select a endpoint" />
         </div>
 
         <div class="flex-1 h-0">
