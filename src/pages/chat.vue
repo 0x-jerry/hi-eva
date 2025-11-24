@@ -56,10 +56,6 @@ win.listen(WindowEventName.ChatHide, async () => {
   chatHistory.value = undefined
 })
 
-onMounted(async () => {
-  await fetchInitializedData()
-})
-
 async function fetchInitializedData() {
   if (!payload.value.promptId) {
     return

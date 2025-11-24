@@ -26,6 +26,18 @@ class ChatHistoryTable extends BaseModelManager<IChatHistoryModel> {
 
     return result
   }
+
+  /**
+   * Delete all chat history messages
+   * @param id
+   */
+  async deleteAllById(id: number) {
+    await this.deleteById(id)
+
+    const sql = `delete from ${chatHistoryMsgTable.TABLE_NAME} where chatHistoryId = $1`
+
+    await this.db.execute(sql, [id])
+  }
 }
 
 export const chatHistoryTable = new ChatHistoryTable()

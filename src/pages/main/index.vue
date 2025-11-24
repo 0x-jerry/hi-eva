@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { useAsyncData } from '@0x-jerry/vue-kit'
 import dayjs from 'dayjs'
-import { Button, Input, Select } from 'tdesign-vue-next'
+import { Button, Empty, Input, Select } from 'tdesign-vue-next'
 import { computed, reactive } from 'vue'
 import ChatWithHistory from '../../components/ChatWithHistory.vue'
 import ClickToEdit from '../../components/ClickToEdit.vue'
-import { chatHistoryTable } from '../../database/chatHistory'
+import Icon from '../../components/Icon.vue'
+import { chatHistoryTable, IChatHistoryModel } from '../../database/chatHistory'
 import { chatHistoryMsgTable } from '../../database/chatHistoryMsg'
 import { endpointConfigTable } from '../../database/endpointConfig'
 
@@ -30,8 +31,12 @@ const selectedEndpoint = computed(() => {
   )
 })
 
-historiesApi.load()
-fetchEndpointsData()
+fetchInitData()
+
+function fetchInitData() {
+  historiesApi.load()
+  fetchEndpointsData()
+}
 
 async function fetchEndpointsData() {
   await endpointConfigsApi.load()
@@ -71,18 +76,31 @@ async function updateHistoryName(name: string) {
 
   await historiesApi.load()
 }
+
+async function handleDeleteHistory(conf: IChatHistoryModel) {
+  await chatHistoryTable.deleteAllById(conf.id)
+  await historiesApi.load()
+}
 </script>
 
 <template>
   <div class="flex h-full">
     <aside class="w-50 flex flex-col bg-light-3 overflow-auto border-(0 r solid gray-2) ">
       <div class="flex-1 overflow-auto">
-        <div v-for="h in historiesApi.data.value" :key="h.id" class="p-2 rounded cursor-pointer hover:bg-light-5"
-          :class="{ 'bg-light-5': state.selectedId === h.id }" @click="selectHistory(h.id)">
-          <div class="truncate">{{ h.name || "Untitled" }}</div>
-          <div class="text-sm text-gray-4 mt-1">
-            {{ dayjs.unix(h.createdDate).format("YYYY-MM-DD HH:mm:ss") }}
+        <template v-if="historiesApi.data.value.length">
+          <div v-for="h in historiesApi.data.value" :key="h.id" class="p-2 cursor-pointer hover:bg-light-5"
+            :class="{ 'bg-light-5': state.selectedId === h.id }" @click="selectHistory(h.id)">
+            <div class="w-full flex">
+              <div class="flex-1 w-0 truncate">{{ h.name || "Untitled" }}</div>
+              <Icon class="i-carbon:trash-can cursor-pointer" @click="handleDeleteHistory(h)" />
+            </div>
+            <div class="text-sm text-gray-4 mt-1">
+              {{ dayjs.unix(h.createdDate).format("YYYY-MM-DD HH:mm:ss") }}
+            </div>
           </div>
+        </template>
+        <div class="size-full flex items-center justify-center">
+          <Empty ></Empty>
         </div>
       </div>
       <div class="bottom-btn">
