@@ -33,10 +33,14 @@ async function hideWindow() {
       <div v-for="conf in promptConfigsApi.data.value" class="flex items-center px-2 hover:bg-gray-2 cursor-pointer"
         @click="openChatPage(conf)">
         <CarbonIcon v-if="conf.icon" :name="conf.icon" />
-        <span v-else>{{ conf.name }}</span>
+        <span class="toolbar-cell" v-else>{{ conf.name }}</span>
       </div>
     </div>
   </AutoResizeContainer>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.toolbar-cell {
+  width: max-content;
+}
+</style>

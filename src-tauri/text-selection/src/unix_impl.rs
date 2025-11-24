@@ -171,13 +171,11 @@ pub fn request_accessibility_access() -> bool {
 }
 
 fn get_frontmost_app() -> Option<i32> {
-    unsafe {
-        let app = NSWorkspace::sharedWorkspace().frontmostApplication()?;
+    let app = NSWorkspace::sharedWorkspace().frontmostApplication()?;
 
-        let pid = app.processIdentifier();
+    let pid = app.processIdentifier();
 
-        Some(pid)
-    }
+    Some(pid)
 }
 
 fn enable_screen_reader_accessibility(application: &AXUIElement) -> Result<()> {

@@ -1,6 +1,5 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "identifier": "com.hi-eva.app",
   "bundle": {
     "windows": {
       "digestAlgorithm": "sha256"
