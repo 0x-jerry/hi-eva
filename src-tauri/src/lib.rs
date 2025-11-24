@@ -21,7 +21,7 @@ pub fn run() {
 
     #[cfg(dev)]
     {
-        context.config_mut().identifier = "com.hi-eva-dev.dev".to_string();
+        context.config_mut().identifier = "hi-eva-dev.0x-jerry.com".to_string();
     }
 
     let app = tauri::Builder::default();
