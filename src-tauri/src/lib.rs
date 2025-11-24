@@ -9,13 +9,20 @@ mod sql;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    env_logger::init();
+
     #[cfg(dev)]
     {
         dotenv::from_filename(".env.development").expect("load env failed");
         std::env::set_var("RUST_BACKTRACE", "1");
     }
 
-    env_logger::init();
+    let mut context = tauri::generate_context!();
+
+    #[cfg(dev)]
+    {
+        context.config_mut().identifier = "com.hi-eva-dev.dev".to_string();
+    }
 
     let app = tauri::Builder::default();
 
@@ -60,7 +67,7 @@ pub fn run() {
         });
 
     let app = app
-        .build(tauri::generate_context!())
+        .build(context)
         .expect("error while building tauri application");
 
     app.run(|_handle, event| match event {

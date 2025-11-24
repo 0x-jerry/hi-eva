@@ -4,6 +4,7 @@ use super::{AppState, MyApp, MyAppWindowExt, TOOLBAR_HIDDEN_LOWEST_Y_POS};
 
 pub trait AppStateExt {
     fn save_toolbar_size(&self, size: PhysicalSize<u32>);
+    #[allow(dead_code)]
     fn get_saved_toolbar_size(&self) -> PhysicalSize<u32>;
     fn is_toolbar_visible(&self) -> bool;
 
