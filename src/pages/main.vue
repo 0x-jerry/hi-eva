@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { RouterView, useRoute, useRouter } from 'vue-router'
 import Icon from '../components/Icon.vue'
+import { useI18n } from '../composables'
 
 const router = useRouter()
 const route = useRoute()
+const { t } = useI18n()
 
 const navButtons = [
-  { name: 'Home', path: '/main', icon: 'i-carbon:chat' },
-  { name: 'Settings', path: '/main/settings', icon: 'i-carbon:settings' },
+  { name: t('main.home'), path: '/main', icon: 'i-carbon:chat' },
+  { name: t('main.settings'), path: '/main/settings', icon: 'i-carbon:settings' },
   {
-    name: 'Statistics',
+    name: t('main.statistics'),
     path: '/main/statistics',
     icon: 'i-carbon:chart-line-data',
   },

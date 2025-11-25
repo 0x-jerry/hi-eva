@@ -1,0 +1,54 @@
+{
+  "basicsetting": {
+    "proxy": "代理地址",
+    "listenClipboard": "监听剪贴板",
+    "openSettingFolder": "打开配置文件夹",
+    "lang": "语言"
+  },
+  "chat": {
+    "newChat": "新建对话",
+    "selectEndpoint": "选择一个 Endpoint",
+    "selectHistory": "在左边选择一个对话来查看",
+    "typeMessage": "输入一条消息",
+    "noHistory": "没有聊天记录"
+  },
+  "common": {
+    "name": "名称",
+    "baseUrl": "基础URL",
+    "apiKey": "API密钥",
+    "model": "模型",
+    "prompt": "提示词",
+    "provider": "提供者",
+    "add": "添加",
+    "edit": "编辑",
+    "delete": "删除",
+    "save": "保存",
+    "cancel": "取消",
+    "refresh": "刷新",
+    "create": "创建",
+    "untitled": "未命名",
+    "confirm": "确认",
+    "abort": "中止",
+    "send": "发送"
+  },
+  "main": {
+    "home": "首页",
+    "settings": "设置",
+    "statistics": "统计",
+    "basicSettings": "基础设置",
+    "providerSettings": "Provider设置",
+    "promptSettings": "Prompt设置",
+    "aboutSettings": "关于"
+  },
+  "promptsetting": {
+    "title": "Prompt配置",
+    "addConfig": "新增配置",
+    "editPrompt": "编辑Prompt"
+  },
+  "providersetting": {
+    "title": "Provider配置",
+    "addConfig": "新增配置",
+    "editProvider": "编辑Provider",
+    "refreshList": "刷新列表"
+  }
+}

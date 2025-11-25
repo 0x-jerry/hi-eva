@@ -1,0 +1,54 @@
+{
+  "basicsetting": {
+    "proxy": "Proxy Address",
+    "listenClipboard": "Listen Clipboard",
+    "openSettingFolder": "Open Setting Folder",
+    "lang": "Language"
+  },
+  "chat": {
+    "newChat": "New Chat",
+    "selectEndpoint": "Select an endpoint",
+    "selectHistory": "Select a history on the left to view chat",
+    "typeMessage": "Type a message",
+    "noHistory": "No chat history"
+  },
+  "common": {
+    "name": "Name",
+    "baseUrl": "BaseURL",
+    "apiKey": "API Key",
+    "model": "Model",
+    "prompt": "Prompt",
+    "provider": "Provider",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "refresh": "Refresh",
+    "create": "Create",
+    "untitled": "Untitled",
+    "confirm": "Confirm",
+    "abort": "Abort",
+    "send": "Send"
+  },
+  "main": {
+    "home": "Home",
+    "settings": "Settings",
+    "statistics": "Statistics",
+    "basicSettings": "Basic Settings",
+    "providerSettings": "Provider Settings",
+    "promptSettings": "Prompt Settings",
+    "aboutSettings": "About"
+  },
+  "promptsetting": {
+    "title": "Prompt Configuration",
+    "addConfig": "Add Configuration",
+    "editPrompt": "Edit Prompt"
+  },
+  "providersetting": {
+    "title": "Provider Configuration",
+    "addConfig": "Add Configuration",
+    "editProvider": "Edit Provider",
+    "refreshList": "Refresh List"
+  }
+}

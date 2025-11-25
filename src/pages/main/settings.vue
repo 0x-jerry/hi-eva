@@ -4,22 +4,23 @@ import { onMounted, reactive, ref, useId } from 'vue'
 import BasicSetting from '../../components/settings/BasicSetting.vue'
 import PromptSetting from '../../components/settings/PromptSetting.vue'
 import ProviderSetting from '../../components/settings/ProviderSetting.vue'
+import { t } from '../../composables'
 
 const scrollElRef = ref<HTMLElement>()
 
 const settings = [
   {
-    label: '基础设置',
+    label: t('main.basicSettings'),
     Component: BasicSetting,
     id: useId(),
   },
   {
-    label: 'Provider 设置',
+    label: t('main.providerSettings'),
     Component: ProviderSetting,
     id: useId(),
   },
   {
-    label: 'Prompt 设置',
+    label: t('main.promptSettings'),
     Component: PromptSetting,
     id: useId(),
   },
@@ -61,7 +62,7 @@ function clickMenu(conf: { id: string }) {
     <div class="sidebar">
       <div class="menu-item" v-for="conf in settings" :key="conf.id" @click="clickMenu(conf)"
         :class="{ active: state.activeMenu === conf.id }">
-        {{ conf.label }}
+        {{ $t(conf.label) }}
       </div>
     </div>
     <div ref="scrollElRef" class="content bg-white flex-1 p-4 pt-2 overflow-auto flex flex-col gap-4">

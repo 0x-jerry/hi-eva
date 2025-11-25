@@ -11,5 +11,14 @@
   "rust-analyzer.cargo.targetDir": "./target-analyzer",
   "editor.codeActionsOnSave": {
     "source.fixAll.biome": "always"
-  }
+  },
+  "i18n-ally.localesPaths": [
+    "src/langs"
+  ],
+  "i18n-ally.keystyle": "nested",
+  "i18n-ally.enabledFrameworks": [
+    "i18next",
+    "vue-sfc",
+    "vue"
+  ]
 }

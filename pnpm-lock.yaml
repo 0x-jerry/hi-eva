@@ -41,6 +41,12 @@ importers:
       github-markdown-css:
         specifier: ^5.8.1
         version: 5.8.1
+      i18next:
+        specifier: ^25.6.3
+        version: 25.6.3(typescript@5.9.3)
+      i18next-vue:
+        specifier: ^5.3.0
+        version: 5.3.0(i18next@25.6.3(typescript@5.9.3))(vue@3.5.24(typescript@5.9.3))
       katex:
         specifier: ^0.16.25
         version: 0.16.25
@@ -1072,6 +1078,20 @@ packages:
   has-flag@4.0.0:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
     engines: {node: '>=8'}
+
+  i18next-vue@5.3.0:
+    resolution: {integrity: sha512-X5gYF1R9FadUdRyIze6p+mU4+kztIRWb1SYeoegB0eFBt/lDA++i0A235enWq5qdrRpWZIHlLV8gd/D5xakOsw==, tarball: https://registry.npmjs.org/i18next-vue/-/i18next-vue-5.3.0.tgz}
+    peerDependencies:
+      i18next: '>=23'
+      vue: ^3.4.38
+
+  i18next@25.6.3:
+    resolution: {integrity: sha512-AEQvoPDljhp67a1+NsnG/Wb1Nh6YoSvtrmeEd24sfGn3uujCtXCF3cXpr7ulhMywKNFF7p3TX1u2j7y+caLOJg==, tarball: https://registry.npmjs.org/i18next/-/i18next-25.6.3.tgz}
+    peerDependencies:
+      typescript: ^5
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   iconv-lite@0.6.3:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==, tarball: https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.6.3.tgz}
@@ -2534,6 +2554,17 @@ snapshots:
       duplexer: 0.1.2
 
   has-flag@4.0.0: {}
+
+  i18next-vue@5.3.0(i18next@25.6.3(typescript@5.9.3))(vue@3.5.24(typescript@5.9.3)):
+    dependencies:
+      i18next: 25.6.3(typescript@5.9.3)
+      vue: 3.5.24(typescript@5.9.3)
+
+  i18next@25.6.3(typescript@5.9.3):
+    dependencies:
+      '@babel/runtime': 7.28.4
+    optionalDependencies:
+      typescript: 5.9.3
 
   iconv-lite@0.6.3:
     dependencies:

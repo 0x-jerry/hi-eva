@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Button, Textarea, TextareaValue } from 'tdesign-vue-next'
 import { computed, ref } from 'vue'
+import { useI18n } from '../../composables'
 
 export interface ChatInputProps {
   isProcessing?: boolean
@@ -13,6 +14,7 @@ export type ChatInputEmits = {
 
 const props = defineProps<ChatInputProps>()
 const emit = defineEmits<ChatInputEmits>()
+const { t } = useI18n()
 
 const text = ref('')
 
@@ -46,11 +48,11 @@ function handleAbort() {
 
 <template>
   <div class="chat-input">
-    <Textarea style="resize: none;" v-model="text" @keydown="onCtrlEnter" placeholder="Type a message" :rows="3" />
+    <Textarea style="resize: none;" v-model="text" @keydown="onCtrlEnter" :placeholder="t('chat.typeMessage')" :rows="3" />
 
     <div class="actions">
-      <Button class="h-full" v-if="isProcessing" @click="handleAbort">Abort</Button>
-      <Button class="h-full" v-else @click="send" :disabled="!canSend">Send</Button>
+      <Button class="h-full" v-if="isProcessing" @click="handleAbort">{{ t('common.abort') }}</Button>
+      <Button class="h-full" v-else @click="send" :disabled="!canSend">{{ t('common.send') }}</Button>
     </div>
   </div>
 </template>

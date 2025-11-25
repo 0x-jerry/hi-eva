@@ -22,6 +22,8 @@
     "dayjs": "^1.11.19",
     "fuse.js": "^7.1.0",
     "github-markdown-css": "^5.8.1",
+    "i18next": "^25.6.3",
+    "i18next-vue": "^5.3.0",
     "katex": "^0.16.25",
     "lodash-es": "^4.17.21",
     "marked": "^17.0.0",

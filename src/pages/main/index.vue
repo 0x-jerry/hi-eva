@@ -6,6 +6,7 @@ import { computed, reactive } from 'vue'
 import ChatWithHistory from '../../components/ChatWithHistory.vue'
 import ClickToEdit from '../../components/ClickToEdit.vue'
 import Icon from '../../components/Icon.vue'
+import { useI18n } from '../../composables'
 import { chatHistoryTable, IChatHistoryModel } from '../../database/chatHistory'
 import { chatHistoryMsgTable } from '../../database/chatHistoryMsg'
 import { endpointConfigTable } from '../../database/endpointConfig'
@@ -15,6 +16,8 @@ const historiesApi = useAsyncData(chatHistoryTable.findAll, [])
 const historyMessageApi = useAsyncData(chatHistoryMsgTable.getMsgs, [])
 
 const endpointConfigsApi = useAsyncData(endpointConfigTable.findAll, [])
+
+const { t } = useI18n()
 
 const state = reactive({
   selectedId: null as number | null,
@@ -57,7 +60,7 @@ async function selectHistory(id: number) {
 
 async function createNewChat() {
   const chatHistory = await chatHistoryTable.createOne({
-    name: '未命名',
+    name: t('common.untitled'),
   })
 
   await historiesApi.load()
@@ -91,7 +94,7 @@ async function handleDeleteHistory(conf: IChatHistoryModel) {
           <div v-for="h in historiesApi.data.value" :key="h.id" class="p-2 cursor-pointer hover:bg-light-5"
             :class="{ 'bg-light-5': state.selectedId === h.id }" @click="selectHistory(h.id)">
             <div class="w-full flex">
-              <div class="flex-1 w-0 truncate">{{ h.name || "Untitled" }}</div>
+              <div class="flex-1 w-0 truncate">{{ h.name || t('common.untitled') }}</div>
               <Icon class="i-carbon:trash-can cursor-pointer" @click="handleDeleteHistory(h)" />
             </div>
             <div class="text-sm text-gray-4 mt-1">
@@ -104,7 +107,7 @@ async function handleDeleteHistory(conf: IChatHistoryModel) {
         </div>
       </div>
       <div class="bottom-btn">
-        <Button class="!rounded-0 w-full" @click="createNewChat">+ 新建对话</Button>
+        <Button class="!rounded-0 w-full" @click="createNewChat">+ {{ t('chat.newChat') }}</Button>
       </div>
     </aside>
 
@@ -120,7 +123,7 @@ async function handleDeleteHistory(conf: IChatHistoryModel) {
             </ClickToEdit>
           </div>
           <Select class="flex-1" v-model="state.endpointConfigId" :options="endpointConfigsApi.data.value"
-            :keys="{ label: 'name', value: 'id' }" placeholder="Select a endpoint" />
+            :keys="{ label: 'name', value: 'id' }" :placeholder="t('chat.selectEndpoint')" />
         </div>
 
         <div class="flex-1 h-0">
@@ -129,7 +132,7 @@ async function handleDeleteHistory(conf: IChatHistoryModel) {
       </template>
       <template v-else>
         <div class="flex items-center justify-center h-full text-muted">
-          Select a history on the left to view chat
+          {{ t('chat.selectHistory') }}
         </div>
       </template>
     </section>

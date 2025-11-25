@@ -2,7 +2,7 @@
 import { useAsyncData } from '@0x-jerry/vue-kit'
 import { Button, List, ListItem, Tag } from 'tdesign-vue-next'
 import { ref, toRaw } from 'vue'
-import { useDrawer } from '../../composables/useDrawer'
+import { useDrawer, useI18n } from '../../composables'
 import {
   endpointConfigTable,
   IEndpointConfigItem,
@@ -18,6 +18,7 @@ export type EndpointSettingEmit = {
 const emit = defineEmits<EndpointSettingEmit>()
 
 const editDrawer = useDrawer()
+const { t } = useI18n()
 
 const configsApi = useAsyncData(async () => {
   const resp = await endpointConfigTable.findAll()
@@ -29,7 +30,7 @@ configsApi.load()
 
 const editData = ref<IEndpointConfigItem>({
   apiKey: '',
-  name: '未命名',
+  name: t('common.untitled'),
   baseUrl: '',
   model: '',
 })
@@ -37,7 +38,7 @@ const editData = ref<IEndpointConfigItem>({
 function resetEditData() {
   editData.value = {
     apiKey: '',
-    name: '未命名',
+    name: t('common.untitled'),
     baseUrl: '',
     model: '',
   }
@@ -87,7 +88,7 @@ function handleNewFunction() {
   <div>
     <SettingTitle class="mb-2 gap-2">
       <span>
-        Provider 配置
+        {{ t('providersetting.title') }}
       </span>
       <div class="flex items-center gap-2">
         <Icon class="i-carbon:add cursor-pointer" @click="handleNewFunction" />
@@ -98,7 +99,7 @@ function handleNewFunction() {
       <template v-if="!configsApi.data.value.length">
         <div class="flex text-center justify-center py-8 bg-light-2">
           <Button variant="text" @click="handleNewFunction">
-            + 新增配置
+            + {{ t('providersetting.addConfig') }}
           </Button>
         </div>
       </template>
@@ -119,7 +120,7 @@ function handleNewFunction() {
       </template>
     </div>
 
-    <editDrawer.Component header="Edit Provider" @confirm="handleAddOrUpdate">
+    <editDrawer.Component :header="t('providersetting.editProvider')" @confirm="handleAddOrUpdate">
       <ProviderItemSetting v-model="editData" />
     </editDrawer.Component>
   </div>
