@@ -2,6 +2,8 @@ use core::{MyApp, MyAppWindowExt, MAIN_WINDOW_LABEL};
 
 use tauri::{Manager, RunEvent};
 
+use crate::{commands::apply_global_shortcut, core::AppBasicConfig};
+
 mod commands;
 mod core;
 mod plugins;
@@ -9,13 +11,12 @@ mod sql;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    env_logger::init();
-
     #[cfg(dev)]
     {
         dotenv::from_filename(".env.development").expect("load env failed");
         std::env::set_var("RUST_BACKTRACE", "1");
     }
+    env_logger::init();
 
     let mut context = tauri::generate_context!();
 
@@ -37,13 +38,15 @@ pub fn run() {
             commands::set_chat_pinned,
             commands::hide_toolbar_window,
             commands::apply_clipboard_listener,
-            commands::apply_enabled,
             commands::open_setting_folder,
+            commands::apply_global_shortcut,
+            commands::apply_auto_trigger,
         ])
+        .plugin(sql::init_sql())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_notification::init())
-        .plugin(sql::init_sql())
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_shell::init())
@@ -56,12 +59,14 @@ pub fn run() {
             #[cfg(unix)]
             app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 
-            let app_handle = app.handle().clone();
+            let _conf = AppBasicConfig::init(app.handle());
 
-            let my_app = MyApp::new(app_handle);
+            let my_app = MyApp::new(app.handle().clone());
             my_app.init();
 
             app.manage(my_app);
+
+            let _ = apply_global_shortcut(app.handle().clone());
 
             Ok(())
         });

@@ -1,7 +1,12 @@
+use std::str::FromStr;
+
 use tauri::{AppHandle, Manager, Result, State, WebviewWindow};
+use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 use tauri_plugin_opener::OpenerExt;
 
-use crate::core::{AppMessageExt, AppState, MyApp, MyAppWindowExt};
+use crate::core::{
+    update_tray_menu, AppBasicConfig, AppMessageExt, AppState, MyApp, MyAppWindowExt,
+};
 
 #[tauri::command]
 pub async fn get_selected_text(state: State<'_, AppState>) -> Result<String> {
@@ -55,8 +60,8 @@ pub async fn apply_clipboard_listener(app: State<'_, MyApp>) -> Result<()> {
 }
 
 #[tauri::command]
-pub async fn apply_enabled(app: State<'_, MyApp>) -> Result<()> {
-    app.apply_enabled();
+pub async fn apply_auto_trigger(app: AppHandle) -> Result<()> {
+    update_tray_menu(&app);
 
     Ok(())
 }
@@ -69,6 +74,37 @@ pub async fn open_setting_folder(app: AppHandle) -> Result<()> {
     app.opener()
         .open_path(conf_dir.to_str().unwrap(), None::<&str>)
         .unwrap();
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn apply_global_shortcut(app: AppHandle) -> Result<()> {
+    let conf = AppBasicConfig::load(&app);
+
+    app.global_shortcut()
+        .unregister_all()
+        .map_err(|err| tauri::Error::Anyhow(err.into()))?;
+
+    if !conf.enable_global_shortcut {
+        return Ok(());
+    }
+
+    if conf.global_shortcut.trim().is_empty() {
+        return Ok(());
+    }
+
+    let shortcut = Shortcut::from_str(&conf.global_shortcut.trim())
+        //
+        .map_err(|err| tauri::Error::Anyhow(err.into()))?;
+
+    app.global_shortcut()
+        .on_shortcut(shortcut, |app, _shortcut, _evt| {
+            log::info!("shortcut triggered!");
+
+            app.state::<MyApp>().show_toolbar_win(None);
+        })
+        .map_err(|err| tauri::Error::Anyhow(err.into()))?;
 
     Ok(())
 }

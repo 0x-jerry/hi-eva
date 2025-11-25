@@ -10,8 +10,10 @@ type ICommandType = {
   hideToolbarWindow(): Promise<void>
   setChatPinned(opt: { pinned: boolean }): Promise<boolean>
   openChat(opt: { promptId: string }): Promise<void>
-  applyClipboardListener(): Promise<void>
   openSettingFolder(): Promise<void>
+  applyAutoTrigger(): Promise<void>
+  applyClipboardListener(): Promise<void>
+  applyGlobalShortcut(): Promise<void>
 }
 
 function buildCommands<T>(): T {

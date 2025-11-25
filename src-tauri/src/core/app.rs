@@ -4,7 +4,7 @@ use clipboard_rs::{Clipboard, ClipboardHandler};
 use tauri::{AppHandle, Manager};
 
 use crate::{
-    core::{AppBasicConfig, AppState},
+    core::{AppBasicConfig, AppState, update_tray_menu},
     plugins::MyWebviewWindowExt,
 };
 
@@ -42,7 +42,7 @@ impl MyApp {
 
         let _ = self.create_tray();
 
-        self.apply_enabled();
+        self.apply_clipboard_listener();
 
         let app_cloned = self.clone();
 
@@ -53,18 +53,16 @@ impl MyApp {
         let _ = text_selection::init();
     }
 
-    pub fn apply_enabled(&self) {
-        self.apply_clipboard_listener();
-    }
-
     pub fn apply_clipboard_listener(&self) {
         let conf = AppBasicConfig::load(self);
 
-        if conf.enabled && conf.listen_clipboard {
+        if conf.enable_listen_clipboard {
             self.start_clipboard_listener();
         } else {
             self.stop_clipboard_listener();
         }
+
+        update_tray_menu(self);
     }
 }
 
@@ -93,7 +91,7 @@ impl ClipboardHandler for MyApp {
 
 impl MouseExtTrait for MyApp {
     fn on_selection_change(&self, result: Option<SelectionResult>) {
-        if !AppBasicConfig::load(self).enabled {
+        if !AppBasicConfig::load(self).enable_auto_trigger {
             return;
         }
 

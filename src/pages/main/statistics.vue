@@ -45,18 +45,6 @@ const chartData = computed(() => {
     ],
   }
 })
-
-const chartOptions = computed(() => {
-  return {
-    plugins: {
-      legend: {
-        labels: {
-          usePointStyle: true,
-        },
-      },
-    },
-  }
-})
 </script>
 
 <template>

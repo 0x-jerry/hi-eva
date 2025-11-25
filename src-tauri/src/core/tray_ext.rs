@@ -15,7 +15,7 @@ pub trait AppTrayExt {
 const MENU_QUIT: &str = "quit";
 const MENU_CHECK_UPDATE: &str = "check-update";
 const MENU_OPEN_STATISTIC: &str = "open-statistic";
-const MENU_ENABLED: &str = "enabled";
+const MENU_ENABLED_AUTO_TRIGGER: &str = "enabled";
 const MENU_LISTEN_CLIPBOARD_ENABLED: &str = "m_clipboard_enabled";
 
 const TRAY_NAME: &str = "main";
@@ -56,19 +56,16 @@ impl AppTrayExt for MyApp {
             MENU_OPEN_STATISTIC => {
                 app.state::<MyApp>().get_statistic_window();
             }
-            MENU_ENABLED => {
+            MENU_ENABLED_AUTO_TRIGGER => {
                 let mut conf = AppBasicConfig::load(app);
-                conf.enabled = !conf.enabled;
+                conf.enable_auto_trigger = !conf.enable_auto_trigger;
                 conf.save(app);
-
-                let my_app = app.state::<MyApp>();
-                my_app.apply_enabled();
 
                 update_tray_menu(app);
             }
             MENU_LISTEN_CLIPBOARD_ENABLED => {
                 let mut conf = AppBasicConfig::load(app);
-                conf.listen_clipboard = !conf.listen_clipboard;
+                conf.enable_listen_clipboard = !conf.enable_listen_clipboard;
                 conf.save(app);
 
                 let my_app = app.state::<MyApp>();
@@ -99,12 +96,12 @@ pub fn build_tray_menu<R: Runtime>(app: &AppHandle<R>) -> Result<Menu<R>> {
     let m_open_static =
         MenuItem::with_id(app, MENU_OPEN_STATISTIC, "Static Page", true, None::<&str>)?;
 
-    let m_enabled = CheckMenuItem::with_id(
+    let m_enable_auto_trigger = CheckMenuItem::with_id(
         app,
-        MENU_ENABLED,
-        "Enabled",
+        MENU_ENABLED_AUTO_TRIGGER,
+        "Auto Trigger",
         true,
-        conf.enabled,
+        conf.enable_auto_trigger,
         None::<&str>,
     )?;
 
@@ -113,14 +110,14 @@ pub fn build_tray_menu<R: Runtime>(app: &AppHandle<R>) -> Result<Menu<R>> {
         MENU_LISTEN_CLIPBOARD_ENABLED,
         "Listen Clipboard",
         true,
-        conf.listen_clipboard,
+        conf.enable_listen_clipboard,
         None::<&str>,
     )?;
 
     let menu = Menu::with_items(
         app,
         &[
-            &m_enabled,
+            &m_enable_auto_trigger,
             &m_listen_clipboard,
             &PredefinedMenuItem::separator(app)?,
             &m_open_static,

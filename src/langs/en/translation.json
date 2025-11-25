@@ -3,7 +3,9 @@
     "proxy": "Proxy Address",
     "listenClipboard": "Listen Clipboard",
     "openSettingFolder": "Open Setting Folder",
-    "lang": "Language"
+    "lang": "Language",
+    "autoTrigger": "Auto trigger",
+    "shortcut": "Shortcut"
   },
   "chat": {
     "newChat": "New Chat",
@@ -29,7 +31,8 @@
     "untitled": "Untitled",
     "confirm": "Confirm",
     "abort": "Abort",
-    "send": "Send"
+    "send": "Send",
+    "detecting": "Detecting"
   },
   "main": {
     "home": "Home",

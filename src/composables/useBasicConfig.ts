@@ -1,52 +1,27 @@
 import type { VersionedData } from '@0x-jerry/utils'
 import { type UseConfigOption, useConfig } from './useConfig'
 
-export interface BasicConfigV1 extends VersionedData {
-  version: 1
+export interface BasicConfig extends VersionedData {
   proxy: string
-  listenClipboard: boolean
+  enableAutoTrigger: boolean
+  enableListenClipboard: boolean
+
+  enableGlobalShortcut: boolean
+  globalShortcut: string
 }
 
-export interface BasicConfigV2 extends VersionedData {
-  version: 2
-  proxy: string
-  listenClipboard: boolean
-  enabled: boolean
-}
-
-export type BasicConfigLatest = BasicConfigV2
-
-export function useBasicConfig(option?: UseConfigOption<BasicConfigLatest>) {
-  const defaultConfig: BasicConfigLatest = {
-    version: 2,
+export function useBasicConfig(option?: UseConfigOption<BasicConfig>) {
+  const defaultConfig: BasicConfig = {
+    version: 3,
     proxy: '',
-    listenClipboard: true,
-    enabled: true,
+    enableAutoTrigger: true,
+    enableListenClipboard: true,
+
+    enableGlobalShortcut: true,
+    globalShortcut: '',
   }
 
-  return useConfig<BasicConfigLatest>('config.json', 'data', defaultConfig, {
+  return useConfig<BasicConfig>('config.json', 'data', defaultConfig, {
     ...option,
-    migrations: [
-      {
-        version: 1,
-        upgrade(): BasicConfigV1 {
-          return {
-            version: 1,
-            proxy: '',
-            listenClipboard: true,
-          }
-        },
-      },
-      {
-        version: 2,
-        upgrade(data: BasicConfigV1): BasicConfigV2 {
-          return {
-            ...data,
-            version: 2,
-            enabled: true,
-          }
-        },
-      },
-    ],
   })
 }

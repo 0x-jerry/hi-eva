@@ -2,7 +2,7 @@
 import { useAsyncData } from '@0x-jerry/vue-kit'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { useLocalStorage } from '@vueuse/core'
-import { nextTick, onMounted, reactive, ref, useTemplateRef } from 'vue'
+import { nextTick, reactive, ref, useTemplateRef } from 'vue'
 import ChatWithHistory from '../components/ChatWithHistory.vue'
 import { chatHistoryTable, IChatHistoryModel } from '../database/chatHistory'
 import {

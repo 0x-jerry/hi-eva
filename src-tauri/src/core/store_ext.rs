@@ -8,13 +8,23 @@ use tauri_plugin_store::StoreExt;
 pub struct AppBasicConfig {
     pub version: i32,
     pub proxy: String,
-    pub listen_clipboard: bool,
-    #[serde(default = "default_enabled")]
-    pub enabled: bool,
+
+    #[serde(default = "default_true")]
+    pub enable_auto_trigger: bool,
+    #[serde(default = "default_true")]
+    pub enable_listen_clipboard: bool,
+    #[serde(default = "default_true")]
+    pub enable_global_shortcut: bool,
+    #[serde(default = "default_string")]
+    pub global_shortcut: String,
 }
 
-fn default_enabled() -> bool {
+fn default_true() -> bool {
     true
+}
+
+fn default_string() -> String {
+    String::new()
 }
 
 impl Default for AppBasicConfig {
@@ -22,13 +32,32 @@ impl Default for AppBasicConfig {
         AppBasicConfig {
             version: 1,
             proxy: "".to_string(),
-            listen_clipboard: true,
-            enabled: true,
+            enable_listen_clipboard: true,
+            enable_auto_trigger: true,
+            enable_global_shortcut: true,
+            global_shortcut: "".into(),
         }
     }
 }
 
 impl AppBasicConfig {
+    pub fn init(app: &AppHandle) -> AppBasicConfig {
+        let config = app.store("config.json").expect("get store failed!");
+
+        let value = config
+            .get("data")
+            .map(|x| {
+                let value = serde_json::from_value::<AppBasicConfig>(x);
+
+                value.unwrap_or_default()
+            })
+            .unwrap_or_default();
+
+        value.save(app);
+
+        value
+    }
+
     pub fn load<R: Runtime>(app: &AppHandle<R>) -> AppBasicConfig {
         let config = app.store("config.json").expect("get store failed!");
 

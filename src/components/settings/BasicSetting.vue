@@ -1,9 +1,10 @@
 <script lang='ts' setup>
-import { Button, Checkbox, Input, Select } from 'tdesign-vue-next'
-import { useId } from 'vue'
+import { sleep } from '@0x-jerry/utils'
+import { Button, Input, MessagePlugin, Select, Switch } from 'tdesign-vue-next'
 import { useBasicConfig, useI18n } from '../../composables'
 import { commands } from '../../logic/commands'
 import { applyLangUpdate, availableLangs, defaultLang } from '../../logic/i18n'
+import ShortcutInput from '../ShortcutInput.vue'
 import SettingTitle from './SettingTitle.vue'
 
 const basicConfig = useBasicConfig()
@@ -14,9 +15,8 @@ const langOptions = availableLangs.map((item) => ({
   value: item,
 }))
 
-const listenClipboardFieldId = useId()
-
 async function applyClipboardChange() {
+  await sleep(100)
   await commands.applyClipboardListener()
 }
 
@@ -26,6 +26,17 @@ function openSettingFolder() {
 
 function updateLang() {
   applyLangUpdate()
+}
+
+async function applyGlobalShortcut() {
+  MessagePlugin.success('changed')
+  await sleep(100)
+  await commands.applyGlobalShortcut()
+}
+
+async function applyAutoTrigger() {
+  await sleep(100)
+  await commands.applyAutoTrigger()
 }
 </script>
 
@@ -50,8 +61,19 @@ function updateLang() {
         <Input class="flex-1" v-model="basicConfig.proxy" :placeholder="t('basicsetting.proxy')" />
       </div>
       <div class="field-row ">
-        <label :for="listenClipboardFieldId">{{ t('basicsetting.listenClipboard') }}</label>
-        <Checkbox :input-id="listenClipboardFieldId" v-model="basicConfig.listenClipboard" binary @change="applyClipboardChange">  </Checkbox>
+        <label>{{ t('basicsetting.listenClipboard') }}</label>
+        <Switch  v-model="basicConfig.enableListenClipboard" @change="applyClipboardChange" />
+      </div>
+      <div class="field-row ">
+        <label>{{ t('basicsetting.autoTrigger') }}</label>
+        <Switch  v-model="basicConfig.enableAutoTrigger" @change="applyAutoTrigger" />
+      </div>
+      <div class="field-row ">
+        <label>{{ t('basicsetting.shortcut') }}</label>
+        <div class="flex gap-1 items-center w-full">
+          <Switch v-model="basicConfig.enableGlobalShortcut" @change="applyGlobalShortcut" />
+          <ShortcutInput v-model="basicConfig.globalShortcut" @blur="applyGlobalShortcut" />
+        </div>
       </div>
     </div>
   </div>
