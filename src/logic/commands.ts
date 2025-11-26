@@ -1,5 +1,6 @@
 import { invoke } from '@tauri-apps/api/core'
 import { snakeCase } from 'lodash-es'
+import type { AppBasicConfig } from '../types'
 
 /**
  * Opt should be an object, and should match the signatures in [commands.rs](../../src-tauri/src/commands.rs).
@@ -14,6 +15,8 @@ type ICommandType = {
   applyAutoTrigger(): Promise<void>
   applyClipboardListener(): Promise<void>
   applyGlobalShortcut(): Promise<void>
+  saveConfiguration(opt: { conf: AppBasicConfig }): Promise<void>
+  getConfiguration(): Promise<AppBasicConfig>
 }
 
 function buildCommands<T>(): T {

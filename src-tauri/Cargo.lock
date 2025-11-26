@@ -1827,6 +1827,7 @@ checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 name = "hi-eva"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "clipboard-rs",
  "dotenv",
  "env_logger",
@@ -1835,6 +1836,7 @@ dependencies = [
  "nanoid",
  "objc2 0.6.3",
  "objc2-app-kit 0.3.2",
+ "rs_utils",
  "serde",
  "serde_json",
  "tauri",
@@ -1850,6 +1852,7 @@ dependencies = [
  "tauri-plugin-store",
  "tauri-plugin-updater",
  "text-selection",
+ "thiserror 2.0.17",
 ]
 
 [[package]]
@@ -4000,6 +4003,27 @@ dependencies = [
  "libc",
  "untrusted",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "rs_utils"
+version = "0.1.0"
+source = "git+https://github.com/0x-jerry/rs-utils?branch=main#8024b7a071e10df13cbaed2351a5109f997958e4"
+dependencies = [
+ "anyhow",
+ "rs_utils_derive",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.17",
+]
+
+[[package]]
+name = "rs_utils_derive"
+version = "0.1.0"
+source = "git+https://github.com/0x-jerry/rs-utils?branch=main#8024b7a071e10df13cbaed2351a5109f997958e4"
+dependencies = [
+ "quote",
+ "syn 2.0.110",
 ]
 
 [[package]]

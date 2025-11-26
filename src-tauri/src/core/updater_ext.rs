@@ -3,7 +3,7 @@ use tauri_plugin_dialog::{DialogExt, MessageDialogButtons};
 use tauri_plugin_notification::NotificationExt;
 use tauri_plugin_updater::UpdaterExt;
 
-use crate::core::AppBasicConfig;
+use crate::core::ConfigurationExt;
 
 use super::MyApp;
 
@@ -37,10 +37,7 @@ fn check_update(app: &AppHandle) -> tauri_plugin_updater::Result<()> {
 
     let mut updater_builder = app.updater_builder();
 
-    let proxy = {
-        let state = AppBasicConfig::load(app);
-        state.proxy
-    };
+    let proxy = app.get_conf().proxy;
 
     let url = Url::parse(proxy.as_str());
 

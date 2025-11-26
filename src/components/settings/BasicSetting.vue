@@ -1,14 +1,15 @@
 <script lang='ts' setup>
-import { sleep } from '@0x-jerry/utils'
 import { Button, Input, MessagePlugin, Select, Switch } from 'tdesign-vue-next'
-import { useBasicConfig, useI18n } from '../../composables'
+import { useAppBasicConfig, useI18n } from '../../composables'
 import { commands } from '../../logic/commands'
 import { applyLangUpdate, availableLangs, defaultLang } from '../../logic/i18n'
 import ShortcutInput from '../ShortcutInput.vue'
 import SettingTitle from './SettingTitle.vue'
 
-const basicConfig = useBasicConfig()
+const basicConfig = useAppBasicConfig()
 const { t } = useI18n()
+
+basicConfig.load()
 
 const langOptions = availableLangs.map((item) => ({
   label: item,
@@ -16,7 +17,7 @@ const langOptions = availableLangs.map((item) => ({
 }))
 
 async function applyClipboardChange() {
-  await sleep(100)
+  await basicConfig.save()
   await commands.applyClipboardListener()
 }
 
@@ -30,13 +31,17 @@ function updateLang() {
 
 async function applyGlobalShortcut() {
   MessagePlugin.success('changed')
-  await sleep(100)
+  await basicConfig.save()
   await commands.applyGlobalShortcut()
 }
 
 async function applyAutoTrigger() {
-  await sleep(100)
+  await basicConfig.save()
   await commands.applyAutoTrigger()
+}
+
+async function saveConfig() {
+  await basicConfig.save()
 }
 </script>
 
@@ -58,21 +63,21 @@ async function applyAutoTrigger() {
       </div>
       <div class="field-row">
         <label>{{ t('basicsetting.proxy') }}</label>
-        <Input class="flex-1" v-model="basicConfig.proxy" :placeholder="t('basicsetting.proxy')" />
+        <Input class="flex-1" v-model="basicConfig.data.proxy" :placeholder="t('basicsetting.proxy')" @blur="saveConfig" />
       </div>
       <div class="field-row ">
         <label>{{ t('basicsetting.listenClipboard') }}</label>
-        <Switch  v-model="basicConfig.enableListenClipboard" @change="applyClipboardChange" />
+        <Switch  v-model="basicConfig.data.enableListenClipboard" @change="applyClipboardChange" />
       </div>
       <div class="field-row ">
         <label>{{ t('basicsetting.autoTrigger') }}</label>
-        <Switch  v-model="basicConfig.enableAutoTrigger" @change="applyAutoTrigger" />
+        <Switch  v-model="basicConfig.data.enableAutoTrigger" @change="applyAutoTrigger" />
       </div>
       <div class="field-row ">
         <label>{{ t('basicsetting.shortcut') }}</label>
         <div class="flex gap-1 items-center w-full">
-          <Switch v-model="basicConfig.enableGlobalShortcut" @change="applyGlobalShortcut" />
-          <ShortcutInput v-model="basicConfig.globalShortcut" @blur="applyGlobalShortcut" />
+          <Switch v-model="basicConfig.data.enableGlobalShortcut" @change="applyGlobalShortcut" />
+          <ShortcutInput v-model="basicConfig.data.globalShortcut" @blur="applyGlobalShortcut" />
         </div>
       </div>
     </div>

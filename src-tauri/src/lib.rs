@@ -2,7 +2,10 @@ use core::{MyApp, MyAppWindowExt, MAIN_WINDOW_LABEL};
 
 use tauri::{Manager, RunEvent};
 
-use crate::{commands::apply_global_shortcut, core::AppBasicConfig};
+use crate::{
+    commands::apply_global_shortcut,
+    core::configuration_ext,
+};
 
 mod commands;
 mod core;
@@ -41,6 +44,8 @@ pub fn run() {
             commands::open_setting_folder,
             commands::apply_global_shortcut,
             commands::apply_auto_trigger,
+            commands::get_configuration,
+            commands::save_configuration,
         ])
         .plugin(sql::init_sql())
         .plugin(tauri_plugin_opener::init())
@@ -59,7 +64,7 @@ pub fn run() {
             #[cfg(unix)]
             app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 
-            let _conf = AppBasicConfig::init(app.handle());
+            configuration_ext::init_manager(app.handle().clone());
 
             let my_app = MyApp::new(app.handle().clone());
             my_app.init();

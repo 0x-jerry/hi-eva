@@ -19,6 +19,8 @@ env_logger = "0.11"
 enigo = "0.3"
 mouce = "0.3"
 objc2-app-kit = "0.3"
+anyhow = "1"
+thiserror = "2"
 
 [lib]
 # The `_lib` suffix may seem redundant but it is necessary
@@ -39,6 +41,8 @@ tauri = { version = "2", features = [
 serde = { workspace = true }
 serde_json = { workspace = true }
 log = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
 env_logger = { workspace = true }
 clipboard-rs = { workspace = true }
 text-selection = { path = "./text-selection" }
@@ -57,6 +61,7 @@ tauri-plugin-sql = { version = "2", features = ["sqlite"] }
 
 [target.'cfg(unix)'.dependencies]
 tauri-nspanel = { git = "https://github.com/ahkohd/tauri-nspanel", branch = "v2.1" }
+rs_utils = { git = "https://github.com/0x-jerry/rs-utils", branch = "main", package = "rs_utils" }
 objc2 = "0.6"
 objc2-app-kit = { workspace = true }
 

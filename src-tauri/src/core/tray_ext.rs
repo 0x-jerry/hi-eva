@@ -1,10 +1,10 @@
 use tauri::{
     menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem},
     tray::{MouseButton, TrayIcon, TrayIconBuilder, TrayIconEvent},
-    AppHandle, Manager, Result, Runtime,
+    AppHandle, Manager, Result, Wry,
 };
 
-use crate::core::AppBasicConfig;
+use crate::core::ConfigurationExt;
 
 use super::{MyApp, MyAppWindowExt, MyUpdaterExt, MAIN_WINDOW_LABEL};
 
@@ -57,16 +57,16 @@ impl AppTrayExt for MyApp {
                 app.state::<MyApp>().get_statistic_window();
             }
             MENU_ENABLED_AUTO_TRIGGER => {
-                let mut conf = AppBasicConfig::load(app);
+                let mut conf = app.get_conf();
                 conf.enable_auto_trigger = !conf.enable_auto_trigger;
-                conf.save(app);
+                app.save_conf(&conf);
 
                 update_tray_menu(app);
             }
             MENU_LISTEN_CLIPBOARD_ENABLED => {
-                let mut conf = AppBasicConfig::load(app);
+                let mut conf = app.get_conf();
                 conf.enable_listen_clipboard = !conf.enable_listen_clipboard;
-                conf.save(app);
+                app.save_conf(&conf);
 
                 let my_app = app.state::<MyApp>();
                 my_app.apply_clipboard_listener();
@@ -87,8 +87,8 @@ pub fn update_tray_menu(app: &AppHandle) {
     });
 }
 
-pub fn build_tray_menu<R: Runtime>(app: &AppHandle<R>) -> Result<Menu<R>> {
-    let conf = AppBasicConfig::load(app);
+pub fn build_tray_menu(app: &AppHandle) -> Result<Menu<Wry>> {
+    let conf = app.get_conf();
 
     let m_quit = MenuItem::with_id(app, MENU_QUIT, "Quit", true, None::<&str>)?;
     let m_check_update =
