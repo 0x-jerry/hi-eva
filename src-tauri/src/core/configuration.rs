@@ -43,10 +43,13 @@ impl From<AppBasicConfigV1> for AppBasicConfigV2 {
 
 pub type AppBasicConfig = AppBasicConfigV2;
 
-pub fn load(app: &AppHandle) -> Result<AppBasicConfig> {
-    let config = app.store("config.json")?;
+const CONFIGURATION_FILE_NAME: &str = "config.json";
+const CONFIGURATION_KEY: &str = "data";
 
-    let value = config.get("data").unwrap_or_default();
+pub fn load(app: &AppHandle) -> Result<AppBasicConfig> {
+    let config = app.store(CONFIGURATION_FILE_NAME)?;
+
+    let value = config.get(CONFIGURATION_KEY).unwrap_or_default();
 
     let version = value
         .get("version")
@@ -85,9 +88,9 @@ pub fn load(app: &AppHandle) -> Result<AppBasicConfig> {
 }
 
 pub fn save<T: Versioned>(app: &AppHandle, value: &T) -> Result<()> {
-    let config = app.store("config.json")?;
+    let config = app.store(CONFIGURATION_FILE_NAME)?;
 
-    config.set("data", value.to_value());
+    config.set(CONFIGURATION_KEY, value.to_value());
 
     config.save()?;
 
