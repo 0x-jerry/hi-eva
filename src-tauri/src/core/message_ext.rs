@@ -1,6 +1,8 @@
 use serde::Serialize;
 use tauri::{Emitter, EventTarget, Manager};
 
+use crate::core::constant::event_name;
+
 use super::{utils::calc_window_position, AppState, MyApp, MyAppWindowExt, CHAT_WINDOW_LABEL};
 
 /// Emit messages to content view
@@ -29,7 +31,7 @@ impl AppMessageExt for MyApp {
 
         win.emit_to(
             EventTarget::labeled(CHAT_WINDOW_LABEL),
-            "chat:show",
+            event_name::CHAT_SHOW,
             OpenChatPayload {
                 prompt_id,
                 selected_text: state.selected_text.clone(),
@@ -44,7 +46,11 @@ impl AppMessageExt for MyApp {
     fn hide_chat(&self) {
         let win = self.get_chat_window();
 
-        win.emit_to(EventTarget::labeled(CHAT_WINDOW_LABEL), "chat:hide", ())
-            .unwrap();
+        win.emit_to(
+            EventTarget::labeled(CHAT_WINDOW_LABEL),
+            event_name::CHAT_HIDE,
+            (),
+        )
+        .unwrap();
     }
 }

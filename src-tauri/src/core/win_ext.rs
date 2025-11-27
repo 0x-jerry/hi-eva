@@ -1,9 +1,10 @@
 use tauri::{Emitter, EventTarget, Manager, PhysicalPosition, WebviewWindow, WebviewWindowBuilder};
 
+use crate::core::constant::event_name;
+
 use super::{utils::calc_window_position, AppStateExt, MyApp, VerticalMoveDir};
 
 pub trait MyAppWindowExt {
-    fn get_statistic_window(&self) -> WebviewWindow;
     fn show_toolbar_win(&self, dir: Option<VerticalMoveDir>);
     fn hide_toolbar_win(&self);
     fn get_main_window(&self) -> WebviewWindow;
@@ -17,7 +18,6 @@ pub trait MyAppWindowExt {
 pub static MAIN_WINDOW_LABEL: &str = "main";
 pub static TOOLBAR_WINDOW_LABEL: &str = "toolbar";
 pub static CHAT_WINDOW_LABEL: &str = "chat";
-pub static STATISTIC_WINDOW_LABEL: &str = "statistic";
 
 pub static TOOLBAR_HIDDEN_LOWEST_Y_POS: i32 = -9999;
 
@@ -126,31 +126,6 @@ impl MyAppWindowExt for MyApp {
         return win;
     }
 
-    fn get_statistic_window(&self) -> WebviewWindow {
-        if let Some(win) = self.get_webview_window(STATISTIC_WINDOW_LABEL) {
-            win.reload().unwrap();
-            return win;
-        }
-
-        let win_builder = WebviewWindowBuilder::new(
-            self.app(),
-            STATISTIC_WINDOW_LABEL,
-            tauri::WebviewUrl::App("#/statistic".into()),
-        )
-        .center()
-        .inner_size(800.0, 600.0)
-        .focused(true)
-        .visible(true)
-        .accept_first_mouse(true)
-        .visible_on_all_workspaces(true);
-
-        let win = win_builder.build().expect("Create toolbar window failed!");
-
-        log::info!("Create chat window");
-
-        return win;
-    }
-
     fn scale_factor(&self) -> f64 {
         let scale_factor = self.primary_monitor().unwrap().unwrap().scale_factor();
         return scale_factor;
@@ -191,7 +166,7 @@ impl MyAppWindowExt for MyApp {
 
         win.emit_to(
             EventTarget::labeled(TOOLBAR_WINDOW_LABEL),
-            "toolbar:show",
+            event_name::TOOLBAR_SHOW,
             (),
         )
         .unwrap();

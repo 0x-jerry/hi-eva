@@ -5,33 +5,25 @@ use tauri_plugin_updater::UpdaterExt;
 
 use crate::core::ConfigurationExt;
 
-use super::MyApp;
+pub fn check_update(app: &AppHandle) {
+    let app = app.clone();
 
-pub trait MyUpdaterExt {
-    fn check_update(&self);
+    std::thread::spawn(move || {
+        if let Err(err) = check_update_inner(&app) {
+            let msg = format!("Check update failed: {}", err);
+            let app_name = app.package_info().name.clone();
+
+            app.notification()
+                .builder()
+                .title(app_name)
+                .body(msg)
+                .show()
+                .unwrap();
+        }
+    });
 }
 
-impl MyUpdaterExt for MyApp {
-    fn check_update(&self) {
-        let app = self.app().clone();
-
-        std::thread::spawn(move || {
-            if let Err(err) = check_update(&app) {
-                let msg = format!("Check update failed: {}", err);
-                let app_name = app.package_info().name.clone();
-
-                app.notification()
-                    .builder()
-                    .title(app_name)
-                    .body(msg)
-                    .show()
-                    .unwrap();
-            }
-        });
-    }
-}
-
-fn check_update(app: &AppHandle) -> tauri_plugin_updater::Result<()> {
+fn check_update_inner(app: &AppHandle) -> tauri_plugin_updater::Result<()> {
     let app_name = app.package_info().name.clone();
     log::info!("start check update");
 

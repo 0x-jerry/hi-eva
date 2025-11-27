@@ -4,12 +4,12 @@ use clipboard_rs::{Clipboard, ClipboardHandler};
 use tauri::{AppHandle, Manager};
 
 use crate::{
-    core::{update_tray_menu, AppState, ConfigurationExt},
+    core::{AppState, ConfigurationExt, create_tray, update_tray_menu},
     plugins::MyWebviewWindowExt,
 };
 
 use super::{
-    mouse_listener, AppMessageExt, AppStateExt, AppStateInner, AppTrayExt, ClipboardListenerExt,
+    mouse_listener, AppMessageExt, AppStateExt, AppStateInner, ClipboardListenerExt,
     MouseExtTrait, MyAppWindowExt, SelectionResult, MAIN_WINDOW_LABEL,
 };
 
@@ -40,7 +40,7 @@ impl MyApp {
         let _ = self.get_toolbar_window();
         let _ = self.get_chat_window();
 
-        let _ = self.create_tray();
+        let _ = create_tray(self);
 
         self.apply_clipboard_listener();
 

@@ -1,4 +1,4 @@
-use crate::core::{configuration, AppBasicConfig};
+use crate::core::{configuration, constant::event_name, AppBasicConfig};
 use std::sync::Mutex;
 use tauri::{AppHandle, Emitter, Manager};
 
@@ -38,7 +38,7 @@ impl ConfigurationExt for AppHandle {
 
         // Emit configuration changed event
         self.webview_windows().iter().for_each(|(_name, win)| {
-            win.emit("configuration:changed", ()).unwrap();
+            win.emit(event_name::CONFIGURATION_CHANGED, ()).unwrap();
         });
 
         configuration::save(self, new_conf).expect("Save configuration failed");

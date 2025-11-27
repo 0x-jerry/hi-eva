@@ -10,8 +10,8 @@ pub use state::*;
 pub mod win_ext;
 pub use win_ext::*;
 
-pub mod tray_ext;
-pub use tray_ext::*;
+pub mod tray;
+pub use tray::*;
 
 pub mod mouse_listener;
 pub use mouse_listener::*;
@@ -20,12 +20,13 @@ pub mod state_ext;
 pub use state_ext::*;
 
 mod utils;
+mod constant;
 
 pub mod common;
 pub use common::*;
 
-pub mod updater_ext;
-pub use updater_ext::*;
+pub mod updater;
+pub use updater::*;
 
 pub mod configuration;
 pub use configuration::*;
