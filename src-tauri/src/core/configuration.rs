@@ -1,13 +1,11 @@
 use anyhow::Result;
-use rs_utils::{
-    config::{do_migrate, Migration, Versioned},
-    derive::Versioned,
-};
+use rs_utils::macros::chain_from;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use tauri::AppHandle;
 use tauri_plugin_store::StoreExt;
 
-#[derive(Debug, Serialize, Deserialize, Default, Clone, Versioned)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AppBasicConfigV1 {
     pub version: i32,
@@ -16,7 +14,13 @@ pub struct AppBasicConfigV1 {
     pub enabled: bool,
 }
 
-#[derive(Debug, Serialize, Deserialize, Default, Clone, Versioned)]
+impl From<Value> for AppBasicConfigV1 {
+    fn from(value: Value) -> Self {
+        serde_json::from_value(value).unwrap_or_default()
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AppBasicConfigV2 {
     pub version: i32,
@@ -57,28 +61,7 @@ pub fn load(app: &AppHandle) -> Result<AppBasicConfig> {
         .flatten()
         .unwrap_or_default();
 
-    let migrations = vec![
-        Migration {
-            version: 1,
-            migrate: |data| {
-                let mut v1 = AppBasicConfigV1::from_value_or_default(data);
-                v1.version = 1;
-
-                Ok(v1.to_value())
-            },
-        },
-        Migration {
-            version: 2,
-            migrate: |data| {
-                let v1 = AppBasicConfigV1::from_value_or_default(data);
-                let v2 = AppBasicConfigV2::from(v1);
-
-                Ok(v2.to_value())
-            },
-        },
-    ];
-
-    let value: AppBasicConfig = do_migrate(value, migrations)?;
+    let value: AppBasicConfig = chain_from!(value, AppBasicConfigV1, AppBasicConfigV2);
 
     if version != value.version as i64 {
         save(app, &value)?;
@@ -87,10 +70,11 @@ pub fn load(app: &AppHandle) -> Result<AppBasicConfig> {
     Ok(value)
 }
 
-pub fn save<T: Versioned>(app: &AppHandle, value: &T) -> Result<()> {
+pub fn save(app: &AppHandle, value: &AppBasicConfig) -> Result<()> {
     let config = app.store(CONFIGURATION_FILE_NAME)?;
 
-    config.set(CONFIGURATION_KEY, value.to_value());
+    let data = serde_json::to_value(value)?;
+    config.set(CONFIGURATION_KEY, data);
 
     config.save()?;
 

@@ -4008,7 +4008,7 @@ dependencies = [
 [[package]]
 name = "rs_utils"
 version = "0.1.0"
-source = "git+https://github.com/0x-jerry/rs-utils?branch=main#8024b7a071e10df13cbaed2351a5109f997958e4"
+source = "git+https://github.com/0x-jerry/rs-utils?branch=main#30cbd1083ea85350be9454ef2069c8e66e63fde4"
 dependencies = [
  "anyhow",
  "rs_utils_derive",
@@ -4020,7 +4020,7 @@ dependencies = [
 [[package]]
 name = "rs_utils_derive"
 version = "0.1.0"
-source = "git+https://github.com/0x-jerry/rs-utils?branch=main#8024b7a071e10df13cbaed2351a5109f997958e4"
+source = "git+https://github.com/0x-jerry/rs-utils?branch=main#30cbd1083ea85350be9454ef2069c8e66e63fde4"
 dependencies = [
  "quote",
  "syn 2.0.110",
