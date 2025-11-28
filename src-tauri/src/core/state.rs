@@ -30,6 +30,7 @@ impl Deref for AppState {
 }
 
 impl AppState {
+    #[allow(dead_code)]
     pub fn is_toolbar_focused(&self) -> bool {
         let state = self.lock().unwrap();
 

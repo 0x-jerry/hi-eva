@@ -1,5 +1,5 @@
 <script lang='ts' setup>
-import { Button, Input, MessagePlugin, Select, Switch } from 'tdesign-vue-next'
+import { Button, Input, Select, Switch } from 'tdesign-vue-next'
 import { useAppBasicConfig, useI18n } from '../../composables'
 import { commands } from '../../logic/commands'
 import { applyLangUpdate, availableLangs, defaultLang } from '../../logic/i18n'
@@ -30,7 +30,6 @@ function updateLang() {
 }
 
 async function applyGlobalShortcut() {
-  MessagePlugin.success('changed')
   await basicConfig.save()
   await commands.applyGlobalShortcut()
 }
