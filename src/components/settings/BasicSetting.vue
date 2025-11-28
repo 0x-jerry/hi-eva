@@ -39,6 +39,11 @@ async function applyAutoTrigger() {
   await commands.applyAutoTrigger()
 }
 
+async function applyAutostart() {
+  await basicConfig.save()
+  await commands.applyAutostart()
+}
+
 async function saveConfig() {
   await basicConfig.save()
 }
@@ -60,10 +65,6 @@ async function saveConfig() {
         <label>{{ t('basicsetting.lang') }}</label>
         <Select class="flex-1" v-model="defaultLang" :options="langOptions" @change="updateLang" />
       </div>
-      <div class="field-row">
-        <label>{{ t('basicsetting.proxy') }}</label>
-        <Input class="flex-1" v-model="basicConfig.data.proxy" :placeholder="t('basicsetting.proxy')" @blur="saveConfig" />
-      </div>
       <div class="field-row ">
         <label>{{ t('basicsetting.listenClipboard') }}</label>
         <Switch  v-model="basicConfig.data.enableListenClipboard" @change="applyClipboardChange" />
@@ -78,6 +79,14 @@ async function saveConfig() {
           <Switch v-model="basicConfig.data.enableGlobalShortcut" @change="applyGlobalShortcut" />
           <ShortcutInput class="flex-1 w-0" v-model="basicConfig.data.globalShortcut" @blur="applyGlobalShortcut" />
         </div>
+      </div>
+      <div class="field-row">
+        <label>{{ t('basicsetting.autostart') }}</label>
+        <Switch  v-model="basicConfig.data.autostart" @change="applyAutostart" />
+      </div>
+      <div class="field-row">
+        <label>{{ t('basicsetting.proxy') }}</label>
+        <Input class="flex-1" v-model="basicConfig.data.proxy" :placeholder="t('basicsetting.proxy')" @blur="saveConfig" />
       </div>
     </div>
   </div>

@@ -15,6 +15,7 @@ type ICommandType = {
   applyAutoTrigger(): Promise<void>
   applyClipboardListener(): Promise<void>
   applyGlobalShortcut(): Promise<void>
+  applyAutostart(): Promise<void>
   saveConfiguration(opt: { conf: AppBasicConfig }): Promise<void>
   getConfiguration(): Promise<AppBasicConfig>
 }

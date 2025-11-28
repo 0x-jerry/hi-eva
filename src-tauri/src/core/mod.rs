@@ -15,6 +15,7 @@ pub use tray::*;
 pub mod mouse_listener;
 pub use mouse_listener::*;
 
+pub mod autostart;
 mod constant;
 mod utils;
 

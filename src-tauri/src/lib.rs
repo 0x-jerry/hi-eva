@@ -2,6 +2,7 @@ use core::{AppWindowExt, MAIN_WINDOW_LABEL};
 
 use anyhow::Result;
 use tauri::{App, Manager, RunEvent};
+use tauri_plugin_autostart::MacosLauncher;
 
 use crate::core::{
     clipboard_listener, configuration_ext, global_shortcut, mouse_listener_app, AppState,
@@ -44,6 +45,7 @@ pub fn run() {
             commands::open_setting_folder,
             commands::apply_global_shortcut,
             commands::apply_auto_trigger,
+            commands::apply_autostart,
             commands::get_configuration,
             commands::save_configuration,
         ])
@@ -55,6 +57,10 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_autostart::init(
+            MacosLauncher::LaunchAgent,
+            Some(vec!["--minimized"]),
+        ))
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             log::info!("single instance");
             app.open_and_focus(MAIN_WINDOW_LABEL);

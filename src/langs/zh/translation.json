@@ -5,7 +5,8 @@
     "openSettingFolder": "打开配置文件夹",
     "lang": "语言",
     "autoTrigger": "自动触发",
-    "shortcut": "快捷键"
+    "shortcut": "快捷键",
+    "autostart": "开启启动"
   },
   "chat": {
     "newChat": "新建对话",

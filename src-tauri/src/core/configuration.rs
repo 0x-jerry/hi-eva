@@ -45,7 +45,36 @@ impl From<AppBasicConfigV1> for AppBasicConfigV2 {
     }
 }
 
-pub type AppBasicConfig = AppBasicConfigV2;
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct AppBasicConfigV3 {
+    pub version: i32,
+    pub proxy: String,
+
+    pub enable_auto_trigger: bool,
+    pub enable_listen_clipboard: bool,
+    pub enable_global_shortcut: bool,
+    pub global_shortcut: String,
+
+    pub autostart: bool,
+}
+
+impl From<AppBasicConfigV2> for AppBasicConfigV3 {
+    fn from(value: AppBasicConfigV2) -> Self {
+        AppBasicConfigV3 {
+            version: 3,
+            autostart: false,
+
+            proxy: value.proxy,
+            enable_auto_trigger: value.enable_auto_trigger,
+            enable_listen_clipboard: value.enable_listen_clipboard,
+            enable_global_shortcut: value.enable_global_shortcut,
+            global_shortcut: value.global_shortcut,
+        }
+    }
+}
+
+pub type AppBasicConfig = AppBasicConfigV3;
 
 const CONFIGURATION_FILE_NAME: &str = "config.json";
 const CONFIGURATION_KEY: &str = "data";
@@ -61,7 +90,8 @@ pub fn load(app: &AppHandle) -> Result<AppBasicConfig> {
         .flatten()
         .unwrap_or_default();
 
-    let value: AppBasicConfig = chain_from!(value, AppBasicConfigV1, AppBasicConfigV2);
+    let value: AppBasicConfig =
+        chain_from!(value, AppBasicConfigV1, AppBasicConfigV2, AppBasicConfigV3);
 
     if version != value.version as i64 {
         save(app, &value)?;

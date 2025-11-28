@@ -1,6 +1,9 @@
 export interface AppBasicConfig {
   version: number
   proxy: string
+
+  autostart: boolean
+
   enableAutoTrigger: boolean
   enableListenClipboard: boolean
 

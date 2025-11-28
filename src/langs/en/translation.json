@@ -5,7 +5,8 @@
     "openSettingFolder": "Open Setting Folder",
     "lang": "Language",
     "autoTrigger": "Auto trigger",
-    "shortcut": "Shortcut"
+    "shortcut": "Shortcut",
+    "autostart": "Autostart"
   },
   "chat": {
     "newChat": "New Chat",
