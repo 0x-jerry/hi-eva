@@ -97,7 +97,12 @@ fn setup_app(app: &mut App) -> Result<()> {
 
     text_selection::check_permissions();
 
-    app_handle.open_and_focus(MAIN_WINDOW_LABEL);
+    let app_handle = app_handle.clone();
+
+    tauri::async_runtime::spawn(async move {
+        std::thread::sleep(std::time::Duration::from_secs(1));
+        app_handle.open_and_focus(MAIN_WINDOW_LABEL);
+    });
 
     Ok(())
 }
