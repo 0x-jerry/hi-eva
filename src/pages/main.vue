@@ -9,7 +9,11 @@ const { t } = useI18n()
 
 const navButtons = [
   { name: t('main.home'), path: '/main', icon: 'i-carbon:chat' },
-  { name: t('main.settings'), path: '/main/settings', icon: 'i-carbon:settings' },
+  {
+    name: t('main.settings'),
+    path: '/main/settings',
+    icon: 'i-carbon:settings',
+  },
   {
     name: t('main.statistics'),
     path: '/main/statistics',
@@ -21,8 +25,8 @@ const navButtons = [
 <template>
   <div class="flex h-screen">
     <div class="nav-col w-60px bg-gray-1 flex flex-col gap-4 border-(0 r solid gray-2)">
-      <div class="flex items-center justify-center pt-1">
-        <img src="/logo.svg" alt="logo" class="w-3/4 p-2 rounded-md bg-gray-2 aspect-ratio-square">
+      <div class="flex items-center justify-center bg-gray-2 px-3 py-2">
+        <img src="/logo.svg" alt="logo" class="w-full aspect-ratio-square">
       </div>
 
       <div class="flex-1 flex flex-col text-gray-5">
