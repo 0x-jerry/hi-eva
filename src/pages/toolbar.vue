@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { useAsyncData } from '@0x-jerry/vue-kit'
-import { getCurrentWindow } from '@tauri-apps/api/window'
 import AutoResizeContainer from '../components/AutoResizeContainer.vue'
 import CarbonIcon from '../components/CarbonIcon.vue'
+import { useWinEventListener } from '../composables/useWinEventListener'
 import { IPromptConfigModel, promptConfigTable } from '../database/promptConfig'
 import { commands } from '../logic/commands'
 import { WindowEventName } from '../logic/events'
@@ -11,9 +11,7 @@ const promptConfigsApi = useAsyncData(promptConfigTable.findAll, [])
 
 promptConfigsApi.load()
 
-const win = getCurrentWindow()
-
-win.listen(WindowEventName.ToolbarShow, () => {
+useWinEventListener(WindowEventName.ToolbarShow, () => {
   promptConfigsApi.load()
 })
 

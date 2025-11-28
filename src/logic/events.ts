@@ -7,8 +7,8 @@ export interface IShowChatPayload {
 }
 
 export enum WindowEventName {
-  ChatShow = 'chat.show',
-  ChatHide = 'chat.hide',
+  ChatShow = 'chat:show',
+  ChatHide = 'chat:hide',
   ToolbarShow = 'toolbar:show',
   ConfigurationChanged = 'configuration:changed',
 }

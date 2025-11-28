@@ -4,6 +4,7 @@ import { getCurrentWindow } from '@tauri-apps/api/window'
 import { useLocalStorage } from '@vueuse/core'
 import { nextTick, reactive, ref, useTemplateRef } from 'vue'
 import ChatWithHistory from '../components/ChatWithHistory.vue'
+import { useWinEventListener } from '../composables/useWinEventListener'
 import { chatHistoryTable, IChatHistoryModel } from '../database/chatHistory'
 import {
   chatHistoryMsgTable,
@@ -34,7 +35,7 @@ const promptConfigApi = useAsyncData(promptConfigTable.getById)
 
 const win = getCurrentWindow()
 
-win.listen(WindowEventName.ChatShow, async (evt) => {
+useWinEventListener(WindowEventName.ChatShow, async (evt) => {
   payload.value = {
     promptId: Number(evt.payload.prompt_id),
     selectedText: evt.payload.selected_text,
@@ -45,7 +46,7 @@ win.listen(WindowEventName.ChatShow, async (evt) => {
   await checkWindowPosition()
 })
 
-win.listen(WindowEventName.ChatHide, async () => {
+useWinEventListener(WindowEventName.ChatHide, async () => {
   if (pinned.value) {
     return
   }
