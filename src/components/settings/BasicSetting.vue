@@ -74,9 +74,9 @@ async function saveConfig() {
       </div>
       <div class="field-row ">
         <label>{{ t('basicsetting.shortcut') }}</label>
-        <div class="flex gap-1 items-center w-full">
+        <div class="flex flex-1 gap-1 items-center w-0">
           <Switch v-model="basicConfig.data.enableGlobalShortcut" @change="applyGlobalShortcut" />
-          <ShortcutInput v-model="basicConfig.data.globalShortcut" @blur="applyGlobalShortcut" />
+          <ShortcutInput class="flex-1 w-0" v-model="basicConfig.data.globalShortcut" @blur="applyGlobalShortcut" />
         </div>
       </div>
     </div>
