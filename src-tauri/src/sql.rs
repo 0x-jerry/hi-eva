@@ -1,5 +1,9 @@
-use tauri::{plugin::TauriPlugin, Runtime};
-use tauri_plugin_sql::{Migration, MigrationKind, PluginConfig};
+use anyhow::Result;
+use sqlx::Executor;
+use tauri::{plugin::TauriPlugin, AppHandle, Manager, Runtime};
+use tauri_plugin_sql::{DbInstances, Migration, MigrationKind, PluginConfig};
+
+const DB_PATH: &str = "sqlite:data.db";
 
 pub fn init_sql<T: Runtime>() -> TauriPlugin<T, Option<PluginConfig>> {
     let migrations = vec![
@@ -24,6 +28,30 @@ pub fn init_sql<T: Runtime>() -> TauriPlugin<T, Option<PluginConfig>> {
     ];
 
     tauri_plugin_sql::Builder::default()
-        .add_migrations("sqlite:data.db", migrations)
+        .add_migrations(DB_PATH, migrations)
         .build()
+}
+
+pub async fn query_prompt_configs_count(app: &AppHandle) -> Result<usize> {
+    let db_instances = app.state::<DbInstances>();
+    let db_pool_map = db_instances.inner().0.read().await;
+
+    let pool = db_pool_map.get(&DB_PATH.to_string());
+
+    if pool.is_none() {
+        return Ok(0);
+    }
+
+    let db = pool.unwrap();
+
+    let size = match db {
+        tauri_plugin_sql::DbPool::Sqlite(pool) => {
+            let query = sqlx::query("select id from prompt_config");
+
+            let r = pool.fetch_all(query).await?;
+            r.len()
+        }
+    };
+
+    Ok(size)
 }

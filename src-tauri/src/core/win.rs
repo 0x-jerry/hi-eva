@@ -1,9 +1,13 @@
 use serde::Serialize;
 use tauri::{
-    AppHandle, Emitter, EventTarget, Manager, PhysicalPosition, WebviewWindow, WebviewWindowBuilder,
+    async_runtime::block_on, AppHandle, Emitter, EventTarget, Manager, PhysicalPosition,
+    WebviewWindow, WebviewWindowBuilder,
 };
 
-use crate::core::{constant::event_name, AppState};
+use crate::{
+    core::{constant::event_name, AppState},
+    sql::query_prompt_configs_count,
+};
 
 use super::{utils::calc_window_position, VerticalMoveDir};
 
@@ -142,6 +146,12 @@ pub fn hide_toolbar_win(app: &AppHandle) {
 }
 
 pub fn show_toolbar_win(app: &AppHandle, dir: Option<VerticalMoveDir>) {
+    let has_prompt_config = block_on(query_prompt_configs_count(app)).unwrap_or_default() > 0;
+
+    if !has_prompt_config {
+        return;
+    }
+
     let win = get_toolbar_window(app);
 
     win.emit_to(

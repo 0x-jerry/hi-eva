@@ -45,11 +45,12 @@ anyhow = { workspace = true }
 thiserror = { workspace = true }
 env_logger = { workspace = true }
 clipboard-rs = { workspace = true }
+mouce = { workspace = true }
 text-selection = { path = "./text-selection" }
 rs_utils = { git = "https://github.com/0x-jerry/rs-utils", branch = "main", package = "rs_utils" }
 dotenv = "0.15"
 nanoid = "0.4"
-mouce = { workspace = true }
+sqlx = { version = "0.8", features = ["sqlite"] }
 tauri-plugin-opener = "2"
 tauri-plugin-single-instance = "2"
 tauri-plugin-shell = "2"
