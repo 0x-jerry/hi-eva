@@ -4,7 +4,7 @@ use tauri::{AppHandle, Emitter, Manager};
 
 pub type ConfigState = Mutex<AppBasicConfig>;
 
-pub fn init_manager(app: AppHandle) {
+pub fn init_manager(app: &AppHandle) {
     let conf = app.reload_conf();
 
     app.manage(Mutex::new(conf));

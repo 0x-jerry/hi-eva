@@ -1,10 +1,10 @@
-use core::{MyApp, MyAppWindowExt, MAIN_WINDOW_LABEL};
+use core::{AppWindowExt, MAIN_WINDOW_LABEL};
 
-use tauri::{Manager, RunEvent};
+use tauri::RunEvent;
 
 use crate::{
     commands::apply_global_shortcut,
-    core::configuration_ext,
+    core::{configuration_ext, init_app},
 };
 
 mod commands;
@@ -57,19 +57,15 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             log::info!("single instance");
-            let app = app.state::<MyApp>();
             app.open_and_focus(MAIN_WINDOW_LABEL);
         }))
         .setup(|app| {
             #[cfg(unix)]
             app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 
-            configuration_ext::init_manager(app.handle().clone());
+            configuration_ext::init_manager(app.handle());
 
-            let my_app = MyApp::new(app.handle().clone());
-            my_app.init();
-
-            app.manage(my_app);
+            init_app(app.handle());
 
             let _ = apply_global_shortcut(app.handle().clone());
 

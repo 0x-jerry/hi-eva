@@ -44,12 +44,11 @@ impl MacWindowExt for WebviewWindow {
         Ok(())
     }
 
-    // todo, rename to ns_toolbar_focus
+    /// only used by toolbar window
     fn ns_focus(&self) -> Result<()> {
         let state = self.state::<AppState>();
-        let mut state = state.lock().unwrap();
 
-        if !state.toolbar.focused {
+        if !state.is_toolbar_focused() {
             let panel = self.get_webview_panel(self.label()).unwrap();
             self.run_on_main_thread(move || {
                 panel.show_and_make_key();
@@ -58,17 +57,16 @@ impl MacWindowExt for WebviewWindow {
 
             log::info!("make key window");
         }
-        state.toolbar.focused = true;
+        state.set_toolbar_focused(true);
 
         Ok(())
     }
 
-    // todo, rename to ns_toolbar_resign_focus
+    /// only used by toolbar window
     fn ns_resign_focus(&self) -> Result<()> {
         let state = self.state::<AppState>();
-        let mut state = state.lock().unwrap();
 
-        if state.toolbar.focused {
+        if state.is_toolbar_focused() {
             let panel = self.get_webview_panel(self.label()).unwrap();
             self.run_on_main_thread(move || {
                 panel.resign_key_window();
@@ -77,7 +75,8 @@ impl MacWindowExt for WebviewWindow {
 
             log::info!("resign key window");
         }
-        state.toolbar.focused = false;
+
+        state.set_toolbar_focused(false);
 
         Ok(())
     }

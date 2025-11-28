@@ -15,7 +15,6 @@ pub trait MouseExtTrait {
     fn on_selection_change(&self, result: Option<SelectionResult>);
     fn on_mouse_down(&self);
     fn on_mouse_move(&self);
-    fn get_cursor_position(&self) -> (f64, f64);
 }
 
 #[derive(Debug, Default)]
@@ -26,25 +25,26 @@ pub struct SelectionResult {
 
 #[derive(Debug)]
 struct SelectionState {
-    mouse_down_pos: (f64, f64),
-    current_mouse_pos: (f64, f64),
+    mouse_down_pos: (i32, i32),
+    current_mouse_pos: (i32, i32),
     mouse_down_ts: Instant,
     last_click_ts: Option<Instant>,
-    last_click_pos: (f64, f64),
+    last_click_pos: (i32, i32),
     last_check_ts: Instant,
 }
 
 pub fn listen<T: 'static + MouseExtTrait + Send>(app: T) {
-    let state = Mutex::new(SelectionState {
-        mouse_down_pos: (0.0, 0.0),
-        current_mouse_pos: app.get_cursor_position(),
-        mouse_down_ts: Instant::now(),
-        last_click_ts: None,
-        last_click_pos: (0.0, 0.0),
-        last_check_ts: Instant::now(),
-    });
 
     let mut mouse = mouce::Mouse::new();
+
+    let state = Mutex::new(SelectionState {
+        mouse_down_pos: (0, 0),
+        current_mouse_pos: mouse.get_position().unwrap_or_default(),
+        mouse_down_ts: Instant::now(),
+        last_click_ts: None,
+        last_click_pos: (0, 0),
+        last_check_ts: Instant::now(),
+    });
 
     let result = mouse.hook(Box::new(move |event| {
         let mut state = state.lock().unwrap();
@@ -65,7 +65,7 @@ pub fn listen<T: 'static + MouseExtTrait + Send>(app: T) {
                 let current_mouse_pos = state.current_mouse_pos;
 
                 let now = Instant::now();
-                let maybe_click = distance(state.mouse_down_pos, current_mouse_pos) < 5.0;
+                let maybe_click = distance(state.mouse_down_pos, current_mouse_pos) < 5;
 
                 if maybe_click {
                     if let Some(last_click_ts) = state.last_click_ts {
@@ -73,7 +73,7 @@ pub fn listen<T: 'static + MouseExtTrait + Send>(app: T) {
 
                         let maybe_multiple_click = now.duration_since(last_click_ts)
                             < Duration::from_millis(db_click_max_delay_check_ms)
-                            && distance(state.last_click_pos, current_mouse_pos) < 5.0;
+                            && distance(state.last_click_pos, current_mouse_pos) < 5;
 
                         if maybe_multiple_click {
                             should_check_selection = true;
@@ -128,9 +128,9 @@ pub fn listen<T: 'static + MouseExtTrait + Send>(app: T) {
     }
 }
 
-fn distance(p1: (f64, f64), p2: (f64, f64)) -> f64 {
+fn distance(p1: (i32, i32), p2: (i32, i32)) -> i32 {
     let x = p1.0 - p2.0;
     let y = p1.1 - p2.1;
 
-    return (x * x + y * y).sqrt();
+    return (x * x + y * y).isqrt();
 }

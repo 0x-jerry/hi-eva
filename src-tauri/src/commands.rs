@@ -5,19 +5,18 @@ use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 use tauri_plugin_opener::OpenerExt;
 
 use crate::core::{
-    AppBasicConfig, AppMessageExt, AppState, ConfigurationExt, MyApp, MyAppWindowExt, update_tray_menu
+    clipboard_listener, hide_toolbar_win, open_chat_win, show_toolbar_win, update_tray_menu,
+    AppBasicConfig, AppState, ConfigurationExt,
 };
 
 #[tauri::command]
 pub async fn get_selected_text(state: State<'_, AppState>) -> Result<String> {
-    let state = state.lock().unwrap();
-
-    Ok(state.selected_text.clone())
+    Ok(state.get_selected_text())
 }
 
 #[tauri::command]
-pub async fn open_chat(app: State<'_, MyApp>, prompt_id: String) -> Result<()> {
-    let _ = app.open_chat(prompt_id);
+pub async fn open_chat(app: AppHandle, prompt_id: String) -> Result<()> {
+    let _ = open_chat_win(&app, prompt_id);
 
     Ok(())
 }
@@ -36,27 +35,23 @@ pub async fn apply_appearance(win: WebviewWindow) -> Result<()> {
 
 #[tauri::command]
 pub async fn set_chat_pinned(state: State<'_, AppState>, pinned: bool) -> Result<bool> {
-    let mut state = state.lock().unwrap();
+    state.set_chat_panel_pinned(pinned);
 
-    state.chat_panel_pinned = pinned;
-
-    log::info!("set pinned {:?}", state.chat_panel_pinned);
-
-    Ok(state.chat_panel_pinned)
+    Ok(pinned)
 }
 
 #[tauri::command]
-pub async fn hide_toolbar_window(app: State<'_, MyApp>) -> Result<()> {
-    app.hide_toolbar_win();
+pub async fn hide_toolbar_window(app: AppHandle) -> Result<()> {
+    hide_toolbar_win(&app);
 
     Ok(())
 }
 
 #[tauri::command]
-pub async fn apply_clipboard_listener(app: State<'_, MyApp>) -> Result<()> {
+pub async fn apply_clipboard_listener(app: AppHandle) -> Result<()> {
     let _ = app.reload_conf();
 
-    app.apply_clipboard_listener();
+    clipboard_listener::apply_clipboard_listener(&app);
 
     Ok(())
 }
@@ -106,13 +101,12 @@ pub async fn apply_global_shortcut(app: AppHandle) -> Result<()> {
         .on_shortcut(shortcut, |app, _shortcut, _evt| {
             log::info!("shortcut triggered!");
 
-            app.state::<MyApp>().show_toolbar_win(None);
+            show_toolbar_win(app, None);
         })
         .map_err(|err| tauri::Error::Anyhow(err.into()))?;
 
     Ok(())
 }
-
 
 #[tauri::command]
 pub async fn get_configuration(app: AppHandle) -> Result<AppBasicConfig> {

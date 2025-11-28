@@ -1,12 +1,12 @@
 use tauri::{
     menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem},
     tray::{MouseButton, TrayIcon, TrayIconBuilder, TrayIconEvent},
-    AppHandle, Manager, Result, Wry,
+    AppHandle, Result, Wry,
 };
 
-use crate::core::{ConfigurationExt, check_update};
+use crate::core::{apply_clipboard_listener, check_update, ConfigurationExt, MAIN_WINDOW_LABEL};
 
-use super::{MyApp, MyAppWindowExt, MAIN_WINDOW_LABEL};
+use super::AppWindowExt;
 
 const MENU_QUIT: &str = "quit";
 const MENU_CHECK_UPDATE: &str = "check-update";
@@ -31,9 +31,7 @@ pub fn create_tray(app: &AppHandle) -> Result<TrayIcon> {
         } => {
             log::info!("tray icon left click");
 
-            icon.app_handle()
-                .state::<MyApp>()
-                .open_and_focus(MAIN_WINDOW_LABEL);
+            icon.app_handle().open_and_focus(MAIN_WINDOW_LABEL);
         }
         _ => {}
     });
@@ -57,8 +55,7 @@ pub fn create_tray(app: &AppHandle) -> Result<TrayIcon> {
             conf.enable_listen_clipboard = !conf.enable_listen_clipboard;
             app.save_conf(&conf);
 
-            let my_app = app.state::<MyApp>();
-            my_app.apply_clipboard_listener();
+            apply_clipboard_listener(app);
 
             update_tray_menu(app);
         }

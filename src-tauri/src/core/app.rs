@@ -1,91 +1,25 @@
-use std::{ops::Deref, sync::Mutex};
+use std::ops::Deref;
 
-use clipboard_rs::{Clipboard, ClipboardHandler};
 use tauri::{AppHandle, Manager};
 
 use crate::{
-    core::{AppState, ConfigurationExt, create_tray, update_tray_menu},
+    core::{
+        apply_clipboard_listener, create_tray, get_chat_window, get_main_window,
+        get_toolbar_window, hide_chat_win, hide_toolbar_win, show_toolbar_win, AppState,
+        ConfigurationExt,
+    },
     plugins::MyWebviewWindowExt,
 };
 
-use super::{
-    mouse_listener, AppMessageExt, AppStateExt, AppStateInner, ClipboardListenerExt,
-    MouseExtTrait, MyAppWindowExt, SelectionResult, MAIN_WINDOW_LABEL,
-};
+use super::{mouse_listener, AppWindowExt, MouseExtTrait, SelectionResult, MAIN_WINDOW_LABEL};
 
-#[derive(Clone)]
-pub struct MyApp(AppHandle);
+struct MyApp(AppHandle);
 
 impl Deref for MyApp {
     type Target = AppHandle;
 
     fn deref(&self) -> &Self::Target {
         &self.0
-    }
-}
-
-impl MyApp {
-    pub fn new(app: AppHandle) -> MyApp {
-        MyApp(app)
-    }
-
-    pub fn app(&self) -> &AppHandle {
-        &self.0
-    }
-
-    pub fn init(&self) {
-        self.manage(Mutex::new(AppStateInner::default()));
-
-        let _ = self.get_main_window();
-        let _ = self.get_toolbar_window();
-        let _ = self.get_chat_window();
-
-        let _ = create_tray(self);
-
-        self.apply_clipboard_listener();
-
-        let app_cloned = self.clone();
-
-        self.open_and_focus(MAIN_WINDOW_LABEL);
-
-        let _ = mouse_listener::listen(app_cloned);
-
-        let _ = text_selection::init();
-    }
-
-    pub fn apply_clipboard_listener(&self) {
-        let conf = self.get_conf();
-
-        if conf.enable_listen_clipboard {
-            self.start_clipboard_listener();
-        } else {
-            self.stop_clipboard_listener();
-        }
-
-        update_tray_menu(self);
-    }
-}
-
-impl ClipboardHandler for MyApp {
-    fn on_clipboard_change(&mut self) {
-        log::info!("clipboard changed");
-
-        let clipboard = clipboard_rs::ClipboardContext::new().unwrap();
-
-        if let Ok(selected_text) = clipboard.get_text() {
-            log::info!("clipboard text: {:?}", selected_text);
-
-            let selected_text = selected_text.trim();
-            if selected_text.len() > 0 {
-                {
-                    let state = self.state::<AppState>();
-                    let mut state = state.lock().unwrap();
-                    state.selected_text = selected_text.to_string();
-                }
-
-                self.show_toolbar_win(None);
-            }
-        }
     }
 }
 
@@ -101,33 +35,24 @@ impl MouseExtTrait for MyApp {
             if result.rect.text.clone().is_some_and(|x| x.len() > 0) {
                 {
                     let state = self.state::<AppState>();
-                    let mut state = state.lock().unwrap();
-                    state.selected_text = result.rect.text.unwrap_or_default();
+                    let selected_text = result.rect.text.unwrap_or_default();
+                    state.set_selected_text(selected_text);
                 }
 
-                self.show_toolbar_win(Some(result.mouse_move_dir));
+                show_toolbar_win(self, Some(result.mouse_move_dir));
             }
         }
     }
 
-    fn get_cursor_position(&self) -> (f64, f64) {
-        let pos = self
-            .cursor_position()
-            .unwrap()
-            .to_logical(self.scale_factor());
-
-        (pos.x, pos.y)
-    }
-
     fn on_mouse_down(&self) {
-        let win_toolbar = self.get_toolbar_window();
+        let win_toolbar = get_toolbar_window(self);
 
         if self.is_toolbar_visible() && !win_toolbar.is_cursor_in() {
-            self.hide_toolbar_win();
+            hide_toolbar_win(self);
         }
 
-        if self.get_chat_window().is_click_outside() {
-            self.hide_chat();
+        if get_chat_window(self).is_click_outside() {
+            hide_chat_win(self);
         }
     }
 
@@ -140,7 +65,7 @@ impl MouseExtTrait for MyApp {
                 return;
             }
 
-            let win_toolbar = self.get_toolbar_window();
+            let win_toolbar = get_toolbar_window(self);
 
             if win_toolbar.is_cursor_in() {
                 win_toolbar.ns_focus().unwrap();
@@ -149,4 +74,22 @@ impl MouseExtTrait for MyApp {
             }
         }
     }
+}
+
+pub fn init_app(app: &AppHandle) {
+    app.manage(AppState::default());
+
+    let _ = create_tray(app);
+
+    let _ = get_main_window(app);
+    let _ = get_toolbar_window(app);
+    let _ = get_chat_window(app);
+
+    app.open_and_focus(MAIN_WINDOW_LABEL);
+
+    apply_clipboard_listener(app);
+
+    let _ = mouse_listener::listen(MyApp(app.clone()));
+
+    let _ = text_selection::init();
 }
