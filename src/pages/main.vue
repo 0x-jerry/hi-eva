@@ -14,11 +14,11 @@ const navButtons = [
     path: '/main/settings',
     icon: 'i-carbon:settings',
   },
-  {
-    name: t('main.statistics'),
-    path: '/main/statistics',
-    icon: 'i-carbon:chart-line-data',
-  },
+  // {
+  //   name: t('main.statistics'),
+  //   path: '/main/statistics',
+  //   icon: 'i-carbon:chart-line-data',
+  // },
 ]
 </script>
 
