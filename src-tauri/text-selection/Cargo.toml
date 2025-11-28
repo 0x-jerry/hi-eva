@@ -8,6 +8,7 @@ license = "MIT / Apache-2.0"
 clipboard-rs = { workspace = true }
 log = { workspace = true }
 enigo = { workspace = true }
+anyhow = { workspace = true }
 
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.62", features = [

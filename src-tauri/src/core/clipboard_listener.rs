@@ -1,7 +1,8 @@
+use anyhow::{anyhow, Result};
 use clipboard_rs::{Clipboard, ClipboardHandler, ClipboardWatcher, ClipboardWatcherContext};
 use tauri::{AppHandle, Manager};
 
-use crate::core::{show_toolbar_win, update_tray_menu, ConfigurationExt};
+use crate::core::{show_toolbar_win, ConfigurationExt};
 
 use super::AppState;
 
@@ -30,25 +31,26 @@ impl ClipboardHandler for ClipboardApp {
     }
 }
 
-pub fn apply_clipboard_listener(app: &AppHandle) {
+pub fn apply_watch_clipboard(app: &AppHandle) -> Result<()> {
     let conf = app.get_conf();
 
     if conf.enable_listen_clipboard {
-        start_watch_clipboard(app);
+        start_watch_clipboard(app)?;
     } else {
         stop_watch_clipboard(app);
     }
 
-    update_tray_menu(app);
+    Ok(())
 }
 
-fn start_watch_clipboard(app: &AppHandle) {
+fn start_watch_clipboard(app: &AppHandle) -> Result<()> {
     stop_watch_clipboard(app);
 
     let clipboard_app = ClipboardApp(app.clone());
 
-    let mut watcher =
-        ClipboardWatcherContext::<ClipboardApp>::new().expect("Init clipboard watcher");
+    let mut watcher = ClipboardWatcherContext::<ClipboardApp>::new()
+        //
+        .map_err(|err| anyhow!("{}", err))?;
 
     let shutdown_handler = watcher.add_handler(clipboard_app).get_shutdown_channel();
 
@@ -60,14 +62,15 @@ fn start_watch_clipboard(app: &AppHandle) {
         log::info!("Start watch clipboard");
         watcher.start_watch();
     });
+
+    Ok(())
 }
 
 fn stop_watch_clipboard(app: &AppHandle) {
-    log::info!("Stop watch clipboard");
-
     let state = app.state::<AppState>();
 
     if let Some(shutdown_handler) = state.take_clipboard_watch_handler() {
         shutdown_handler.stop();
+        log::info!("Stop watch clipboard");
     }
 }

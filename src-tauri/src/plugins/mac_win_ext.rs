@@ -1,4 +1,5 @@
-use tauri::{Manager, Result, WebviewWindow};
+use anyhow::Result;
+use tauri::{Manager, WebviewWindow};
 
 use tauri_nspanel::{
     tauri_panel, CollectionBehavior, ManagerExt, PanelLevel, StyleMask, WebviewWindowExt,

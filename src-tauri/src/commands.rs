@@ -1,11 +1,8 @@
-use std::str::FromStr;
-
 use tauri::{AppHandle, Manager, Result, State, WebviewWindow};
-use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 use tauri_plugin_opener::OpenerExt;
 
 use crate::core::{
-    clipboard_listener, hide_toolbar_win, open_chat_win, show_toolbar_win, update_tray_menu,
+    clipboard_listener, global_shortcut, hide_toolbar_win, open_chat_win, update_tray_menu,
     AppBasicConfig, AppState, ConfigurationExt,
 };
 
@@ -51,7 +48,7 @@ pub async fn hide_toolbar_window(app: AppHandle) -> Result<()> {
 pub async fn apply_clipboard_listener(app: AppHandle) -> Result<()> {
     let _ = app.reload_conf();
 
-    clipboard_listener::apply_clipboard_listener(&app);
+    clipboard_listener::apply_watch_clipboard(&app)?;
 
     Ok(())
 }
@@ -79,33 +76,10 @@ pub async fn open_setting_folder(app: AppHandle) -> Result<()> {
 
 #[tauri::command]
 pub async fn apply_global_shortcut(app: AppHandle) -> Result<()> {
-    let conf = app.reload_conf();
+    let _ = app.reload_conf();
 
-    app.global_shortcut()
-        .unregister_all()
-        .map_err(|err| tauri::Error::Anyhow(err.into()))?;
-
-    if !conf.enable_global_shortcut {
-        return Ok(());
-    }
-
-    if conf.global_shortcut.trim().is_empty() {
-        return Ok(());
-    }
-
-    let shortcut = Shortcut::from_str(&conf.global_shortcut.trim())
-        //
-        .map_err(|err| tauri::Error::Anyhow(err.into()))?;
-
-    app.global_shortcut()
-        .on_shortcut(shortcut, |app, _shortcut, _evt| {
-            log::info!("shortcut triggered!");
-
-            show_toolbar_win(app, None);
-        })
-        .map_err(|err| tauri::Error::Anyhow(err.into()))?;
-
-    Ok(())
+    update_tray_menu(&app);
+    global_shortcut::apply_global_shortcut(&app).map_err(|err| err.into())
 }
 
 #[tauri::command]

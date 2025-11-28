@@ -1,6 +1,4 @@
-use std::error::Error;
-
-pub type Result<T> = std::result::Result<T, Box<dyn Error>>;
+use anyhow::Result;
 
 pub(crate) trait HostHelperTrait {
     fn detect_selection_rect(&self) -> Result<Option<SelectionRect>>;

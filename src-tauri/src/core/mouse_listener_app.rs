@@ -1,21 +1,21 @@
 use std::ops::Deref;
 
+use anyhow::Result;
 use tauri::{AppHandle, Manager};
 
 use crate::{
     core::{
-        apply_clipboard_listener, create_tray, get_chat_window, get_main_window,
-        get_toolbar_window, hide_chat_win, hide_toolbar_win, show_toolbar_win, AppState,
-        ConfigurationExt,
+        get_chat_window, get_toolbar_window, hide_chat_win, hide_toolbar_win, show_toolbar_win,
+        AppState, ConfigurationExt,
     },
     plugins::MyWebviewWindowExt,
 };
 
-use super::{mouse_listener, AppWindowExt, MouseExtTrait, SelectionResult, MAIN_WINDOW_LABEL};
+use super::{mouse_listener, AppWindowExt, MouseExtTrait, SelectionResult};
 
-struct MyApp(AppHandle);
+struct MouseListenerApp(AppHandle);
 
-impl Deref for MyApp {
+impl Deref for MouseListenerApp {
     type Target = AppHandle;
 
     fn deref(&self) -> &Self::Target {
@@ -23,7 +23,7 @@ impl Deref for MyApp {
     }
 }
 
-impl MouseExtTrait for MyApp {
+impl MouseExtTrait for MouseListenerApp {
     fn on_selection_change(&self, result: Option<SelectionResult>) {
         if !self.get_conf().enable_auto_trigger {
             return;
@@ -76,20 +76,8 @@ impl MouseExtTrait for MyApp {
     }
 }
 
-pub fn init_app(app: &AppHandle) {
-    app.manage(AppState::default());
+pub fn init_mouse_listener(app: &AppHandle) -> Result<()> {
+    mouse_listener::listen(MouseListenerApp(app.clone()))?;
 
-    let _ = create_tray(app);
-
-    let _ = get_main_window(app);
-    let _ = get_toolbar_window(app);
-    let _ = get_chat_window(app);
-
-    app.open_and_focus(MAIN_WINDOW_LABEL);
-
-    apply_clipboard_listener(app);
-
-    let _ = mouse_listener::listen(MyApp(app.clone()));
-
-    let _ = text_selection::init();
+    Ok(())
 }

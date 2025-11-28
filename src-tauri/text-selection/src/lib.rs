@@ -1,3 +1,5 @@
+use anyhow::Result;
+
 pub mod types;
 
 #[cfg(unix)]
@@ -33,7 +35,7 @@ pub fn get_selected_rect() -> Option<SelectionRect> {
     }
 }
 
-pub fn init() {
+pub fn check_permissions() {
     #[cfg(unix)]
     {
         let _ = unix_impl::request_accessibility_access();

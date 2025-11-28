@@ -3,6 +3,7 @@ use std::{
     time::{Duration, Instant},
 };
 
+use anyhow::{Ok, Result};
 use mouce::{
     common::{MouseButton, MouseEvent},
     MouseActions,
@@ -33,8 +34,7 @@ struct SelectionState {
     last_check_ts: Instant,
 }
 
-pub fn listen<T: 'static + MouseExtTrait + Send>(app: T) {
-
+pub fn listen<T: 'static + MouseExtTrait + Send>(app: T) -> Result<()> {
     let mut mouse = mouce::Mouse::new();
 
     let state = Mutex::new(SelectionState {
@@ -46,7 +46,7 @@ pub fn listen<T: 'static + MouseExtTrait + Send>(app: T) {
         last_check_ts: Instant::now(),
     });
 
-    let result = mouse.hook(Box::new(move |event| {
+    mouse.hook(Box::new(move |event| {
         let mut state = state.lock().unwrap();
 
         match event {
@@ -121,11 +121,9 @@ pub fn listen<T: 'static + MouseExtTrait + Send>(app: T) {
             }
             _ => {}
         }
-    }));
+    }))?;
 
-    if let Err(err) = result {
-        log::error!("error is {:?}", err);
-    }
+    Ok(())
 }
 
 fn distance(p1: (i32, i32), p2: (i32, i32)) -> i32 {

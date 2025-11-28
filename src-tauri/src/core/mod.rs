@@ -1,5 +1,4 @@
-pub mod app;
-pub use app::*;
+pub mod mouse_listener_app;
 
 pub mod state;
 pub use state::*;
@@ -33,3 +32,5 @@ pub use configuration_ext::*;
 
 pub mod clipboard_listener;
 pub use clipboard_listener::*;
+
+pub mod global_shortcut;

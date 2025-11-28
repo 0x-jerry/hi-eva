@@ -1,5 +1,6 @@
 use std::{cmp, i32, thread};
 
+use anyhow::Result;
 use windows::Win32::{
     Foundation::RECT,
     System::Com::{CoCreateInstance, CoInitialize, CLSCTX_ALL},
@@ -9,7 +10,7 @@ use windows::Win32::{
 };
 
 use crate::{
-    types::{HostHelperTrait, Result},
+    types::HostHelperTrait,
     SelectionRect,
 };
 

@@ -1,3 +1,4 @@
+use anyhow::Result;
 use tauri::{async_runtime::block_on, AppHandle, Url};
 use tauri_plugin_dialog::{DialogExt, MessageDialogButtons};
 use tauri_plugin_notification::NotificationExt;
@@ -23,7 +24,7 @@ pub fn check_update(app: &AppHandle) {
     });
 }
 
-fn check_update_inner(app: &AppHandle) -> tauri_plugin_updater::Result<()> {
+fn check_update_inner(app: &AppHandle) -> Result<()> {
     let app_name = app.package_info().name.clone();
     log::info!("start check update");
 

@@ -5450,6 +5450,7 @@ dependencies = [
 name = "text-selection"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "clipboard-rs",
  "enigo",
  "log",

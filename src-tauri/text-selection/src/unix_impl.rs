@@ -1,5 +1,6 @@
 use std::{any::type_name, ptr::NonNull};
 
+use anyhow::{bail, Result};
 use objc2_app_kit::NSWorkspace;
 use objc2_application_services::{
     kAXTrustedCheckOptionPrompt, AXError, AXIsProcessTrustedWithOptions, AXTextMarkerRange,
@@ -8,10 +9,7 @@ use objc2_application_services::{
 use objc2_core_foundation::{CFBoolean, CFDictionary, CFRetained, CFString, CFType, ConcreteType};
 use serde::Serialize;
 
-use crate::{
-    types::{HostHelperTrait, Result},
-    SelectionRect,
-};
+use crate::{types::HostHelperTrait, SelectionRect};
 
 #[allow(non_upper_case_globals)]
 pub const kAXSelectedTextMarkerRangeAttribute: &str = "AXSelectedTextMarkerRange";
@@ -102,16 +100,10 @@ fn get_element_attr<T: ConcreteType>(element: &AXUIElement, attr: &str) -> Resul
 
                 return Ok(v);
             } else {
-                return Err(Box::new(std::io::Error::new(
-                    std::io::ErrorKind::Other,
-                    format!("Convert {:?} to type {:?} failed", attr, type_name::<T>()),
-                )));
+                bail!("Convert {:?} to type {:?} failed", attr, type_name::<T>())
             }
         } else {
-            return Err(Box::new(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                format!("Convert {:?} to type {:?} failed", attr, type_name::<T>()),
-            )));
+            bail!("Convert {:?} to type {:?} failed", attr, type_name::<T>())
         }
     }
 }

@@ -31,10 +31,10 @@ pub fn get_main_window(app: &AppHandle) -> WebviewWindow {
     let win = win_builder.build().expect("Create main window failed!");
 
     let app = app.clone();
+
     win.on_window_event(move |event| match event {
         tauri::WindowEvent::CloseRequested { api, .. } => {
             api.prevent_close();
-            log::info!("show main window");
             get_main_window(&app).hide().unwrap();
         }
         _ => {}
@@ -113,6 +113,12 @@ pub fn get_chat_window(app: &AppHandle) -> WebviewWindow {
     log::info!("Create chat window");
 
     return win;
+}
+
+pub fn init_windows(app: &AppHandle) {
+    get_main_window(app);
+    get_toolbar_window(app);
+    get_chat_window(app);
 }
 
 /// Move toolbar to invisible area

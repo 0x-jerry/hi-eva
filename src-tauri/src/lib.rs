@@ -1,10 +1,10 @@
 use core::{AppWindowExt, MAIN_WINDOW_LABEL};
 
-use tauri::RunEvent;
+use anyhow::Result;
+use tauri::{App, Manager, RunEvent};
 
-use crate::{
-    commands::apply_global_shortcut,
-    core::{configuration_ext, init_app},
+use crate::core::{
+    clipboard_listener, configuration_ext, global_shortcut, mouse_listener_app, AppState,
 };
 
 mod commands;
@@ -60,14 +60,7 @@ pub fn run() {
             app.open_and_focus(MAIN_WINDOW_LABEL);
         }))
         .setup(|app| {
-            #[cfg(unix)]
-            app.set_activation_policy(tauri::ActivationPolicy::Accessory);
-
-            configuration_ext::init_manager(app.handle());
-
-            init_app(app.handle());
-
-            let _ = apply_global_shortcut(app.handle().clone());
+            setup_app(app)?;
 
             Ok(())
         });
@@ -82,4 +75,29 @@ pub fn run() {
         }
         _ => (),
     });
+}
+
+fn setup_app(app: &mut App) -> Result<()> {
+    #[cfg(unix)]
+    app.set_activation_policy(tauri::ActivationPolicy::Accessory);
+
+    let app_handle = app.handle();
+
+    configuration_ext::init_manager(app_handle);
+
+    app_handle.manage(AppState::default());
+
+    core::tray::create_tray(app_handle)?;
+
+    core::win::init_windows(app_handle);
+
+    clipboard_listener::apply_watch_clipboard(app_handle)?;
+    global_shortcut::apply_global_shortcut(app_handle)?;
+    mouse_listener_app::init_mouse_listener(app_handle)?;
+
+    text_selection::check_permissions();
+
+    app_handle.open_and_focus(MAIN_WINDOW_LABEL);
+
+    Ok(())
 }
