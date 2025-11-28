@@ -3,7 +3,9 @@
     "proxy": "代理地址",
     "listenClipboard": "监听剪贴板",
     "openSettingFolder": "打开配置文件夹",
-    "lang": "语言"
+    "lang": "语言",
+    "autoTrigger": "自动触发",
+    "shortcut": "快捷键"
   },
   "chat": {
     "newChat": "新建对话",
@@ -29,7 +31,8 @@
     "untitled": "未命名",
     "confirm": "确认",
     "abort": "中止",
-    "send": "发送"
+    "send": "发送",
+    "detecting": "检测中"
   },
   "main": {
     "home": "首页",
