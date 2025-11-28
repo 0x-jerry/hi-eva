@@ -48,9 +48,10 @@ clipboard-rs = { workspace = true }
 mouce = { workspace = true }
 text-selection = { path = "./text-selection" }
 rs_utils = { git = "https://github.com/0x-jerry/rs-utils", branch = "main", package = "rs_utils" }
+sqlx = { version = "0.8", features = ["sqlite"] }
 dotenv = "0.15"
 nanoid = "0.4"
-sqlx = { version = "0.8", features = ["sqlite"] }
+smart-default = "0.7"
 tauri-plugin-opener = "2"
 tauri-plugin-single-instance = "2"
 tauri-plugin-shell = "2"

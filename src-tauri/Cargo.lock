@@ -1870,6 +1870,7 @@ dependencies = [
  "rs_utils",
  "serde",
  "serde_json",
+ "smart-default",
  "sqlx",
  "tauri",
  "tauri-build",
@@ -4052,7 +4053,7 @@ dependencies = [
 [[package]]
 name = "rs_utils"
 version = "0.1.0"
-source = "git+https://github.com/0x-jerry/rs-utils?branch=main#30cbd1083ea85350be9454ef2069c8e66e63fde4"
+source = "git+https://github.com/0x-jerry/rs-utils?branch=main#aea88df36a55ba6fc4e039709e670879ee3f5e70"
 dependencies = [
  "anyhow",
  "rs_utils_derive",
@@ -4064,7 +4065,7 @@ dependencies = [
 [[package]]
 name = "rs_utils_derive"
 version = "0.1.0"
-source = "git+https://github.com/0x-jerry/rs-utils?branch=main#30cbd1083ea85350be9454ef2069c8e66e63fde4"
+source = "git+https://github.com/0x-jerry/rs-utils?branch=main#aea88df36a55ba6fc4e039709e670879ee3f5e70"
 dependencies = [
  "quote",
  "syn 2.0.110",
@@ -4545,6 +4546,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "smart-default"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0eb01866308440fc64d6c44d9e86c5cc17adfe33c4d6eed55da9145044d0ffc1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.110",
 ]
 
 [[package]]

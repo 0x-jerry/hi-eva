@@ -1,14 +1,19 @@
 use anyhow::Result;
-use rs_utils::macros::chain_from;
+use rs_utils::{
+    macros::Versioned,
+    migration::{self, do_migrate, Versioned},
+};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use smart_default::SmartDefault;
 use tauri::AppHandle;
 use tauri_plugin_store::StoreExt;
 
-#[derive(Debug, Serialize, Deserialize, Default, Clone)]
+#[derive(Debug, Serialize, Deserialize, SmartDefault, Clone, Versioned)]
 #[serde(rename_all = "camelCase")]
 pub struct AppBasicConfigV1 {
-    pub version: i32,
+    #[default = 1]
+    pub version: u32,
     pub proxy: String,
     pub listen_clipboard: bool,
     pub enabled: bool,
@@ -20,10 +25,11 @@ impl From<Value> for AppBasicConfigV1 {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, SmartDefault, Clone, Versioned)]
 #[serde(rename_all = "camelCase")]
 pub struct AppBasicConfigV2 {
-    pub version: i32,
+    #[default = 2]
+    pub version: u32,
     pub proxy: String,
 
     pub enable_auto_trigger: bool,
@@ -35,20 +41,21 @@ pub struct AppBasicConfigV2 {
 impl From<AppBasicConfigV1> for AppBasicConfigV2 {
     fn from(value: AppBasicConfigV1) -> Self {
         AppBasicConfigV2 {
-            version: 2,
             proxy: value.proxy,
             enable_auto_trigger: value.enabled,
             enable_listen_clipboard: value.listen_clipboard,
             enable_global_shortcut: false,
             global_shortcut: "".into(),
+            ..Default::default()
         }
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, SmartDefault, Clone, Versioned)]
 #[serde(rename_all = "camelCase")]
 pub struct AppBasicConfigV3 {
-    pub version: i32,
+    #[default = 3]
+    pub version: u32,
     pub proxy: String,
 
     pub enable_auto_trigger: bool,
@@ -62,14 +69,12 @@ pub struct AppBasicConfigV3 {
 impl From<AppBasicConfigV2> for AppBasicConfigV3 {
     fn from(value: AppBasicConfigV2) -> Self {
         AppBasicConfigV3 {
-            version: 3,
-            autostart: false,
-
             proxy: value.proxy,
             enable_auto_trigger: value.enable_auto_trigger,
             enable_listen_clipboard: value.enable_listen_clipboard,
             enable_global_shortcut: value.enable_global_shortcut,
             global_shortcut: value.global_shortcut,
+            ..Default::default()
         }
     }
 }
@@ -86,14 +91,43 @@ pub fn load(app: &AppHandle) -> Result<AppBasicConfig> {
 
     let version = value
         .get("version")
-        .map(|v| v.as_i64())
+        .map(|v| v.as_u64())
         .flatten()
-        .unwrap_or_default();
+        .unwrap_or_default() as u32;
 
-    let value: AppBasicConfig =
-        chain_from!(value, AppBasicConfigV1, AppBasicConfigV2, AppBasicConfigV3);
+    let migrations = vec![
+        migration::Migration {
+            version: 1,
+            migrate: |data| {
+                let mut v1 = AppBasicConfigV1::from_value_or_default(data);
+                v1.version = 1;
 
-    if version != value.version as i64 {
+                Ok(v1.to_value())
+            },
+        },
+        migration::Migration {
+            version: 2,
+            migrate: |data| {
+                let v1 = AppBasicConfigV1::from_value_or_default(data);
+                let v2 = AppBasicConfigV2::from(v1);
+
+                Ok(v2.to_value())
+            },
+        },
+        migration::Migration {
+            version: 3,
+            migrate: |data| {
+                let v1 = AppBasicConfigV2::from_value_or_default(data);
+                let v2 = AppBasicConfigV3::from(v1);
+
+                Ok(v2.to_value())
+            },
+        },
+    ];
+
+    let value: AppBasicConfig = do_migrate(value, migrations)?;
+
+    if version != value.version {
         save(app, &value)?;
     }
 
