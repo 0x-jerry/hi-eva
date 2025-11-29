@@ -1,7 +1,7 @@
 use anyhow::Result;
 use rs_utils::{
-    macros::Versioned,
-    migration::{self, do_migrate, Versioned},
+    macros::{migration, Versioned},
+    migration::Versioned,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -95,37 +95,8 @@ pub fn load(app: &AppHandle) -> Result<AppBasicConfig> {
         .flatten()
         .unwrap_or_default() as u32;
 
-    let migrations = vec![
-        migration::Migration {
-            version: 1,
-            migrate: |data| {
-                let mut v1 = AppBasicConfigV1::from_value_or_default(data);
-                v1.version = 1;
-
-                Ok(v1.to_value())
-            },
-        },
-        migration::Migration {
-            version: 2,
-            migrate: |data| {
-                let v1 = AppBasicConfigV1::from_value_or_default(data);
-                let v2 = AppBasicConfigV2::from(v1);
-
-                Ok(v2.to_value())
-            },
-        },
-        migration::Migration {
-            version: 3,
-            migrate: |data| {
-                let v1 = AppBasicConfigV2::from_value_or_default(data);
-                let v2 = AppBasicConfigV3::from(v1);
-
-                Ok(v2.to_value())
-            },
-        },
-    ];
-
-    let value: AppBasicConfig = do_migrate(value, migrations)?;
+    let value: AppBasicConfig =
+        migration!(value, AppBasicConfigV1, AppBasicConfigV2, AppBasicConfigV3);
 
     if version != value.version {
         save(app, &value)?;

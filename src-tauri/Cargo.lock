@@ -4053,7 +4053,7 @@ dependencies = [
 [[package]]
 name = "rs_utils"
 version = "0.1.0"
-source = "git+https://github.com/0x-jerry/rs-utils?branch=main#aea88df36a55ba6fc4e039709e670879ee3f5e70"
+source = "git+https://github.com/0x-jerry/rs-utils?branch=main#cb41af13de26380d972d99f1f2057ea6eb7c72dc"
 dependencies = [
  "anyhow",
  "rs_utils_derive",
@@ -4065,8 +4065,9 @@ dependencies = [
 [[package]]
 name = "rs_utils_derive"
 version = "0.1.0"
-source = "git+https://github.com/0x-jerry/rs-utils?branch=main#aea88df36a55ba6fc4e039709e670879ee3f5e70"
+source = "git+https://github.com/0x-jerry/rs-utils?branch=main#cb41af13de26380d972d99f1f2057ea6eb7c72dc"
 dependencies = [
+ "proc-macro2",
  "quote",
  "syn 2.0.110",
 ]
