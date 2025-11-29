@@ -69,6 +69,7 @@ pub fn get_toolbar_window(app: &AppHandle) -> WebviewWindow {
     .transparent(true)
     .skip_taskbar(true)
     .focused(false)
+    .visible(false)
     .always_on_top(true);
 
     let win = win_builder.build().expect("Create toolbar window failed!");
@@ -82,9 +83,9 @@ pub fn get_toolbar_window(app: &AppHandle) -> WebviewWindow {
             .expect("convert to non active panel failed");
     }
 
-    win.show().unwrap();
-
     hide_toolbar_win(app);
+
+    win.show().unwrap();
 
     return win;
 }
@@ -129,7 +130,7 @@ pub fn init_windows(app: &AppHandle) {
 pub fn hide_toolbar_win(app: &AppHandle) {
     let win = get_toolbar_window(app);
 
-    let old_pos = win.outer_position().unwrap();
+    let old_pos = win.outer_position().unwrap_or_default();
 
     let pos = PhysicalPosition::new(old_pos.x, TOOLBAR_HIDDEN_LOWEST_Y_POS - 100);
 
