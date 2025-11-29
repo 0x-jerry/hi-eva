@@ -1,19 +1,20 @@
-use crate::core::{configuration, constant::event_name, AppBasicConfig};
+use crate::core::{
+    configuration::{self, AppBasicConfig},
+    constant::event_name,
+};
 use std::sync::Mutex;
 use tauri::{AppHandle, Emitter, Manager};
 
 pub type ConfigState = Mutex<AppBasicConfig>;
 
 pub fn init_manager(app: &AppHandle) {
-    let conf = app.reload_conf();
+    let conf = configuration::load(app).expect("Load configuration failed!");
 
     app.manage(Mutex::new(conf));
 }
 
 pub trait ConfigurationExt {
     fn get_conf(&self) -> AppBasicConfig;
-
-    fn reload_conf(&self) -> AppBasicConfig;
 
     fn save_conf(&self, new_conf: &AppBasicConfig);
 }
@@ -23,12 +24,6 @@ impl ConfigurationExt for AppHandle {
         let binding = self.state::<ConfigState>();
 
         return binding.lock().unwrap().clone();
-    }
-
-    fn reload_conf(&self) -> AppBasicConfig {
-        let conf = configuration::load(self).expect("Load configuration failed!");
-
-        return conf;
     }
 
     fn save_conf(&self, new_conf: &AppBasicConfig) {

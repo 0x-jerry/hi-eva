@@ -26,7 +26,6 @@ pub mod updater;
 pub use updater::*;
 
 pub mod configuration;
-pub use configuration::*;
 
 pub mod configuration_ext;
 pub use configuration_ext::*;

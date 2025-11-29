@@ -2,8 +2,8 @@ use tauri::{AppHandle, Manager, Result, State, WebviewWindow};
 use tauri_plugin_opener::OpenerExt;
 
 use crate::core::{
-    autostart, clipboard_listener, global_shortcut, hide_toolbar_win, open_chat_win,
-    update_tray_menu, AppBasicConfig, AppState, ConfigurationExt,
+    autostart, clipboard_listener, configuration::AppBasicConfig, global_shortcut,
+    hide_toolbar_win, open_chat_win, update_tray_menu, AppState, ConfigurationExt,
 };
 
 #[tauri::command]
@@ -46,8 +46,6 @@ pub async fn hide_toolbar_window(app: AppHandle) -> Result<()> {
 
 #[tauri::command]
 pub async fn apply_clipboard_listener(app: AppHandle) -> Result<()> {
-    let _ = app.reload_conf();
-
     clipboard_listener::apply_watch_clipboard(&app)?;
 
     Ok(())
@@ -55,8 +53,6 @@ pub async fn apply_clipboard_listener(app: AppHandle) -> Result<()> {
 
 #[tauri::command]
 pub async fn apply_auto_trigger(app: AppHandle) -> Result<()> {
-    let _ = app.reload_conf();
-
     update_tray_menu(&app);
 
     Ok(())
@@ -76,8 +72,6 @@ pub async fn open_setting_folder(app: AppHandle) -> Result<()> {
 
 #[tauri::command]
 pub async fn apply_global_shortcut(app: AppHandle) -> Result<()> {
-    let _ = app.reload_conf();
-
     update_tray_menu(&app);
     global_shortcut::apply_global_shortcut(&app).map_err(|err| err.into())
 }

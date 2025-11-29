@@ -1,7 +1,6 @@
 use anyhow::Result;
 use rs_utils::macros::{migration, Versioned};
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use smart_default::SmartDefault;
 use tauri::AppHandle;
 use tauri_plugin_store::StoreExt;
@@ -14,12 +13,6 @@ pub struct AppBasicConfigV1 {
     pub proxy: String,
     pub listen_clipboard: bool,
     pub enabled: bool,
-}
-
-impl From<Value> for AppBasicConfigV1 {
-    fn from(value: Value) -> Self {
-        serde_json::from_value(value).unwrap_or_default()
-    }
 }
 
 #[derive(Debug, Serialize, Deserialize, SmartDefault, Clone, Versioned)]
