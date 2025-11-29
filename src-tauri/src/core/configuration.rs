@@ -1,8 +1,5 @@
 use anyhow::Result;
-use rs_utils::{
-    macros::{migration, Versioned},
-    migration::Versioned,
-};
+use rs_utils::macros::{migration, Versioned};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use smart_default::SmartDefault;
@@ -95,8 +92,7 @@ pub fn load(app: &AppHandle) -> Result<AppBasicConfig> {
         .flatten()
         .unwrap_or_default() as u32;
 
-    let value: AppBasicConfig =
-        migration!(value, AppBasicConfigV1, AppBasicConfigV2, AppBasicConfigV3);
+    let value = migration!(value, AppBasicConfigV1, AppBasicConfigV2, AppBasicConfigV3)?;
 
     if version != value.version {
         save(app, &value)?;
