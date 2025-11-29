@@ -30,7 +30,7 @@ pub fn get_main_window(app: &AppHandle) -> WebviewWindow {
     .center()
     .accept_first_mouse(true)
     .visible_on_all_workspaces(true)
-    .visible(true);
+    .visible(false);
 
     let win = win_builder.build().expect("Create main window failed!");
 

@@ -59,7 +59,7 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_autostart::init(
             MacosLauncher::LaunchAgent,
-            Some(vec!["--minimized"]),
+            Some(vec!["--minimized", "--autostart"]),
         ))
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             log::info!("single instance");
@@ -105,10 +105,17 @@ fn setup_app(app: &mut App) -> Result<()> {
 
     let app_handle = app_handle.clone();
 
-    tauri::async_runtime::spawn(async move {
-        std::thread::sleep(std::time::Duration::from_secs(1));
-        app_handle.open_and_focus(MAIN_WINDOW_LABEL);
-    });
+    if !check_if_start_by_autostart() {
+        tauri::async_runtime::spawn(async move {
+            std::thread::sleep(std::time::Duration::from_secs(1));
+            app_handle.open_and_focus(MAIN_WINDOW_LABEL);
+        });
+    }
 
     Ok(())
+}
+
+fn check_if_start_by_autostart() -> bool {
+    let args = std::env::args().collect::<Vec<_>>();
+    args.contains(&"--autostart".into())
 }
