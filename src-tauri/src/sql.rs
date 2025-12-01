@@ -25,6 +25,12 @@ pub fn init_sql<T: Runtime>() -> TauriPlugin<T, Option<PluginConfig>> {
             sql: include_str!("sql/init_20251124.sql"),
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 4,
+            description: "add order for prompt_config",
+            sql: include_str!("sql/init_20251201.sql"),
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri_plugin_sql::Builder::default()

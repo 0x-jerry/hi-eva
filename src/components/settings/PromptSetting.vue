@@ -2,6 +2,7 @@
 import { useAsyncData } from '@0x-jerry/vue-kit'
 import { Button, List, ListItem } from 'tdesign-vue-next'
 import { ref, toRaw } from 'vue'
+import { VueDraggable } from 'vue-draggable-plus'
 import { useDrawer, useI18n } from '../../composables'
 import type { IPromptConfigItem } from '../../database/promptConfig'
 import { promptConfigTable } from '../../database/promptConfig'
@@ -13,7 +14,7 @@ import SettingTitle from './SettingTitle.vue'
 const editDrawer = useDrawer()
 const { t } = useI18n()
 
-const configsApi = useAsyncData(() => promptConfigTable.findAll(), [])
+const configsApi = useAsyncData(promptConfigTable.getAllSorted, [])
 
 configsApi.load()
 
@@ -41,6 +42,7 @@ async function removeConf(conf: IPromptConfigItem) {
 
 async function handleAddOrUpdate() {
   const conf = editData.value
+  conf.orderNo = conf.orderNo ?? configsApi.data.value.length
 
   if (conf.id) {
     await promptConfigTable.updateOne({ ...conf, id: conf.id })
@@ -65,6 +67,16 @@ function handleNewFunction() {
 
   editDrawer.open()
 }
+
+async function applyChangeOrder() {
+  const data = [...configsApi.data.value]
+  data.forEach((item, i) => {
+    item.orderNo = i
+  })
+
+  await promptConfigTable.batchSaveOrder(data)
+  await configsApi.load()
+}
 </script>
 
 <template>
@@ -84,22 +96,26 @@ function handleNewFunction() {
       </template>
       <template v-else>
         <List>
-          <ListItem v-for="conf in configsApi.data.value">
-            <div class="gap-1 flex items-center">
-              <div v-if="conf.icon"
-                class="text-xl border-(1 solid light-8) rounded size-6 flex items-center justify-center">
-                <CarbonIcon :name="conf.icon" />
+          <VueDraggable v-model="configsApi.data.value" handle=".handle" :animation="200" @end="applyChangeOrder">
+            <ListItem v-for="conf in configsApi.data.value" :key="conf.id">
+              <Icon class="i-carbon:draggable handle cursor-move !px-2" />
+              <div class="gap-1 flex flex-1 items-center">
+                <div v-if="conf.icon"
+                  class="text-xl border-(1 solid light-8) rounded size-6 flex items-center justify-center">
+                  <CarbonIcon :name="conf.icon" />
+                </div>
+                <span>
+                  {{ conf.name }}
+                </span>
               </div>
-              <span>
-                {{ conf.name }}
-              </span>
-            </div>
 
-            <template #action>
-              <Icon class="i-carbon:edit cursor-pointer" @click="openEditDrawer(conf)" />
-              <Icon class="i-carbon:trash-can cursor-pointer" @click="removeConf(conf)" />
-            </template>
-          </ListItem>
+              <template #action>
+                <Icon class="i-carbon:edit cursor-pointer" @click="openEditDrawer(conf)" />
+                <Icon class="i-carbon:trash-can cursor-pointer" @click="removeConf(conf)" />
+              </template>
+            </ListItem>
+
+          </VueDraggable>
         </List>
       </template>
     </div>

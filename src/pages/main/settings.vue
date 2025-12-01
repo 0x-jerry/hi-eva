@@ -104,8 +104,7 @@ function clickMenu(conf: { id: string }) {
   }
 
   &:last-child {
-    min-height: 100vh;
-    --uno: pb-2;
+    padding-bottom: 50vh;
   }
 }
 

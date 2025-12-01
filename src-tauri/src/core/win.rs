@@ -1,7 +1,6 @@
 use serde::Serialize;
 use tauri::{
-    async_runtime::block_on, AppHandle, Emitter, EventTarget, Manager, PhysicalPosition,
-    WebviewWindow, WebviewWindowBuilder,
+    AppHandle, Emitter, EventTarget, Manager, PhysicalPosition, WebviewWindow, WebviewWindowBuilder, async_runtime::block_on
 };
 
 use crate::{
@@ -28,6 +27,8 @@ pub fn get_main_window(app: &AppHandle) -> WebviewWindow {
     )
     .inner_size(800.0, 600.0)
     .center()
+    // https://github.com/tauri-apps/tauri/issues/8581
+    .disable_drag_drop_handler()
     .accept_first_mouse(true)
     .visible_on_all_workspaces(true)
     .visible(false);

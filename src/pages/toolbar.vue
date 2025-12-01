@@ -7,7 +7,7 @@ import { IPromptConfigModel, promptConfigTable } from '../database/promptConfig'
 import { commands } from '../logic/commands'
 import { WindowEventName } from '../logic/events'
 
-const promptConfigsApi = useAsyncData(promptConfigTable.findAll, [])
+const promptConfigsApi = useAsyncData(promptConfigTable.getAllSorted, [])
 
 promptConfigsApi.load()
 
