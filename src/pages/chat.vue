@@ -1,8 +1,9 @@
 <script lang="ts" setup>
+import { sleep } from '@0x-jerry/utils'
 import { useAsyncData } from '@0x-jerry/vue-kit'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { useLocalStorage } from '@vueuse/core'
-import { nextTick, reactive, ref, useTemplateRef } from 'vue'
+import { reactive, ref, useTemplateRef } from 'vue'
 import ChatWithHistory from '../components/ChatWithHistory.vue'
 import { useWinEventListener } from '../composables/useWinEventListener'
 import { chatHistoryTable, IChatHistoryModel } from '../database/chatHistory'
@@ -97,7 +98,7 @@ async function createChatHistory() {
       name,
     })
 
-    await nextTick()
+    await sleep()
 
     await chatRef.value?.sendMsg(msg)
   }

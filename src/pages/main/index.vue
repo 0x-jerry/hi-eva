@@ -102,7 +102,7 @@ async function handleDeleteHistory(conf: IChatHistoryModel) {
             </div>
           </div>
         </template>
-        <div class="size-full flex items-center justify-center">
+        <div v-else class="size-full flex items-center justify-center">
           <Empty ></Empty>
         </div>
       </div>

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { createPromise, isArray, Optional } from '@0x-jerry/utils'
+import { createPromise, Optional } from '@0x-jerry/utils'
 import { useLoading } from '@0x-jerry/vue-kit'
 import { watchImmediate } from '@vueuse/core'
 import OpenAI from 'openai'
@@ -143,7 +143,10 @@ async function startChatStream(msgs: IChatHistoryMsgItem[]) {
   })
 
   stream.on('error', (err) => {
-    console.error(err)
+    if (state.responseMsg) {
+      state.responseMsg.content += err.message
+    }
+
     resultPromise.reject(err.message)
   })
 
