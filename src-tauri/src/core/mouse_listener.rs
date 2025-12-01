@@ -27,7 +27,6 @@ pub struct SelectionResult {
 #[derive(Debug)]
 struct SelectionState {
     mouse_down_pos: (i32, i32),
-    current_mouse_pos: (i32, i32),
     mouse_down_ts: Instant,
     last_click_ts: Option<Instant>,
     last_click_pos: (i32, i32),
@@ -39,43 +38,43 @@ pub fn listen<T: 'static + MouseExtTrait + Send>(app: T) -> Result<()> {
 
     let state = Mutex::new(SelectionState {
         mouse_down_pos: (0, 0),
-        current_mouse_pos: mouse.get_position().unwrap_or_default(),
         mouse_down_ts: Instant::now(),
         last_click_ts: None,
         last_click_pos: (0, 0),
         last_check_ts: Instant::now(),
     });
 
+    let mouse_cloned = mouse.clone();
+
     mouse.hook(Box::new(move |event| {
         let mut state = state.lock().unwrap();
 
         match event {
-            MouseEvent::AbsoluteMove(x, y) => {
-                state.current_mouse_pos = ((*x).into(), (*y).into());
+            MouseEvent::AbsoluteMove(_x, _y) => {
                 app.on_mouse_move();
             }
             MouseEvent::Press(MouseButton::Left) => {
-                state.mouse_down_pos = state.current_mouse_pos;
+                state.mouse_down_pos = mouse_cloned.get_position().unwrap_or_default();
                 state.mouse_down_ts = Instant::now();
                 app.on_mouse_down();
             }
             MouseEvent::Release(MouseButton::Left) => {
                 let mut should_check_selection = false;
 
-                let current_mouse_pos = state.current_mouse_pos;
+                let current_mouse_pos = mouse_cloned.get_position().unwrap_or_default();
 
                 let now = Instant::now();
                 let maybe_click = distance(state.mouse_down_pos, current_mouse_pos) < 5;
 
                 if maybe_click {
                     if let Some(last_click_ts) = state.last_click_ts {
-                        let db_click_max_delay_check_ms = 500;
+                        let dbl_click_max_delay_check_ms = 500;
 
-                        let maybe_multiple_click = now.duration_since(last_click_ts)
-                            < Duration::from_millis(db_click_max_delay_check_ms)
+                        let maybe_dbl_click = now.duration_since(last_click_ts)
+                            < Duration::from_millis(dbl_click_max_delay_check_ms)
                             && distance(state.last_click_pos, current_mouse_pos) < 5;
 
-                        if maybe_multiple_click {
+                        if maybe_dbl_click {
                             should_check_selection = true;
                         }
                     }
@@ -88,33 +87,24 @@ pub fn listen<T: 'static + MouseExtTrait + Send>(app: T) -> Result<()> {
                 }
 
                 if should_check_selection {
-                    let should_check_again =
-                        now.duration_since(state.last_check_ts) > Duration::from_millis(100);
+                    let result = text_selection::get_selected_rect();
 
-                    if should_check_again {
-                        log::info!("check selection start");
+                    let result = result.map(|rect| {
+                        let dir = if current_mouse_pos.1 > state.mouse_down_pos.1 {
+                            VerticalMoveDir::Down
+                        } else {
+                            VerticalMoveDir::Up
+                        };
 
-                        let result = text_selection::get_selected_rect();
+                        return SelectionResult {
+                            rect,
+                            mouse_move_dir: dir,
+                        };
+                    });
 
-                        let result = result.map(|rect| {
-                            let dir = if current_mouse_pos.1 > state.mouse_down_pos.1 {
-                                VerticalMoveDir::Down
-                            } else {
-                                VerticalMoveDir::Up
-                            };
+                    app.on_selection_change(result);
 
-                            return SelectionResult {
-                                rect,
-                                mouse_move_dir: dir,
-                            };
-                        });
-
-                        app.on_selection_change(result);
-
-                        log::info!("check selection end");
-
-                        state.last_check_ts = now;
-                    }
+                    state.last_check_ts = now;
                 } else {
                     app.on_selection_change(None);
                 }

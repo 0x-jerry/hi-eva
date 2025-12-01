@@ -25,13 +25,13 @@ impl Deref for MouseListenerApp {
 
 impl MouseExtTrait for MouseListenerApp {
     fn on_selection_change(&self, result: Option<SelectionResult>) {
+        log::info!("trigger selection change: {:?}", result);
+
         if !self.get_conf().enable_auto_trigger {
             return;
         }
 
         if let Some(result) = result {
-            log::info!("result is {:?}", result);
-
             if result.rect.text.clone().is_some_and(|x| x.len() > 0) {
                 {
                     let state = self.state::<AppState>();
