@@ -33,13 +33,15 @@ impl MouseExtTrait for MouseListenerApp {
 
         if let Some(result) = result {
             if result.rect.text.clone().is_some_and(|x| x.len() > 0) {
-                {
-                    let state = self.state::<AppState>();
-                    let selected_text = result.rect.text.unwrap_or_default();
-                    state.set_selected_text(selected_text);
-                }
+                let state = self.state::<AppState>();
+                let selected_text = result.rect.text.unwrap_or_default();
+                let selected_text = selected_text.trim().to_string();
 
-                show_toolbar_win(self, Some(result.mouse_move_dir));
+                if !selected_text.is_empty() {
+                    state.set_selected_text(selected_text);
+
+                    show_toolbar_win(self, Some(result.mouse_move_dir));
+                }
             }
         }
     }
