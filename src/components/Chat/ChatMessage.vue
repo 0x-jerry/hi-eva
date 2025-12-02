@@ -25,6 +25,7 @@ const isUser = props.message.role === 'user'
         <span class="name">{{ message.role }}</span>
       </template>
     </div>
+
     <div class="content">
       <Markdown :content="message.content" />
     </div>
@@ -38,7 +39,9 @@ const isUser = props.message.role === 'user'
 
 .content {
   padding: 8px;
-  border-radius: 6px
+  border-radius: 6px;
+  max-width: 100%;
+  width: fit-content;
 }
 
 .from-user {

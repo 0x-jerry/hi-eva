@@ -71,6 +71,8 @@ async function fetchInitializedData() {
 async function createChatHistory() {
   const promptTpl = promptConfigApi.data.value?.prompt
 
+  const selectedText = payload.value.selectedText
+
   if (!promptTpl) {
     throw new Error(`Prompt config is null`)
   }
@@ -78,7 +80,7 @@ async function createChatHistory() {
   state.messages = []
 
   const msg = mustache(promptTpl, {
-    selection: payload.value.selectedText,
+    selection: selectedText,
   })
 
   const msgItem = await chatHistoryMsgTable.getByContent(msg)
@@ -91,8 +93,9 @@ async function createChatHistory() {
 
     state.messages = msgs
   } else {
-    // todo, generate history name
-    const name = promptConfigApi.data.value?.name || 'unknown-prompt-config'
+    const promptName = promptConfigApi.data.value?.name || 'Unknown'
+
+    const name = `${promptName} - ${selectedText}`
 
     chatHistory.value = await chatHistoryTable.createOne({
       name,

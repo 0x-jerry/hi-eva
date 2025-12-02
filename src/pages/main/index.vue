@@ -111,7 +111,7 @@ async function handleDeleteHistory(conf: IChatHistoryModel) {
           </div>
         </template>
         <div v-else class="size-full flex items-center justify-center">
-          <Empty ></Empty>
+          <Empty></Empty>
         </div>
       </div>
       <div class="bottom-btn">
@@ -124,7 +124,9 @@ async function handleDeleteHistory(conf: IChatHistoryModel) {
         <div class="flex gap-1 items-center p-2 border-(0 b solid gray-2)">
           <div class="truncate w-200px">
             <ClickToEdit :value="selectedHistory.name" @ok="updateHistoryName">
-              {{ selectedHistory.name }}
+              <div class="w-full truncate">
+                {{ selectedHistory.name }}
+              </div>
               <template #edit="{ value, update }">
                 <Input class="w-full" :model-value="value" @update:model-value="update" autofocus />
               </template>
