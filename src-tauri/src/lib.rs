@@ -18,7 +18,9 @@ pub fn run() {
     #[cfg(dev)]
     {
         dotenv::from_filename(".env.development").expect("load env failed");
-        std::env::set_var("RUST_BACKTRACE", "1");
+        unsafe  {
+            std::env::set_var("RUST_BACKTRACE", "1");
+        }
     }
     env_logger::init();
 
@@ -97,17 +99,20 @@ fn setup_app(app: &mut App) -> Result<()> {
 
     core::win::init_windows(app_handle);
 
-    clipboard_listener::apply_watch_clipboard(app_handle)?;
-    global_shortcut::apply_global_shortcut(app_handle)?;
-    mouse_listener_app::init_mouse_listener(app_handle)?;
+    let has_permission = text_selection::check_permissions();
 
-    text_selection::check_permissions();
+    if has_permission {
+        clipboard_listener::apply_watch_clipboard(app_handle)?;
+        mouse_listener_app::init_mouse_listener(app_handle)?;
+    }
+
+    global_shortcut::apply_global_shortcut(app_handle)?;
 
     let app_handle = app_handle.clone();
 
     if !check_if_start_by_autostart() {
         tauri::async_runtime::spawn(async move {
-            std::thread::sleep(std::time::Duration::from_secs(1));
+            std::thread::sleep(std::time::Duration::from_millis(500));
             app_handle.open_and_focus(MAIN_WINDOW_LABEL);
         });
     }

@@ -35,9 +35,10 @@ pub fn get_selected_rect() -> Option<SelectionRect> {
     }
 }
 
-pub fn check_permissions() {
+pub fn check_permissions() -> bool {
     #[cfg(unix)]
-    {
-        let _ = unix_impl::request_accessibility_access();
-    }
+    return unix_impl::request_accessibility_access();
+
+    #[cfg(windows)]
+    return true
 }
