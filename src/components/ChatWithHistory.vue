@@ -1,11 +1,13 @@
 <script lang="ts" setup>
 import { createPromise, Optional } from '@0x-jerry/utils'
 import { useLoading } from '@0x-jerry/vue-kit'
+import { fetch as backendFetch, ClientOptions } from '@tauri-apps/plugin-http'
 import { watchImmediate } from '@vueuse/core'
 import OpenAI from 'openai'
 import { ChatCompletionStream } from 'openai/lib/ChatCompletionStream.mjs'
 import { ChatCompletionMessageParam } from 'openai/resources/index.mjs'
 import { reactive, ref } from 'vue'
+import { useAppBasicConfig } from '../composables'
 import { chatHistoryTable, IChatHistoryModel } from '../database/chatHistory'
 import {
   chatHistoryMsgTable,
@@ -22,6 +24,8 @@ export interface ChatWithHistoryProps {
 }
 
 const props = defineProps<ChatWithHistoryProps>()
+
+const appConfig = useAppBasicConfig()
 
 const state = reactive({
   selectedText: '',
@@ -117,6 +121,24 @@ async function startChatStream(msgs: IChatHistoryMsgItem[]) {
     baseURL: baseUrl,
     apiKey,
     dangerouslyAllowBrowser: true,
+    async fetch(input, init) {
+      await appConfig.load()
+      const proxy = appConfig.data.proxy
+
+      if (!proxy) {
+        return globalThis.fetch(input, init)
+      }
+
+      const config: RequestInit & ClientOptions = init || {}
+
+      config.proxy = {
+        all: {
+          url: proxy,
+        },
+      }
+
+      return backendFetch(input, init)
+    },
   })
 
   const resultPromise = createPromise<void>()
