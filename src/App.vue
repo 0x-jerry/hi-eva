@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useEventListener } from '@vueuse/core'
 import { ConfigProvider } from 'tdesign-vue-next'
 import NotificationPlugin from 'tdesign-vue-next/es/notification/plugin'
 import { onErrorCaptured, onMounted } from 'vue'
@@ -10,11 +11,33 @@ onMounted(() => {
 })
 
 onErrorCaptured((err) => {
+  showErrorNotification(err)
+
+  return false
+})
+
+useEventListener(window, 'unhandledrejection', (evt) => {
+  evt.stopPropagation()
+
+  showErrorNotification(evt.reason)
+})
+
+useEventListener(window, 'error', (evt) => {
+  evt.stopPropagation()
+
+  showErrorNotification(evt.error)
+})
+
+function showErrorNotification(rawErr: unknown) {
+  console.error(rawErr)
+
+  const err = rawErr instanceof Error ? rawErr : new Error(String(rawErr))
+
   NotificationPlugin.error({
     title: err.name,
     content: err.message,
   })
-})
+}
 </script>
 
 <template>

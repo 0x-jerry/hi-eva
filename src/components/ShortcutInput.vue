@@ -51,7 +51,11 @@ function handleKeyEvent(evt: KeyboardEvent) {
   const alt = evt.altKey ? 'Alt' : ''
   const key = evt.key.toUpperCase()
 
-  const keys = [ctrl, shift, alt, key].filter((n) => n)
+  const specialKeys = ['CONTROL', 'SHIFT', 'META', 'ALT']
+
+  const isSpecialKey = specialKeys.includes(key)
+
+  const keys = [ctrl, shift, alt, isSpecialKey ? '' : key].filter((k) => !!k)
 
   newShortcut.value = keys.join('+')
 }

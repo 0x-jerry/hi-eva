@@ -1,0 +1,62 @@
+diff --git a/src/App.vue b/src/App.vue
+index 1d466bb..0c9642a 100644
+--- a/src/App.vue
++++ b/src/App.vue
+@@ -1,4 +1,5 @@
+ <script setup lang="ts">
++import { useEventListener } from '@vueuse/core'
+ import { ConfigProvider } from 'tdesign-vue-next'
+ import NotificationPlugin from 'tdesign-vue-next/es/notification/plugin'
+ import { onErrorCaptured, onMounted } from 'vue'
+@@ -10,11 +11,33 @@ onMounted(() => {
+ })
+ 
+ onErrorCaptured((err) => {
++  showErrorNotification(err)
++
++  return false
++})
++
++useEventListener(window, 'unhandledrejection', (evt) => {
++  evt.stopPropagation()
++
++  showErrorNotification(evt.reason)
++})
++
++useEventListener(window, 'error', (evt) => {
++  evt.stopPropagation()
++
++  showErrorNotification(evt.error)
++})
++
++function showErrorNotification(rawErr: unknown) {
++  console.error(rawErr)
++
++  const err = rawErr instanceof Error ? rawErr : new Error(String(rawErr))
++
+   NotificationPlugin.error({
+     title: err.name,
+     content: err.message,
+   })
+-})
++}
+ </script>
+ 
+ <template>
+diff --git a/src/components/ShortcutInput.vue b/src/components/ShortcutInput.vue
+index 26878d4..20158ff 100644
+--- a/src/components/ShortcutInput.vue
++++ b/src/components/ShortcutInput.vue
+@@ -51,7 +51,11 @@ function handleKeyEvent(evt: KeyboardEvent) {
+   const alt = evt.altKey ? 'Alt' : ''
+   const key = evt.key.toUpperCase()
+ 
+-  const keys = [ctrl, shift, alt, key].filter((n) => n)
++  const specialKeys = ['CONTROL', 'SHIFT', 'META', 'ALT']
++
++  const isSpecialKey = specialKeys.includes(key)
++
++  const keys = [ctrl, shift, alt, isSpecialKey ? '' : key].filter((k) => !!k)
+ 
+   newShortcut.value = keys.join('+')
+ }
