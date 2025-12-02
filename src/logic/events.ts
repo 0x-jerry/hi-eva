@@ -11,6 +11,7 @@ export enum WindowEventName {
   ChatHide = 'chat:hide',
   ToolbarShow = 'toolbar:show',
   ConfigurationChanged = 'configuration:changed',
+  WindowShow = 'window:show'
 }
 
 export interface TauriWindowEventMap {
@@ -18,6 +19,7 @@ export interface TauriWindowEventMap {
   [WindowEventName.ChatHide]: void
   [WindowEventName.ToolbarShow]: void
   [WindowEventName.ConfigurationChanged]: void
+  [WindowEventName.WindowShow]: void
 }
 
 declare module '@tauri-apps/api/window' {

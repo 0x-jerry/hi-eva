@@ -25,15 +25,14 @@ watch(
 </script>
 
 <template>
-  <div class="message-list h-full" ref="container">
+  <div class="message-list" ref="container">
     <ChatMessage v-for="m in messages.toReversed()" :key="m.id" :message="m" />
   </div>
 </template>
 
 <style scoped>
 .message-list {
-  overflow: auto;
-  padding: 12px;
+  height: max-content;
   display: flex;
   flex-direction: column-reverse;
   gap: 8px;

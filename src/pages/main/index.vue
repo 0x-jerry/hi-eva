@@ -2,14 +2,16 @@
 import { useAsyncData } from '@0x-jerry/vue-kit'
 import dayjs from 'dayjs'
 import { Button, Empty, Input, Select } from 'tdesign-vue-next'
-import { computed, reactive } from 'vue'
+import { computed, onMounted, reactive } from 'vue'
 import ChatWithHistory from '../../components/ChatWithHistory.vue'
 import ClickToEdit from '../../components/ClickToEdit.vue'
 import Icon from '../../components/Icon.vue'
 import { useI18n } from '../../composables'
+import { useWinEventListener } from '../../composables/useWinEventListener'
 import { chatHistoryTable, IChatHistoryModel } from '../../database/chatHistory'
 import { chatHistoryMsgTable } from '../../database/chatHistoryMsg'
 import { endpointConfigTable } from '../../database/endpointConfig'
+import { WindowEventName } from '../../logic/events'
 
 const historiesApi = useAsyncData(chatHistoryTable.findAll, [])
 
@@ -34,7 +36,13 @@ const selectedEndpoint = computed(() => {
   )
 })
 
-fetchInitData()
+onMounted(() => {
+  fetchInitData()
+})
+
+useWinEventListener(WindowEventName.WindowShow, () => {
+  historiesApi.load()
+})
 
 function fetchInitData() {
   historiesApi.load()
@@ -111,7 +119,7 @@ async function handleDeleteHistory(conf: IChatHistoryModel) {
       </div>
     </aside>
 
-    <section class="flex flex-col h-full flex-1 bg-white">
+    <section class="flex flex-col h-full flex-1 w-0 bg-white">
       <template v-if="selectedHistory">
         <div class="flex gap-1 items-center p-2 border-(0 b solid gray-2)">
           <div class="truncate w-200px">

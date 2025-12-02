@@ -2,6 +2,7 @@
 import { Button, Textarea, TextareaValue } from 'tdesign-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from '../../composables'
+import Icon from '../Icon.vue'
 
 export interface ChatInputProps {
   isProcessing?: boolean
@@ -48,11 +49,17 @@ function handleAbort() {
 
 <template>
   <div class="chat-input">
-    <Textarea style="resize: none;" v-model="text" @keydown="onCtrlEnter" :placeholder="t('chat.typeMessage')" :rows="3" />
+    <Textarea style="resize: none;" v-model="text" @keydown="onCtrlEnter" :placeholder="t('chat.typeMessage')"
+      :rows="3" />
 
     <div class="actions">
-      <Button class="h-full" v-if="isProcessing" @click="handleAbort">{{ t('common.abort') }}</Button>
-      <Button class="h-full" v-else @click="send" :disabled="!canSend">{{ t('common.send') }}</Button>
+      <Button class="h-full relative text-2xl" v-if="isProcessing" @click="handleAbort" :title="t('common.abort')">
+        <div class="spinning-effect"></div>
+        <Icon class="i-carbon:stop-filled-alt" />
+      </Button>
+      <Button class="h-full text-2xl" v-else @click="send" :disabled="!canSend" :title="t('common.send')">
+        <Icon class="i-carbon:send-alt-filled" />
+      </Button>
     </div>
   </div>
 </template>
@@ -65,11 +72,42 @@ function handleAbort() {
   border-top: 1px solid #eee
 }
 
-.chat-input textarea {
-  flex: 1;
-  min-height: 56px;
-  padding: 8px;
-  resize: vertical
+.spinning-effect {
+  --size: 40px;
+
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: 50%;
+  width: var(--size);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+
+  &::before {
+    --border: 4px;
+    --color: white;
+    position: absolute;
+    display: block;
+    top: 0;
+    left: 0;
+    content: '';
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background:
+      radial-gradient(farthest-side, var(--color) 94%, #0000) top/var(--border) var(--border) no-repeat,
+      conic-gradient(#0000 30%, var(--color));
+
+    mask: radial-gradient(farthest-side, #0000 calc(100% - var(--border)), #000 0);
+    animation: l13 1s infinite linear;
+  }
+
+}
+
+@keyframes l13 {
+  100% {
+    transform: rotate(1turn)
+  }
 }
 
 .actions {

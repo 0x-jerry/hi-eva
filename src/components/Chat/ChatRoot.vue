@@ -21,8 +21,8 @@ function handleSend(content: string) {
 </script>
 
 <template>
-  <div class="chat-root flex flex-col">
-    <div class="flex-1 h-0">
+  <div class="chat-root">
+    <div class="flex-1 h-0 overflow-auto p-3">
       <ChatMessageList :messages="messages" />
     </div>
 
