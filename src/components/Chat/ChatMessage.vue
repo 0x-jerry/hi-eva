@@ -1,16 +1,60 @@
 <script setup lang="ts">
+import { Button, Tooltip } from 'tdesign-vue-next'
+import { t } from '../../composables'
 import type { IChatHistoryMsgItem } from '../../database/chatHistoryMsg'
 import Icon from '../Icon.vue'
 import Markdown from '../Markdown.vue'
 
-interface ChatMessageProps {
+export interface ChatMessageProps {
   message: IChatHistoryMsgItem
 }
 
+export interface ChatMessageEmits {
+  'reset-to': [msg: IChatHistoryMsgItem]
+  continue: [msg: IChatHistoryMsgItem]
+  copy: [msg: IChatHistoryMsgItem]
+  delete: [msg: IChatHistoryMsgItem]
+}
+
 const props = defineProps<ChatMessageProps>()
+const emit = defineEmits<ChatMessageEmits>()
 
 const roleClass = props.message.role === 'user' ? 'from-user' : 'from-assistant'
 const isUser = props.message.role === 'user'
+
+interface ToolConfig {
+  event: keyof ChatMessageEmits
+  icon: string
+  tooltip: string
+}
+
+const tools: ToolConfig[] = [
+  {
+    event: 'copy',
+    icon: 'i-carbon:copy',
+    tooltip: t('chatMessage.copyMsg'),
+  },
+  {
+    event: 'continue',
+    icon: 'i-carbon:continue',
+    tooltip: t('chatMessage.ContinueMsg'),
+  },
+  {
+    event: 'reset-to',
+    icon: 'i-carbon:restart',
+    tooltip: t('chatMessage.resetMsg'),
+  },
+  {
+    event: 'delete',
+    icon: 'i-carbon:trash-can',
+    tooltip: t('chatMessage.deleteMsg'),
+  },
+]
+
+function handleToolEvent(tool: ToolConfig) {
+  // @ts-expect-error
+  emit(tool.event, props.message)
+}
 </script>
 
 <template>
@@ -29,12 +73,34 @@ const isUser = props.message.role === 'user'
     <div class="content">
       <Markdown :content="message.content" />
     </div>
+    <div class="content-tools">
+      <template v-for="tool in tools">
+        <Tooltip :content="$t(tool.tooltip)">
+          <Button size="small" shape="circle" theme="default" @click="handleToolEvent(tool)">
+            <Icon :class="tool.icon" />
+          </Button>
+        </Tooltip>
+      </template>
+    </div>
   </div>
 </template>
 
 <style lang="less" scoped>
 .chat-message {
   max-width: 90%;
+  position: relative;
+
+  .content-tools {
+    --uno: text-xs transition flex gap-2 items-center;
+    margin-top: 8px;
+    opacity: 0;
+  }
+
+  &:hover {
+    .content-tools {
+      opacity: 1;
+    }
+  }
 }
 
 .content {
@@ -46,6 +112,9 @@ const isUser = props.message.role === 'user'
 
 .from-user {
   align-self: flex-end;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 
   .meta {
     justify-content: end;
@@ -53,6 +122,10 @@ const isUser = props.message.role === 'user'
 
   .content {
     background: #e6f7ff;
+  }
+
+  .content-tools {
+    --uno: justify-end;
   }
 }
 

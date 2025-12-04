@@ -9,7 +9,11 @@ export interface ChatRoomProps {
   isProcessing?: boolean
 }
 
-export type ChatRoomEmits = ChatInputEmits
+export interface ChatRoomEmits extends ChatInputEmits {
+  'delete-msg': [msg: IChatHistoryMsgItem]
+  'reset-to-msg': [msg: IChatHistoryMsgItem]
+  'continue-from-msg': [msg: IChatHistoryMsgItem]
+}
 
 defineProps<ChatRoomProps>()
 
@@ -23,7 +27,8 @@ function handleSend(content: string) {
 <template>
   <div class="chat-root">
     <div class="flex-1 h-0 overflow-auto p-3">
-      <ChatMessageList :messages="messages" />
+      <ChatMessageList :messages="messages" @delete="emit('delete-msg', $event)"
+        @reset-to="emit('reset-to-msg', $event)" @continue="emit('continue-from-msg', $event)" />
     </div>
 
     <ChatInput :is-processing="isProcessing" @send="handleSend" @abort="emit('abort')" />

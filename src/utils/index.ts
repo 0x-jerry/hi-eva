@@ -29,3 +29,12 @@ export function bindAllMethodsToSelf(obj: Record<string, any>, target = obj) {
     bindAllMethodsToSelf(superProto, target)
   }
 }
+
+export function normalizeError(raw: unknown) {
+  if (raw instanceof Error) {
+    return raw
+  }
+
+  const err = new Error(String(raw))
+  err.cause = raw
+}

@@ -73,6 +73,15 @@ export abstract class BaseModelManager<T extends BaseModel> {
     return resp
   }
 
+  async deleteBatchByIds(ids: number[]) {
+    const keys = ids.map((_, idx) => `$${idx + 1}`).join(', ')
+    const sql = `delete from ${this.TABLE_NAME} where id in (${keys})`
+
+    const resp = await db.execute(sql, ids)
+
+    return resp
+  }
+
   async createOne(data: CreatedModel<T>) {
     const columns = [...commonColumn, ...this.COLUMN_NAMES]
 

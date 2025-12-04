@@ -6,7 +6,7 @@ import { watchImmediate } from '@vueuse/core'
 import OpenAI from 'openai'
 import { ChatCompletionStream } from 'openai/lib/ChatCompletionStream.mjs'
 import { ChatCompletionMessageParam } from 'openai/resources/index.mjs'
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useAppBasicConfig } from '../composables'
 import { chatHistoryTable, IChatHistoryModel } from '../database/chatHistory'
 import {
@@ -39,6 +39,13 @@ let streamRef: Optional<ChatCompletionStream>
 const chatHistory = ref<IChatHistoryModel>()
 
 let updateDataPromise = null as null | Promise<void>
+
+const handleSendMsg = useLoading(_handleSendMsg)
+const continueChatStream = useLoading(_continueChatStream)
+
+const isProcessing = computed(
+  () => handleSendMsg.isLoading || continueChatStream.isLoading,
+)
 
 watchImmediate(
   () => props.historyId,
@@ -73,15 +80,10 @@ async function updateChatTitle(newTitle: string) {
   chatHistory.value = await chatHistoryTable.getById(history.id)
 }
 
-const handleSendMsg = useLoading(_handleSendMsg)
 async function _handleSendMsg(msgContent: string) {
   await updateDataPromise
 
   const historyId = props.historyId
-
-  if (!historyId) {
-    throw new Error(`Chat history is not initialized!`)
-  }
 
   const newMsgItem = await chatHistoryMsgTable.createOne({
     chatHistoryId: historyId,
@@ -91,15 +93,7 @@ async function _handleSendMsg(msgContent: string) {
 
   state.messages.push(newMsgItem)
 
-  state.responseMsg = await chatHistoryMsgTable.createOne({
-    chatHistoryId: historyId,
-    role: ChatRole.Assistant,
-    content: '',
-  })
-
-  state.messages.push(state.responseMsg)
-
-  await startChatStream(state.messages.slice(0, -1))
+  await continueChatStream()
 }
 
 async function saveResponseMsgItem() {
@@ -110,7 +104,25 @@ async function saveResponseMsgItem() {
   })
 }
 
-async function startChatStream(msgs: IChatHistoryMsgItem[]) {
+async function _continueChatStream() {
+  const historyId = props.historyId
+
+  state.responseMsg = await chatHistoryMsgTable.createOne({
+    chatHistoryId: historyId,
+    role: ChatRole.Assistant,
+    content: '',
+  })
+
+  state.messages.push(state.responseMsg)
+
+  try {
+    await _startChatStream(state.messages.slice(0, -1))
+  } catch (_) {
+    // ignore all error
+  }
+}
+
+async function _startChatStream(msgs: IChatHistoryMsgItem[]) {
   const { apiKey, model, baseUrl } = props.endpointConfig || {}
 
   if (!baseUrl || !apiKey || !model) {
@@ -147,7 +159,7 @@ async function startChatStream(msgs: IChatHistoryMsgItem[]) {
     model,
     messages: msgs.map((msg) => {
       const item: ChatCompletionMessageParam = {
-        role: msg.role === ChatRole.User ? 'user' : 'assistant',
+        role: msg.role === ChatRole.User ? ChatRole.User : ChatRole.Assistant,
         content: msg.content,
       }
 
@@ -169,7 +181,11 @@ async function startChatStream(msgs: IChatHistoryMsgItem[]) {
       state.responseMsg.content += err.message
     }
 
-    resultPromise.reject(err.message)
+    resultPromise.reject(err)
+  })
+
+  stream.on('abort', (err) => {
+    resultPromise.reject(err)
   })
 
   for await (const chunk of stream) {
@@ -192,6 +208,41 @@ function handleAbort() {
   streamRef?.abort()
 }
 
+async function handleResetToMsg(msg: IChatHistoryMsgItem) {
+  const idx = state.messages.findIndex((n) => n.id === msg.id)
+  if (idx === -1) {
+    return
+  }
+
+  const removedMsgs = state.messages.splice(idx + 1)
+
+  // biome-ignore lint/style/noNonNullAssertion: Ensured exists
+  await chatHistoryMsgTable.deleteBatchByIds(removedMsgs.map((n) => n.id!))
+}
+
+async function handleDeleteMsg(msg: IChatHistoryMsgItem) {
+  const idx = state.messages.findIndex((n) => n.id === msg.id)
+  if (idx === -1) {
+    return
+  }
+
+  const removedMsg = state.messages.splice(idx, 1).at(0)
+  if (!removedMsg?.id) {
+    return
+  }
+
+  await chatHistoryMsgTable.deleteById(removedMsg.id)
+}
+
+async function handleContinue(msg: IChatHistoryMsgItem) {
+  await handleResetToMsg(msg)
+  if (isProcessing.value) {
+    return
+  }
+
+  await continueChatStream()
+}
+
 defineExpose({
   sendMsg: handleSendMsg,
   abortStream: handleAbort,
@@ -200,8 +251,9 @@ defineExpose({
 
 <template>
   <template v-if="chatHistory">
-    <ChatRoot :title="chatHistory.name" :messages="state.messages" :is-processing="handleSendMsg.isLoading"
-      @rename-title="updateChatTitle" @send="handleSendMsg" @abort="handleAbort" />
+    <ChatRoot :title="chatHistory.name" :messages="state.messages" :is-processing="isProcessing"
+      @rename-title="updateChatTitle" @send="handleSendMsg" @abort="handleAbort" @reset-to-msg="handleResetToMsg"
+      @delete-msg="handleDeleteMsg" @continue-from-msg="handleContinue" />
   </template>
   <template v-else>
     <div class="loading">

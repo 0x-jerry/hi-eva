@@ -33,7 +33,8 @@
     "confirm": "Confirm",
     "abort": "Abort",
     "send": "Send",
-    "detecting": "Detecting"
+    "detecting": "Detecting",
+    "copied": "Copied"
   },
   "main": {
     "home": "Home",
@@ -54,5 +55,11 @@
     "addConfig": "Add Configuration",
     "editProvider": "Edit Provider",
     "refreshList": "Refresh List"
+  },
+  "chatMessage": {
+    "copyMsg": "Copy content",
+    "ContinueMsg": "Continue from this msg",
+    "resetMsg": "Reset to this msg",
+    "deleteMsg": "Delete this msg"
   }
 }

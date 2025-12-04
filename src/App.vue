@@ -22,12 +22,6 @@ useEventListener(window, 'unhandledrejection', (evt) => {
   showErrorNotification(evt.reason)
 })
 
-useEventListener(window, 'error', (evt) => {
-  evt.stopPropagation()
-
-  showErrorNotification(evt.error)
-})
-
 function showErrorNotification(rawErr: unknown) {
   console.error(rawErr)
 

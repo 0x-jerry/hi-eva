@@ -107,7 +107,8 @@ fn setup_app(app: &mut App) -> Result<()> {
         mouse_listener_app::init_mouse_listener(app_handle)?;
     }
 
-    global_shortcut::apply_global_shortcut(app_handle)?;
+    // Ignore error
+    let _ = global_shortcut::apply_global_shortcut(app_handle);
 
     let app_handle = app_handle.clone();
 
