@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { sleep } from '@0x-jerry/utils'
 import { icons } from '@iconify-json/carbon'
+import Fuse from 'fuse.js'
 import { Input, Popup } from 'tdesign-vue-next'
-import { computed, reactive } from 'vue'
+import { computed, reactive, useTemplateRef, watch } from 'vue'
+import { searchAlias } from '../logic/icon'
 import CarbonIcon from './CarbonIcon.vue'
 import Icon from './Icon.vue'
 
@@ -9,31 +12,56 @@ export interface IconPickerProps {
   disabled?: boolean
 }
 
+const props = defineProps<IconPickerProps>()
+
 const vValue = defineModel<string>()
+
+const inputContainerRef = useTemplateRef('inputRef')
 
 const state = reactive({
   searchValue: '',
   visible: false,
 })
 
-const props = defineProps<IconPickerProps>()
+watch(
+  () => state.visible,
+  async (visible) => {
+    if (!visible) return
 
-const names = Object.keys(icons.icons)
+    // Delay to trigger input focus, default delay is 250ms
+    // https://tdesign.tencent.com/vue-next/components/popup?tab=api
+    await sleep(500)
+
+    // https://github.com/Tencent/tdesign-vue-next/issues/6074
+    // @ts-expect-error
+    inputContainerRef.value?.focus()
+  },
+)
+
+const iconNames = Object.keys(icons.icons)
+const iconSearchableSet = iconNames.map((item) => {
+  const alias = searchAlias.find((n) => n.includes(item))
+
+  return {
+    name: item,
+    alias,
+  }
+})
+
+const fuse = new Fuse(iconSearchableSet, {
+  isCaseSensitive: false,
+  keys: ['name', 'alias'],
+  threshold: 0.4,
+})
 
 const filteredNames = computed(() => {
   const v = state.searchValue.trim()
-  if (!v) return names
+  if (!v) return iconNames
 
-  return names.filter((n) => n.includes(v))
+  const result = fuse.search(v)
+
+  return result.map((item) => item.item.name)
 })
-
-async function showPopover() {
-  if (props.disabled) {
-    return
-  }
-
-  state.visible = true
-}
 
 function handleSelect(name: string) {
   vValue.value = name
@@ -53,8 +81,8 @@ function handleSelect(name: string) {
 
       <template #content>
         <div class="w-400px p-2">
-          <div class="search mb-4">
-            <Input class="w-full" v-model="state.searchValue">
+          <div  class="search mb-4">
+            <Input ref="inputRef" class="w-full" v-model="state.searchValue" autofocus>
               <template #suffix-icon>
                 <Icon class="i-carbon:search" />
               </template>
