@@ -76,7 +76,7 @@ function handleToolEvent(tool: ToolConfig) {
     <div class="content-tools">
       <template v-for="tool in tools">
         <Tooltip :content="$t(tool.tooltip)">
-          <Button size="small" shape="circle" theme="default" @click="handleToolEvent(tool)">
+          <Button class="border-0" size="small" shape="circle" theme="default" @click="handleToolEvent(tool)">
             <Icon :class="tool.icon" />
           </Button>
         </Tooltip>
