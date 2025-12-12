@@ -6,7 +6,7 @@
     "lang": "语言",
     "autoTrigger": "自动触发",
     "shortcut": "快捷键",
-    "autostart": "开启启动"
+    "autostart": "开机启动"
   },
   "chat": {
     "newChat": "新建对话",
