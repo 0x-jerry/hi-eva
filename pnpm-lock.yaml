@@ -65,6 +65,9 @@ importers:
       openai:
         specifier: ^6.10.0
         version: 6.10.0
+      remend:
+        specifier: ^1.0.1
+        version: 1.0.1
       tdesign-vue-next:
         specifier: ^1.17.6
         version: 1.17.6(vue@3.5.25(typescript@5.9.3))
@@ -1512,6 +1515,9 @@ packages:
   readdirp@5.0.0:
     resolution: {integrity: sha512-9u/XQ1pvrQtYyMpZe7DXKv2p5CNvyVwzUB6uhLAnQwHMSgKMBR62lc7AHljaeteeHXn11XTAaLLUVZYVZyuRBQ==}
     engines: {node: '>= 20.19.0'}
+
+  remend@1.0.1:
+    resolution: {integrity: sha512-152puVH0qMoRJQFnaMG+rVDdf01Jq/CaED+MBuXExurJgdbkLp0c3TIe4R12o28Klx8uyGsjvFNG05aFG69G9w==}
 
   resolve-pkg-maps@1.0.0:
     resolution: {integrity: sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw==}
@@ -3077,6 +3083,8 @@ snapshots:
     optional: true
 
   readdirp@5.0.0: {}
+
+  remend@1.0.1: {}
 
   resolve-pkg-maps@1.0.0: {}
 
