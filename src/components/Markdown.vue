@@ -7,8 +7,8 @@ marked.use(markedKatex({ throwOnError: false }))
 </script>
 
 <script lang='ts' setup>
-import { computed } from 'vue'
 import remend from 'remend'
+import { computed } from 'vue'
 import 'github-markdown-css'
 
 export interface MarkdownContentProps {
@@ -19,7 +19,7 @@ const props = defineProps<MarkdownContentProps>()
 
 const html = computed(() => {
   const content = remend(props.content?.trim() || '')
-  return marked.parse(content);
+  return marked.parse(content)
 })
 </script>
 
