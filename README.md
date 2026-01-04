@@ -1,3 +1,3 @@
-# Hi Eva
+# Q(uick) Toolbar
 
-A quick tool to use ai with current context.
+A quick toolbar that is context-aware.
