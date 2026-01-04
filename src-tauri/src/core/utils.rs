@@ -1,4 +1,4 @@
-use tauri::{LogicalPosition, PhysicalPosition, WebviewWindow};
+use tauri::{AppHandle, LogicalPosition, PhysicalPosition, WebviewWindow};
 
 use super::VerticalMoveDir;
 
@@ -41,4 +41,12 @@ pub fn calc_window_position(
     log::info!("calc_window_position: {:?}", pos);
 
     pos
+}
+
+pub fn get_app_name(app: &AppHandle) -> String {
+    app.config().product_name.clone().unwrap_or_default()
+}
+
+pub fn get_app_version(app: &AppHandle) -> String {
+    app.config().version.clone().unwrap_or_default()
 }

@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "hi-eva",
+  "productName": "Quick Toolbar",
   "version": "1.3.2",
-  "identifier": "hi-eva.0x-jerry.com",
+  "identifier": "q-toolbar.0x-jerry.com",
   "build": {
     "beforeDevCommand": "pnpm ui:dev",
     "devUrl": "http://localhost:8990",
@@ -35,7 +35,7 @@
         "installMode": "passive"
       },
       "endpoints": [
-        "https://github.com/0x-jerry/hi-eva/releases/latest/download/latest.json"
+        "https://github.com/0x-jerry/q-toolbar/releases/latest/download/latest.json"
       ]
     },
     "sql": {

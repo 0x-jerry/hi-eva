@@ -5,7 +5,7 @@ use tauri::{
     AppHandle, Wry,
 };
 
-use crate::core::{apply_watch_clipboard, check_update, ConfigurationExt, MAIN_WINDOW_LABEL};
+use crate::core::{ConfigurationExt, MAIN_WINDOW_LABEL, apply_watch_clipboard, check_update, utils::{get_app_name, get_app_version}};
 
 use super::AppWindowExt;
 
@@ -19,8 +19,14 @@ const TRAY_NAME: &str = "main";
 pub fn create_tray(app: &AppHandle) -> Result<TrayIcon> {
     let menu = build_tray_menu(app)?;
 
+    let app_version = get_app_version(app);
+    let app_name = get_app_name(app);
+
+    let tooltip_str = format!("{} v{}", app_name, app_version);
+
     let tray = TrayIconBuilder::with_id(TRAY_NAME)
         .menu(&menu)
+        .tooltip(tooltip_str)
         .show_menu_on_left_click(false)
         .icon(app.default_window_icon().unwrap().clone())
         .build(app)?;

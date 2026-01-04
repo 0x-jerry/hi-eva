@@ -4,7 +4,7 @@ use tauri::{
 };
 
 use crate::{
-    core::{constant::event_name, AppState},
+    core::{AppState, constant::event_name, utils::get_app_name},
     sql::query_prompt_configs_count,
 };
 
@@ -25,6 +25,7 @@ pub fn get_main_window(app: &AppHandle) -> WebviewWindow {
         MAIN_WINDOW_LABEL,
         tauri::WebviewUrl::App("#/main".into()),
     )
+    .title(get_app_name(app))
     .inner_size(800.0, 600.0)
     .center()
     // https://github.com/tauri-apps/tauri/issues/8581
@@ -60,6 +61,7 @@ pub fn get_toolbar_window(app: &AppHandle) -> WebviewWindow {
         TOOLBAR_WINDOW_LABEL,
         tauri::WebviewUrl::App("#/toolbar".into()),
     )
+    .title(get_app_name(app))
     .inner_size(0.0, 0.0)
     .visible_on_all_workspaces(true)
     .accept_first_mouse(true)
@@ -101,6 +103,7 @@ pub fn get_chat_window(app: &AppHandle) -> WebviewWindow {
         CHAT_WINDOW_LABEL,
         tauri::WebviewUrl::App("#/chat".into()),
     )
+    .title(get_app_name(app))
     .inner_size(400.0, 600.0)
     .focused(false)
     .decorations(false)

@@ -1,4 +1,4 @@
-## Copilot Instructions for hi-eva
+## Copilot Instructions for q-toolbar
 
 This file gives focused, actionable guidance for AI coding agents working in this repo. Keep suggestions specific to discovered patterns and commands.
 
