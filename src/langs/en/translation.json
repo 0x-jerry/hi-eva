@@ -34,7 +34,8 @@
     "abort": "Abort",
     "send": "Send",
     "detecting": "Detecting",
-    "copied": "Copied"
+    "copied": "Copied",
+    "loading": "Loading"
   },
   "main": {
     "home": "Home",

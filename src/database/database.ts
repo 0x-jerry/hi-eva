@@ -12,6 +12,10 @@ export interface BaseModel {
 interface PaginationParam {
   size?: number
   current: number
+  /**
+   * sort order
+   */
+  desc?: boolean
 }
 
 type CreatedModel<T extends BaseModel> = Omit<
@@ -39,10 +43,20 @@ export abstract class BaseModelManager<T extends BaseModel> {
 
   readonly db = db
 
-  async page(opt: PaginationParam) {
-    const { size = 10, current } = opt
+  async count() {
+    const sql = `select count(*) as count from ${this.TABLE_NAME}`
 
-    const sql = `select * from ${this.TABLE_NAME} order by ${COMMON_COLUMN.id} limit ${size} offset ${size * current}`
+    const resp = await db.select<{ count: number }[]>(sql)
+
+    return resp.at(0)?.count || 0
+  }
+
+  async page(opt: PaginationParam) {
+    const { size = 10, current, desc } = opt
+
+    const order = desc ? 'desc' : 'asc'
+
+    const sql = `select * from ${this.TABLE_NAME} order by ${COMMON_COLUMN.id} ${order} limit ${size} offset ${size * current}`
 
     const resp = await db.select<T[]>(sql)
 
