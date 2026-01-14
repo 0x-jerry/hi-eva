@@ -42,9 +42,9 @@ useWinEventListener(WindowEventName.ChatShow, async (evt) => {
     selectedText: evt.payload.selected_text,
   }
 
-  await fetchInitializedData()
-
   await checkWindowPosition()
+
+  await fetchInitializedData()
 })
 
 useWinEventListener(WindowEventName.ChatHide, async () => {
